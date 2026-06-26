@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Bull's & Trading Cafe — Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0A0F0A; --bg2:#0F160F; --bg3:#141D14;
+  --card:#111811; --card2:#162016; --card3:#1A271A;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.12);
+  --green:#22C55E; --green2:#16A34A; --green3:#15803D;
+  --green-dim:rgba(34,197,94,0.10); --green-glow:rgba(34,197,94,0.20);
+  --gold:#F59E0B; --gold-dim:rgba(245,158,11,0.12);
+  --red:#EF4444; --red-dim:rgba(239,68,68,0.12);
+  --blue:#3B82F6; --blue-dim:rgba(59,130,246,0.12);
+  --orange:#F97316; --orange-dim:rgba(249,115,22,0.12);
+  --white:#FFFFFF; --muted:rgba(255,255,255,0.5); --muted2:rgba(255,255,255,0.25);
+  --text:rgba(255,255,255,0.88);
+  --font:'DM Sans',sans-serif; --font-d:'Playfair Display',serif; --font-m:'DM Mono',monospace;
+  --r:12px; --rs:8px; --rl:16px;
+  --sidebar:240px;
+  --transition:0.2s cubic-bezier(.4,0,.2,1);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:var(--green);color:#000}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+img{display:block;max-width:100%}
+input,select,textarea,button{font-family:var(--font)}
+a{color:inherit;text-decoration:none}
+
+/* ═══════════════════════════════════════════
+   PAGE SYSTEM
+═══════════════════════════════════════════ */
+.page{display:none;min-height:100vh;animation:fadeIn 0.3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══════════════════════════════════════════
+   AUTH PAGES
+═══════════════════════════════════════════ */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);position:relative;overflow:hidden}
+.auth-wrap::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(34,197,94,0.06),transparent)}
+.auth-card{width:100%;max-width:440px;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:40px 36px;position:relative;z-index:1;box-shadow:0 32px 80px rgba(0,0,0,0.5)}
+.auth-logo{text-align:center;margin-bottom:32px}
+.auth-logo .mark{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);border-radius:18px;font-size:32px;margin-bottom:14px}
+.auth-logo h1{font-family:var(--font-d);font-size:22px;color:var(--white);margin-bottom:4px}
+.auth-logo p{font-size:13px;color:var(--muted)}
+.auth-tabs{display:flex;background:var(--bg3);border-radius:10px;padding:4px;margin-bottom:28px;gap:4px}
+.auth-tab{flex:1;padding:9px;border-radius:7px;border:none;background:transparent;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all var(--transition)}
+.auth-tab.active{background:var(--card2);color:var(--white)}
+.fld{margin-bottom:16px}
+.fld label{display:block;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:7px}
+.inp{width:100%;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--white);font-size:14px;outline:none;transition:border-color var(--transition)}
+.inp:focus{border-color:rgba(34,197,94,0.4)}
+.inp::placeholder{color:var(--muted2)}
+select.inp{cursor:pointer}
+.btn-auth{width:100%;padding:14px;background:var(--green);color:#000;font-weight:800;font-size:15px;border:none;border-radius:var(--r);cursor:pointer;transition:all var(--transition);margin-top:8px;min-height:50px}
+.btn-auth:hover{background:var(--green2);transform:translateY(-1px)}
+.auth-divider{text-align:center;color:var(--muted2);font-size:12px;margin:20px 0;position:relative}
+.auth-divider::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border)}
+.auth-divider span{background:var(--card);padding:0 12px;position:relative}
+.auth-link{text-align:center;font-size:13px;color:var(--muted);margin-top:20px}
+.auth-link a{color:var(--green);font-weight:600;cursor:pointer}
+.role-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.role-btn{padding:12px 8px;background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;text-align:center;transition:all var(--transition)}
+.role-btn.active{border-color:var(--green);background:var(--green-dim);color:var(--green)}
+.role-btn .rico{font-size:22px;display:block;margin-bottom:4px}
+.msg{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none}
+.msg.show{display:block}
+.msg.success{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);color:#6EE89A}
+.msg.error{background:var(--red-dim);border:1px solid rgba(239,68,68,0.2);color:#FCA5A5}
+
+/* ═══════════════════════════════════════════
+   APP SHELL — SIDEBAR + MAIN
+═══════════════════════════════════════════ */
+.app-shell{display:flex;min-height:100vh}
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--card);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;z-index:200;
+  transform:translateX(-100%);transition:transform var(--transition);
+  overflow-y:auto;
+}
+.sidebar.open{transform:translateX(0)}
+.sb-head{padding:20px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sb-logo{display:flex;align-items:center;gap:10px}
+.sb-logo .dot{width:36px;height:36px;background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sb-logo-text{font-size:14px;font-weight:700;color:var(--white);line-height:1.2}
+.sb-logo-text small{display:block;font-size:10px;color:var(--muted);font-weight:400;letter-spacing:0.05em}
+.sb-user{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-avatar{width:34px;height:34px;border-radius:50%;background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--green);flex-shrink:0}
+.sb-user-info{flex:1;min-width:0}
+.sb-user-name{font-size:13px;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-user-role{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em}
+.sb-badge{padding:2px 7px;border-radius:100px;font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase}
+.sb-badge.owner{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(245,158,11,0.2)}
+.sb-badge.staff{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,130,246,0.2)}
+.sb-badge.customer{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,0.2)}
+.sb-nav{flex:1;padding:12px 10px;overflow-y:auto}
+.sb-section-label{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted2);padding:8px 8px 4px;margin-top:8px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:10px;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:all var(--transition);margin-bottom:2px;border:1px solid transparent}
+.sb-item:hover{background:var(--bg3);color:var(--white)}
+.sb-item.active{background:var(--green-dim);color:var(--green);border-color:rgba(34,197,94,0.15)}
+.sb-item .ico{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-item .badge-count{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:100px}
+.sb-foot{padding:14px 10px;border-top:1px solid var(--border)}
+.sb-logout{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;color:var(--muted);font-size:13px;cursor:pointer;transition:all var(--transition);width:100%;background:none;border:1px solid transparent}
+.sb-logout:hover{background:var(--red-dim);color:var(--red);border-color:rgba(239,68,68,0.15)}
+/* Overlay */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:199;display:none;backdrop-filter:blur(4px)}
+.overlay.show{display:block}
+/* Main content */
+.main{flex:1;min-height:100vh;background:var(--bg)}
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(10,15,10,0.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:14px 20px;display:flex;align-items:center;gap:14px;
+}
+.menu-btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;color:var(--white);font-size:18px;display:flex;align-items:center;justify-content:center;transition:background var(--transition)}
+.menu-btn:hover{background:var(--card2)}
+.topbar-title{flex:1;font-size:16px;font-weight:700;color:var(--white)}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.notif-btn{position:relative;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;color:var(--muted);font-size:16px;display:flex;align-items:center;transition:all var(--transition)}
+.notif-btn:hover{color:var(--white)}
+.notif-dot{position:absolute;top:6px;right:6px;width:6px;height:6px;background:var(--red);border-radius:50%}
+.content{padding:20px}
+
+/* ═══════════════════════════════════════════
+   COMPONENTS
+═══════════════════════════════════════════ */
+/* Stats Grid */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:18px 16px;position:relative;overflow:hidden;transition:border-color var(--transition)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0}
+.stat-card.green::before{background:var(--green)}
+.stat-card.gold::before{background:var(--gold)}
+.stat-card.blue::before{background:var(--blue)}
+.stat-card.red::before{background:var(--red)}
+.stat-card.orange::before{background:var(--orange)}
+.stat-card:hover{border-color:var(--border2)}
+.stat-ico{font-size:22px;margin-bottom:10px}
+.stat-val{font-size:26px;font-weight:800;color:var(--white);line-height:1;margin-bottom:4px;font-family:var(--font-d)}
+.stat-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:600}
+.stat-trend{font-size:11px;margin-top:6px;display:flex;align-items:center;gap:4px}
+.stat-trend.up{color:var(--green)}
+.stat-trend.down{color:var(--red)}
+
+/* Section title */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-hdr h3{font-size:15px;font-weight:700;color:var(--white)}
+.sec-hdr .see-all{font-size:12px;color:var(--green);cursor:pointer;font-weight:600}
+
+/* Card */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:18px}
+.card-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
+/* Table */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;min-width:500px}
+th{background:var(--bg3);padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap}
+td{padding:12px 14px;font-size:13px;color:var(--text);border-top:1px solid var(--border)}
+tr:hover td{background:rgba(255,255,255,0.02)}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase}
+.badge.green{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,0.2)}
+.badge.red{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
+.badge.gold{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(245,158,11,0.2)}
+.badge.blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,130,246,0.2)}
+.badge.orange{background:var(--orange-dim);color:var(--orange);border:1px solid rgba(249,115,22,0.2)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;transition:all var(--transition);border:none;min-height:40px}
+.btn-primary{background:var(--green);color:#000}
+.btn-primary:hover{background:var(--green2);transform:translateY(-1px)}
+.btn-secondary{background:var(--bg3);color:var(--white);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--border2);background:var(--card2)}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
+.btn-danger:hover{background:rgba(239,68,68,0.2)}
+.btn-gold{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(245,158,11,0.2)}
+.btn-sm{padding:6px 12px;font-size:12px;min-height:32px}
+.btn-icon{width:36px;height:36px;padding:0;justify-content:center}
+
+/* Forms */
+.form-grid{display:grid;gap:14px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-fld label{display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+.form-inp{width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--white);font-size:13px;outline:none;transition:border-color var(--transition);font-family:var(--font)}
+.form-inp:focus{border-color:rgba(34,197,94,0.4)}
+.form-inp::placeholder{color:var(--muted2)}
+select.form-inp{cursor:pointer}
+textarea.form-inp{resize:vertical;min-height:80px}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:none;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(6px)}
+.modal-bg.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:24px 20px;animation:slideUp 0.3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-hdr h3{font-size:16px;font-weight:800;color:var(--white)}
+.modal-close{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;transition:color var(--transition)}
+.modal-close:hover{color:var(--white)}
+
+/* Chart placeholder */
+.chart-area{background:var(--bg3);border-radius:var(--r);padding:20px;position:relative;overflow:hidden}
+.chart-bars{display:flex;align-items:flex-end;gap:8px;height:120px;margin-top:12px}
+.cbar{flex:1;border-radius:4px 4px 0 0;transition:height 0.6s ease;position:relative;cursor:pointer;min-width:0}
+.cbar.green{background:linear-gradient(180deg,var(--green),rgba(34,197,94,0.3))}
+.cbar.gold{background:linear-gradient(180deg,var(--gold),rgba(245,158,11,0.3))}
+.cbar:hover::after{content:attr(data-val);position:absolute;top:-24px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--white);font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap}
+.chart-labels{display:flex;gap:8px;margin-top:6px}
+.chart-labels span{flex:1;text-align:center;font-size:10px;color:var(--muted);min-width:0}
+
+/* Order card */
+.order-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:16px;margin-bottom:10px;transition:border-color var(--transition)}
+.order-card:hover{border-color:var(--border2)}
+.order-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.order-num{font-family:var(--font-m);font-size:13px;color:var(--green);font-weight:500}
+.order-time{font-size:11px;color:var(--muted)}
+.order-items{font-size:13px;color:var(--text);margin-bottom:10px;line-height:1.7}
+.order-footer{display:flex;align-items:center;justify-content:space-between}
+.order-total{font-size:16px;font-weight:800;color:var(--white)}
+
+/* Menu item */
+.menu-item-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:transform var(--transition),border-color var(--transition)}
+.menu-item-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+.mic-img{height:130px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:52px;position:relative}
+.mic-body{padding:14px}
+.mic-name{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px}
+.mic-cat{font-size:11px;color:var(--muted);margin-bottom:10px}
+.mic-footer{display:flex;align-items:center;justify-content:space-between}
+.mic-price{font-size:18px;font-weight:800;color:var(--green)}
+.mic-toggle{position:relative;display:inline-flex;align-items:center;cursor:pointer}
+.mic-toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{width:36px;height:20px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);position:relative;transition:background var(--transition)}
+.mic-toggle input:checked + .toggle-track{background:var(--green-dim);border-color:rgba(34,197,94,0.3)}
+.toggle-track::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:var(--muted2);border-radius:50%;transition:all var(--transition)}
+.mic-toggle input:checked + .toggle-track::after{transform:translateX(16px);background:var(--green)}
+
+/* Review card */
+.review-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:16px;margin-bottom:10px}
+.rev-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.rev-user{display:flex;align-items:center;gap:10px}
+.rev-av{width:34px;height:34px;border-radius:50%;background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--green);flex-shrink:0}
+.rev-name{font-size:13px;font-weight:700;color:var(--white)}
+.rev-date{font-size:11px;color:var(--muted)}
+.rev-stars{color:#FBBF24;font-size:14px;letter-spacing:1px}
+.rev-text{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.7;margin-bottom:10px}
+.rev-cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.rev-cat{font-size:11px;color:var(--muted);background:var(--bg3);padding:3px 8px;border-radius:6px;display:flex;align-items:center;gap:4px}
+.rev-cat .star{color:#FBBF24;font-size:10px}
+
+/* Notification panel */
+.notif-panel{position:absolute;top:100%;right:0;width:320px;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);box-shadow:0 20px 60px rgba(0,0,0,0.5);z-index:300;display:none;max-height:400px;overflow:hidden;flex-direction:column}
+.notif-panel.show{display:flex}
+.notif-panel-hdr{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.notif-panel-hdr h4{font-size:14px;font-weight:700;color:var(--white)}
+.notif-list{overflow-y:auto;flex:1}
+.notif-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background var(--transition)}
+.notif-item:hover{background:var(--bg3)}
+.notif-item.unread{border-left:3px solid var(--green)}
+.notif-item .ni-title{font-size:13px;font-weight:600;color:var(--white);margin-bottom:3px}
+.notif-item .ni-sub{font-size:12px;color:var(--muted)}
+.notif-item .ni-time{font-size:10px;color:var(--muted2);margin-top:4px}
+
+/* Order builder */
+.ob-grid{display:grid;grid-template-columns:1fr;gap:14px}
+.ob-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px}
+.ob-emoji{font-size:28px;flex-shrink:0}
+.ob-info{flex:1;min-width:0}
+.ob-name{font-size:13px;font-weight:700;color:var(--white)}
+.ob-price{font-size:12px;color:var(--green);font-weight:600}
+.ob-qty{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.qty-btn{width:28px;height:28px;border-radius:8px;background:var(--card);border:1px solid var(--border);color:var(--white);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition)}
+.qty-btn:hover{border-color:var(--green);color:var(--green)}
+.qty-num{font-size:14px;font-weight:700;color:var(--white);min-width:20px;text-align:center}
+.ob-total-box{background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);border-radius:var(--rl);padding:16px;display:flex;align-items:center;justify-content:space-between}
+.ob-total-lbl{font-size:13px;color:var(--muted);font-weight:600}
+.ob-total-val{font-size:24px;font-weight:800;color:var(--green);font-family:var(--font-d)}
+
+/* Staff card */
+.staff-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:16px;display:flex;align-items:center;gap:14px;margin-bottom:10px;transition:border-color var(--transition)}
+.staff-card:hover{border-color:var(--border2)}
+.staff-av{width:44px;height:44px;border-radius:50%;background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--blue);flex-shrink:0}
+.staff-info{flex:1;min-width:0}
+.staff-name{font-size:14px;font-weight:700;color:var(--white)}
+.staff-role{font-size:12px;color:var(--muted)}
+.staff-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* Loyalty */
+.loyalty-card{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid rgba(245,158,11,0.2);border-radius:var(--rl);padding:20px;margin-bottom:16px;position:relative;overflow:hidden}
+.loyalty-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(245,158,11,0.08),transparent 70%)}
+.loyalty-pts{font-size:40px;font-weight:800;color:var(--gold);font-family:var(--font-d);line-height:1}
+.loyalty-sub{font-size:13px;color:var(--muted);margin-top:4px}
+.loyalty-bar-wrap{background:var(--bg3);border-radius:100px;height:8px;margin-top:16px}
+.loyalty-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--gold),#FBBF24);transition:width 1s ease}
+
+/* Analytics mini chart */
+.sparkline{display:flex;align-items:flex-end;gap:3px;height:40px}
+.sp-bar{flex:1;border-radius:2px;background:var(--green-dim);transition:background var(--transition)}
+.sp-bar.active{background:var(--green)}
+
+/* Receipt */
+.receipt{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px;font-family:var(--font-m);font-size:12px}
+.receipt-hdr{text-align:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px dashed var(--border)}
+.receipt-hdr h4{font-size:14px;color:var(--white);font-weight:700}
+.receipt-hdr p{color:var(--muted);font-size:11px}
+.receipt-row{display:flex;justify-content:space-between;color:var(--text);padding:3px 0}
+.receipt-total{display:flex;justify-content:space-between;color:var(--white);font-weight:700;font-size:14px;padding-top:10px;margin-top:8px;border-top:1px dashed var(--border)}
+.receipt-footer{text-align:center;color:var(--muted);font-size:11px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)}
+
+/* Audit log */
+.audit-row{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.audit-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.audit-icon.green{background:var(--green-dim)}
+.audit-icon.blue{background:var(--blue-dim)}
+.audit-icon.gold{background:var(--gold-dim)}
+.audit-icon.red{background:var(--red-dim)}
+.audit-info{flex:1;min-width:0}
+.audit-title{font-size:13px;font-weight:600;color:var(--white)}
+.audit-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.audit-time{font-size:11px;color:var(--muted2);flex-shrink:0;font-family:var(--font-m)}
+
+/* Progress bar */
+.prog-item{margin-bottom:12px}
+.prog-hdr{display:flex;justify-content:space-between;margin-bottom:5px}
+.prog-name{font-size:12px;color:var(--text);font-weight:500}
+.prog-val{font-size:12px;color:var(--muted);font-family:var(--font-m)}
+.prog-bar{height:6px;background:var(--bg3);border-radius:100px;overflow:hidden}
+.prog-fill{height:100%;border-radius:100px;transition:width 1s ease}
+.prog-fill.green{background:var(--green)}
+.prog-fill.gold{background:var(--gold)}
+.prog-fill.blue{background:var(--blue)}
+.prog-fill.orange{background:var(--orange)}
+.prog-fill.red{background:var(--red)}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;background:var(--bg3);padding:4px;border-radius:10px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:8px 16px;border-radius:7px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all var(--transition);white-space:nowrap;border:none;background:transparent}
+.tab.active{background:var(--card2);color:var(--white)}
+
+/* Search */
+.search-bar{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:16px}
+.search-bar .ico{font-size:16px;color:var(--muted);flex-shrink:0}
+.search-bar input{flex:1;background:none;border:none;color:var(--white);font-size:13px;outline:none;font-family:var(--font)}
+.search-bar input::placeholder{color:var(--muted2)}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:13px;font-weight:600;color:var(--white);z-index:1000;transition:transform 0.3s ease;display:flex;align-items:center;gap:8px;box-shadow:0 20px 60px rgba(0,0,0,0.5);white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:rgba(34,197,94,0.3);color:var(--green)}
+.toast.error{border-color:rgba(239,68,68,0.3);color:var(--red)}
+
+/* Welcome screen */
+.welcome-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:var(--bg);position:relative;overflow:hidden}
+.welcome-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 30%,rgba(34,197,94,0.06),transparent)}
+.welcome-inner{position:relative;z-index:1;max-width:480px}
+.welcome-logo{font-size:64px;margin-bottom:20px;animation:pulse 3s ease infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.welcome-title{font-family:var(--font-d);font-size:clamp(28px,6vw,42px);color:var(--white);line-height:1.1;margin-bottom:12px}
+.welcome-sub{font-size:15px;color:var(--muted);line-height:1.75;margin-bottom:36px}
+.welcome-actions{display:flex;flex-direction:column;gap:10px}
+.welcome-btn{display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);cursor:pointer;transition:all var(--transition);text-align:left}
+.welcome-btn:hover{border-color:var(--border2);background:var(--card2);transform:translateX(4px)}
+.welcome-btn .wico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.welcome-btn .wtext .wt{font-size:14px;font-weight:700;color:var(--white)}
+.welcome-btn .wtext .ws{font-size:12px;color:var(--muted);margin-top:2px}
+.welcome-btn .warrow{margin-left:auto;color:var(--muted2);font-size:18px}
+
+/* Rating input */
+.rating-input{display:flex;gap:6px;flex-direction:row-reverse;justify-content:flex-end}
+.rating-input input{display:none}
+.rating-input label{font-size:26px;cursor:pointer;transition:transform 0.1s;color:var(--muted2);filter:grayscale(100%)}
+.rating-input input:checked ~ label,.rating-input label:hover,.rating-input label:hover ~ label{color:#FBBF24;filter:none;transform:scale(1.1)}
+
+/* ═══════════════════════════════════════════
+   DESKTOP
+═══════════════════════════════════════════ */
+@media(min-width:768px){
+  .sidebar{transform:translateX(0);position:sticky;height:100vh;top:0;align-self:flex-start}
+  .overlay{display:none!important}
+  .menu-btn{display:none}
+  .stats-grid{grid-template-columns:repeat(4,1fr)}
+  .form-row{grid-template-columns:1fr 1fr}
+  .content{padding:24px 28px}
+  .modal-bg{align-items:center}
+  .modal{border-radius:20px;max-width:520px}
+  @keyframes slideUp{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+  .menu-grid{grid-template-columns:repeat(3,1fr)}
+  .ob-grid{grid-template-columns:1fr}
+}
+@media(min-width:1024px){
+  .stats-grid{grid-template-columns:repeat(4,1fr)}
+  .menu-grid{grid-template-columns:repeat(4,1fr)}
+}
+.menu-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════
+   PAGE: WELCOME
+═══════════════════════════════════════ -->
+<div class="page active" id="page-welcome">
+  <div class="welcome-screen">
+    <div class="welcome-inner">
+      <div class="welcome-logo">🐂</div>
+      <h1 class="welcome-title">Bull's &amp; Trading Cafe</h1>
+      <p class="welcome-sub">Management System — Select your role to continue. All data is stored locally for this demo. Connect Supabase for production use.</p>
+      <div class="welcome-actions">
+        <div class="welcome-btn" onclick="loginAs('owner')">
+          <div class="wico" style="background:var(--gold-dim)">👑</div>
+          <div class="wtext"><div class="wt">Owner / Admin</div><div class="ws">Full access · Analytics · Reports</div></div>
+          <div class="warrow">→</div>
+        </div>
+        <div class="welcome-btn" onclick="loginAs('staff')">
+          <div class="wico" style="background:var(--blue-dim)">👨‍🍳</div>
+          <div class="wtext"><div class="wt">Staff</div><div class="ws">Orders · Billing · Daily summary</div></div>
+          <div class="warrow">→</div>
+        </div>
+        <div class="welcome-btn" onclick="showPage('page-auth-customer')">
+          <div class="wico" style="background:var(--green-dim)">🛍️</div>
+          <div class="wtext"><div class="wt">Customer</div><div class="ws">Menu · Reviews · Loyalty points</div></div>
+          <div class="warrow">→</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   PAGE: CUSTOMER AUTH
+═══════════════════════════════════════ -->
+<div class="page" id="page-auth-customer">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="mark">🐂</div>
+        <h1>Bull's &amp; Trading Cafe</h1>
+        <p>Customer Portal · Trade Smart. Eat Better.</p>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('signup')">Sign Up</button>
+        <button class="auth-tab" onclick="switchAuthTab('login')">Sign In</button>
+      </div>
+      <div id="auth-msg" class="msg"></div>
+      <div id="auth-signup">
+        <div class="fld"><label>Full Name</label><input class="inp" type="text" id="c-name" placeholder="Your full name"></div>
+        <div class="fld"><label>Email Address</label><input class="inp" type="email" id="c-email" placeholder="your@email.com"></div>
+        <div class="fld"><label>Phone Number</label><input class="inp" type="tel" id="c-phone" placeholder="+91 98765 43210"></div>
+        <div class="fld"><label>Password</label><input class="inp" type="password" id="c-pass" placeholder="Create password"></div>
+        <button class="btn-auth" onclick="customerSignup()">🎉 Create Account</button>
+        <div class="auth-link">Already have an account? <a onclick="switchAuthTab('login')">Sign In</a></div>
+      </div>
+      <div id="auth-login" style="display:none">
+        <div class="fld"><label>Email Address</label><input class="inp" type="email" id="cl-email" placeholder="your@email.com"></div>
+        <div class="fld"><label>Password</label><input class="inp" type="password" id="cl-pass" placeholder="Your password"></div>
+        <button class="btn-auth" onclick="customerLogin()">🚀 Sign In</button>
+        <div class="auth-link">No account? <a onclick="switchAuthTab('signup')">Sign Up Free</a></div>
+        <div class="auth-divider"><span>or</span></div>
+        <div style="text-align:center"><a onclick="showPage('page-welcome')" style="font-size:13px;color:var(--muted);cursor:pointer">← Back to Home</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   APP: OWNER DASHBOARD
+═══════════════════════════════════════ -->
+<div class="page" id="page-owner">
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="owner-sidebar">
+      <div class="sb-head">
+        <div class="sb-logo">
+          <div class="dot">🐂</div>
+          <div class="sb-logo-text">Bull's &amp; Trading<small>Management System</small></div>
+        </div>
+      </div>
+      <div class="sb-user">
+        <div class="sb-avatar">O</div>
+        <div class="sb-user-info">
+          <div class="sb-user-name">Cafe Owner</div>
+          <div class="sb-user-role">Administrator</div>
+        </div>
+        <span class="sb-badge owner">Owner</span>
+      </div>
+      <nav class="sb-nav">
+        <div class="sb-section-label">Overview</div>
+        <div class="sb-item active" onclick="ownerNav('dashboard',this)"><span class="ico">📊</span>Dashboard</div>
+        <div class="sb-item" onclick="ownerNav('analytics',this)"><span class="ico">📈</span>Analytics</div>
+        <div class="sb-item" onclick="ownerNav('reports',this)"><span class="ico">📋</span>Reports</div>
+        <div class="sb-section-label">Operations</div>
+        <div class="sb-item" onclick="ownerNav('orders',this)"><span class="ico">🧾</span>All Orders <span class="badge-count">3</span></div>
+        <div class="sb-item" onclick="ownerNav('menu',this)"><span class="ico">🍽️</span>Menu Management</div>
+        <div class="sb-item" onclick="ownerNav('offers',this)"><span class="ico">🔥</span>Offers &amp; Deals</div>
+        <div class="sb-section-label">People</div>
+        <div class="sb-item" onclick="ownerNav('staff',this)"><span class="ico">👥</span>Staff Management</div>
+        <div class="sb-item" onclick="ownerNav('customers',this)"><span class="ico">👤</span>Customers</div>
+        <div class="sb-item" onclick="ownerNav('reviews',this)"><span class="ico">⭐</span>Reviews <span class="badge-count">2</span></div>
+        <div class="sb-section-label">System</div>
+        <div class="sb-item" onclick="ownerNav('audit',this)"><span class="ico">🔍</span>Audit Logs</div>
+        <div class="sb-item" onclick="ownerNav('settings',this)"><span class="ico">⚙️</span>Settings</div>
+      </nav>
+      <div class="sb-foot">
+        <button class="sb-logout" onclick="logout()"><span>🚪</span>Sign Out</button>
+      </div>
+    </aside>
+    <div class="overlay" id="owner-overlay" onclick="closeSidebar('owner')"></div>
+
+    <!-- Main -->
+    <main class="main">
+      <div class="topbar">
+        <button class="menu-btn" onclick="openSidebar('owner')">☰</button>
+        <span class="topbar-title" id="owner-page-title">Dashboard</span>
+        <div class="topbar-actions" style="position:relative">
+          <button class="notif-btn" onclick="toggleNotif('owner-notif')">🔔<span class="notif-dot"></span></button>
+          <div class="notif-panel" id="owner-notif">
+            <div class="notif-panel-hdr"><h4>Notifications</h4><span style="font-size:11px;color:var(--green);cursor:pointer">Mark all read</span></div>
+            <div class="notif-list" id="owner-notif-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content" id="owner-content">
+        <!-- Dashboard injected by JS -->
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   APP: STAFF DASHBOARD
+═══════════════════════════════════════ -->
+<div class="page" id="page-staff">
+  <div class="app-shell">
+    <aside class="sidebar" id="staff-sidebar">
+      <div class="sb-head">
+        <div class="sb-logo">
+          <div class="dot">🐂</div>
+          <div class="sb-logo-text">Bull's &amp; Trading<small>Staff Panel</small></div>
+        </div>
+      </div>
+      <div class="sb-user">
+        <div class="sb-avatar" style="background:var(--blue-dim);color:var(--blue)">S</div>
+        <div class="sb-user-info">
+          <div class="sb-user-name">Staff Member</div>
+          <div class="sb-user-role">Operational Access</div>
+        </div>
+        <span class="sb-badge staff">Staff</span>
+      </div>
+      <nav class="sb-nav">
+        <div class="sb-section-label">Operations</div>
+        <div class="sb-item active" onclick="staffNav('new-order',this)"><span class="ico">➕</span>New Order</div>
+        <div class="sb-item" onclick="staffNav('orders',this)"><span class="ico">🧾</span>Order History</div>
+        <div class="sb-item" onclick="staffNav('daily',this)"><span class="ico">📅</span>Daily Summary</div>
+        <div class="sb-item" onclick="staffNav('menu-view',this)"><span class="ico">🍽️</span>View Menu</div>
+      </nav>
+      <div class="sb-foot">
+        <button class="sb-logout" onclick="logout()"><span>🚪</span>Sign Out</button>
+      </div>
+    </aside>
+    <div class="overlay" id="staff-overlay" onclick="closeSidebar('staff')"></div>
+
+    <main class="main">
+      <div class="topbar">
+        <button class="menu-btn" onclick="openSidebar('staff')">☰</button>
+        <span class="topbar-title" id="staff-page-title">New Order</span>
+        <div class="topbar-actions">
+          <span style="font-size:12px;color:var(--muted);font-family:var(--font-m)" id="staff-clock"></span>
+        </div>
+      </div>
+      <div class="content" id="staff-content"></div>
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   APP: CUSTOMER DASHBOARD
+═══════════════════════════════════════ -->
+<div class="page" id="page-customer">
+  <div class="app-shell">
+    <aside class="sidebar" id="customer-sidebar">
+      <div class="sb-head">
+        <div class="sb-logo">
+          <div class="dot">🐂</div>
+          <div class="sb-logo-text">Bull's &amp; Trading<small>Customer Portal</small></div>
+        </div>
+      </div>
+      <div class="sb-user">
+        <div class="sb-avatar">C</div>
+        <div class="sb-user-info">
+          <div class="sb-user-name" id="cust-name-display">Customer</div>
+          <div class="sb-user-role">Loyalty Member</div>
+        </div>
+        <span class="sb-badge customer">Member</span>
+      </div>
+      <nav class="sb-nav">
+        <div class="sb-section-label">Explore</div>
+        <div class="sb-item active" onclick="customerNav('home',this)"><span class="ico">🏠</span>Home</div>
+        <div class="sb-item" onclick="customerNav('menu',this)"><span class="ico">🍽️</span>View Menu</div>
+        <div class="sb-item" onclick="customerNav('offers',this)"><span class="ico">🔥</span>Today's Offers</div>
+        <div class="sb-section-label">My Account</div>
+        <div class="sb-item" onclick="customerNav('profile',this)"><span class="ico">👤</span>My Profile</div>
+        <div class="sb-item" onclick="customerNav('orders',this)"><span class="ico">🧾</span>My Orders</div>
+        <div class="sb-item" onclick="customerNav('reviews',this)"><span class="ico">⭐</span>My Reviews</div>
+        <div class="sb-item" onclick="customerNav('loyalty',this)"><span class="ico">🏆</span>Loyalty Points</div>
+        <div class="sb-section-label">Cafe Info</div>
+        <div class="sb-item" onclick="customerNav('visit',this)"><span class="ico">📍</span>Visit Us</div>
+      </nav>
+      <div class="sb-foot">
+        <button class="sb-logout" onclick="logout()"><span>🚪</span>Sign Out</button>
+      </div>
+    </aside>
+    <div class="overlay" id="customer-overlay" onclick="closeSidebar('customer')"></div>
+
+    <main class="main">
+      <div class="topbar">
+        <button class="menu-btn" onclick="openSidebar('customer')">☰</button>
+        <span class="topbar-title" id="customer-page-title">Home</span>
+        <div class="topbar-actions">
+          <span style="font-size:16px;cursor:pointer" onclick="customerNav('loyalty',null)">🏆</span>
+        </div>
+      </div>
+      <div class="content" id="customer-content"></div>
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   MODAL
+═══════════════════════════════════════ -->
+<div class="modal-bg" id="modalBg" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal">
+    <div class="modal-hdr">
+      <h3 id="modal-title">Modal</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+const STATE = {
+  role: null,
+  user: null,
+  customers: JSON.parse(localStorage.getItem('btc_customers') || '[]'),
+  orders: JSON.parse(localStorage.getItem('btc_orders') || '[]'),
+  reviews: JSON.parse(localStorage.getItem('btc_reviews') || '[]'),
+  notifications: [],
+  cart: {},
+  orderCounter: parseInt(localStorage.getItem('btc_order_counter') || '100'),
+};
+
+const MENU = [
+  {id:1,cat:'pizza',emoji:'🍕',name:'Classic Margherita',desc:'Tomato sauce, mozzarella, basil',price:119,available:true},
+  {id:2,cat:'pizza',emoji:'🍕',name:'Paneer Tikka Pizza',desc:'Spiced paneer, capsicum, onion',price:129,available:true},
+  {id:3,cat:'pizza',emoji:'🍕',name:'Veg Supreme Pizza',desc:'Loaded veggies, olives, corn',price:139,available:true},
+  {id:4,cat:'burger',emoji:'🍔',name:'Crispy Veg Burger',desc:'Golden patty, lettuce, house sauce',price:119,available:true},
+  {id:5,cat:'burger',emoji:'🍗',name:'Spicy Chicken Burger',desc:'Juicy chicken, jalapeños, mayo',price:139,available:true},
+  {id:6,cat:'burger',emoji:'🍔',name:'Double Stack Burger',desc:'Two patties, double cheese',price:159,available:true},
+  {id:7,cat:'mocktail',emoji:'🍹',name:'Green Mojito',desc:'Mint, lime, sugar cane, ice',price:79,available:true},
+  {id:8,cat:'mocktail',emoji:'🥤',name:'Berry Blast',desc:'Mixed berries, citrus, soda',price:89,available:true},
+  {id:9,cat:'mocktail',emoji:'☕',name:'Cold Coffee',desc:'Creamy, strong, chilled',price:79,available:true},
+  {id:10,cat:'dessert',emoji:'🍫',name:'Choco Lava Cake',desc:'Warm molten chocolate centre',price:59,available:true},
+  {id:11,cat:'dessert',emoji:'🍦',name:'Vanilla Sundae',desc:'Ice cream, chocolate drizzle',price:69,available:true},
+  {id:12,cat:'dessert',emoji:'🍫',name:'Brownie Delight',desc:'Fudgy brownie + ice cream',price:79,available:true},
+];
+
+const OFFERS = [
+  {id:1,title:'2 Pizzas Combo',desc:'Any 2 pizzas at a special price',emoji:'🍕',price:119,original:238,active:true},
+  {id:2,title:'2 Veg Burgers',desc:'Great value burger deal',emoji:'🍔',price:119,original:238,active:true},
+  {id:3,title:'2 Non-Veg Burgers',desc:'Chicken burger combo',emoji:'🍗',price:139,original:278,active:true},
+  {id:4,title:'Mocktail Special',desc:'Any fresh mocktail',emoji:'🍹',price:79,original:89,active:true},
+  {id:5,title:'Choco Lava Cake',desc:'Indulgent dessert deal',emoji:'🍫',price:59,original:69,active:true},
+  {id:6,title:'Buy 20 Burgers',desc:'Get 4 Cold Coffees FREE!',emoji:'🔥',price:2780,original:3096,active:true},
+];
+
+const NOTIFICATIONS = [
+  {id:1,title:'New Review Submitted',sub:'Rahul M. left a 5-star review',time:'2m ago',unread:true,type:'review'},
+  {id:2,title:'Sales Milestone! 🎉',sub:'Today\'s revenue crossed ₹5,000',time:'1h ago',unread:true,type:'sales'},
+  {id:3,title:'New Customer Registered',sub:'Priya K. joined from Pune',time:'3h ago',unread:false,type:'customer'},
+  {id:4,title:'Low Stock Alert',sub:'Cold Coffee running low',time:'5h ago',unread:false,type:'alert'},
+];
+
+const SAMPLE_ORDERS = [
+  {id:'ORD-101',items:'2× Margherita, 1× Cold Coffee',total:317,status:'completed',time:'10:32 AM',date:'Today'},
+  {id:'ORD-102',items:'1× Chicken Burger, 1× Berry Blast',total:228,status:'completed',time:'11:15 AM',date:'Today'},
+  {id:'ORD-103',items:'3× Veg Burger, 2× Mocktail',total:515,status:'preparing',time:'12:04 PM',date:'Today'},
+  {id:'ORD-104',items:'1× Brownie Delight',total:79,status:'pending',time:'12:18 PM',date:'Today'},
+];
+
+const SAMPLE_REVIEWS = [
+  {id:1,name:'Rahul M.',initials:'R',rating:5,food:5,service:5,cleanliness:4,ambience:5,text:'The 2 pizza combo at ₹119 is unreal value! Best café in Shirur hands down.',date:'2h ago',replied:false},
+  {id:2,name:'Priya K.',initials:'P',rating:5,food:5,service:4,cleanliness:5,ambience:5,text:'The choco lava cake at ₹59 was divine. Will come back every single time!',date:'5h ago',replied:true},
+  {id:3,name:'Amol S.',initials:'A',rating:4,food:4,service:5,cleanliness:4,ambience:4,text:'Great value for money. Burgers are top notch. Staff very friendly.',date:'Yesterday',replied:false},
+  {id:4,name:'Sneha D.',initials:'S',rating:5,food:5,service:5,cleanliness:5,ambience:5,text:'Mocktails here are so fresh! The green mojito is my absolute favourite.',date:'Yesterday',replied:true},
+];
+
+const STAFF = [
+  {id:1,name:'Ravi Kulkarni',role:'Head Chef',email:'ravi@bulls.cafe',status:'active',orders_today:14},
+  {id:2,name:'Meera Patil',role:'Cashier',email:'meera@bulls.cafe',status:'active',orders_today:22},
+  {id:3,name:'Suresh Jadhav',role:'Server',email:'suresh@bulls.cafe',status:'active',orders_today:18},
+];
+
+/* ═══════════════════════════════════════════
+   PAGE & NAVIGATION
+═══════════════════════════════════════════ */
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function loginAs(role){
+  STATE.role = role;
+  if(role === 'owner'){
+    STATE.user = {name:'Cafe Owner',role:'owner'};
+    showPage('page-owner');
+    loadOwnerNotifications();
+    ownerNav('dashboard', document.querySelector('#owner-sidebar .sb-item'));
+  } else if(role === 'staff'){
+    STATE.user = {name:'Staff Member',role:'staff'};
+    showPage('page-staff');
+    staffNav('new-order', document.querySelector('#staff-sidebar .sb-item'));
+    startClock();
+  }
+}
+
+function logout(){
+  STATE.role = null;
+  STATE.user = null;
+  STATE.cart = {};
+  showPage('page-welcome');
+}
+
+/* ═══════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════ */
+function openSidebar(role){
+  document.getElementById(role+'-sidebar').classList.add('open');
+  const ov = document.getElementById(role+'-overlay');
+  if(ov) ov.classList.add('show');
+}
+function closeSidebar(role){
+  document.getElementById(role+'-sidebar').classList.remove('open');
+  const ov = document.getElementById(role+'-overlay');
+  if(ov) ov.classList.remove('show');
+}
+
+/* ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ */
+function openModal(title, bodyHTML){
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHTML;
+  document.getElementById('modalBg').classList.add('show');
+}
+function closeModal(){document.getElementById('modalBg').classList.remove('show')}
+function closeModalOutside(e){if(e.target===document.getElementById('modalBg'))closeModal()}
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+function toast(msg, type='success'){
+  const t = document.getElementById('toast');
+  t.className = `toast ${type}`;
+  t.innerHTML = (type==='success'?'✅':'❌') + ' ' + msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+/* ═══════════════════════════════════════════
+   NOTIFICATIONS
+═══════════════════════════════════════════ */
+function loadOwnerNotifications(){
+  const list = document.getElementById('owner-notif-list');
+  if(!list) return;
+  list.innerHTML = NOTIFICATIONS.map(n=>`
+    <div class="notif-item ${n.unread?'unread':''}">
+      <div class="ni-title">${n.title}</div>
+      <div class="ni-sub">${n.sub}</div>
+      <div class="ni-time">${n.time}</div>
+    </div>`).join('');
+}
+function toggleNotif(id){
+  const p = document.getElementById(id);
+  p.classList.toggle('show');
+  document.addEventListener('click',function handler(e){
+    if(!p.contains(e.target)){p.classList.remove('show');document.removeEventListener('click',handler);}
+  });
+}
+
+/* ═══════════════════════════════════════════
+   CLOCK
+═══════════════════════════════════════════ */
+function startClock(){
+  const el = document.getElementById('staff-clock');
+  if(!el) return;
+  const update = ()=>{const n=new Date();el.textContent=n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});};
+  update(); setInterval(update,1000);
+}
+
+/* ═══════════════════════════════════════════
+   OWNER NAVIGATION & VIEWS
+═══════════════════════════════════════════ */
+function ownerNav(view, el){
+  if(el){
+    document.querySelectorAll('#owner-sidebar .sb-item').forEach(i=>i.classList.remove('active'));
+    el.classList.add('active');
+  }
+  const titles = {dashboard:'Dashboard',analytics:'Analytics',reports:'Reports',orders:'All Orders',menu:'Menu Management',offers:'Offers & Deals',staff:'Staff Management',customers:'Customers',reviews:'Reviews',audit:'Audit Logs',settings:'Settings'};
+  document.getElementById('owner-page-title').textContent = titles[view] || view;
+  const c = document.getElementById('owner-content');
+  const views = {
+    dashboard: ownerDashboard,
+    analytics: ownerAnalytics,
+    reports: ownerReports,
+    orders: ownerOrders,
+    menu: ownerMenu,
+    offers: ownerOffers,
+    staff: ownerStaff,
+    customers: ownerCustomers,
+    reviews: ownerReviews,
+    audit: ownerAudit,
+    settings: ownerSettings,
+  };
+  c.innerHTML = '';
+  if(views[view]) c.innerHTML = views[view]();
+  closeSidebar('owner');
+  initCharts();
+}
+
+function ownerDashboard(){
+  const todayRev = SAMPLE_ORDERS.filter(o=>o.date==='Today').reduce((s,o)=>s+o.total,0);
+  return `
+  <div class="stats-grid">
+    <div class="stat-card green"><div class="stat-ico">💰</div><div class="stat-val">₹${todayRev}</div><div class="stat-lbl">Today's Revenue</div><div class="stat-trend up">▲ +18% vs yesterday</div></div>
+    <div class="stat-card gold"><div class="stat-ico">📦</div><div class="stat-val">${SAMPLE_ORDERS.length}</div><div class="stat-lbl">Today's Orders</div><div class="stat-trend up">▲ +5 since morning</div></div>
+    <div class="stat-card blue"><div class="stat-ico">👥</div><div class="stat-val">${STATE.customers.length + 47}</div><div class="stat-lbl">Total Customers</div><div class="stat-trend up">▲ 3 new today</div></div>
+    <div class="stat-card orange"><div class="stat-ico">⭐</div><div class="stat-val">4.8</div><div class="stat-lbl">Avg Rating</div><div class="stat-trend up">▲ 0.1 this week</div></div>
+  </div>
+  <div style="display:grid;gap:14px;margin-bottom:14px">
+    <div class="card">
+      <div class="card-title">📊 Weekly Revenue</div>
+      <div class="chart-area">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:11px;color:var(--muted)">Mon — Sun</span>
+          <span style="font-size:13px;font-weight:700;color:var(--green)">₹38,450 total</span>
+        </div>
+        <div class="chart-bars" id="rev-chart">
+          <div class="cbar green" style="height:55%" data-val="₹4,200">.</div>
+          <div class="cbar green" style="height:70%" data-val="₹5,600">.</div>
+          <div class="cbar green" style="height:45%" data-val="₹3,800">.</div>
+          <div class="cbar green" style="height:85%" data-val="₹6,900">.</div>
+          <div class="cbar green" style="height:95%" data-val="₹8,200">.</div>
+          <div class="cbar gold" style="height:100%" data-val="₹9,750 (Sat)">.</div>
+          <div class="cbar green" style="height:60%" data-val="₹0 (Today live)">.</div>
+        </div>
+        <div class="chart-labels">
+          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+    <div class="card">
+      <div class="card-title">🏆 Top Items</div>
+      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍕 Pizzas</span><span class="prog-val">42%</span></div><div class="prog-bar"><div class="prog-fill green" style="width:42%"></div></div></div>
+      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍔 Burgers</span><span class="prog-val">35%</span></div><div class="prog-bar"><div class="prog-fill gold" style="width:35%"></div></div></div>
+      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍹 Mocktails</span><span class="prog-val">14%</span></div><div class="prog-bar"><div class="prog-fill blue" style="width:14%"></div></div></div>
+      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍫 Desserts</span><span class="prog-val">9%</span></div><div class="prog-bar"><div class="prog-fill orange" style="width:9%"></div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">⏰ Peak Hours</div>
+      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">12–2 PM</span><span class="prog-val">High</span></div><div class="prog-bar"><div class="prog-fill green" style="width:90%"></div></div></div>
+      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">7–9 PM</span><span class="prog-val">Peak</span></div><div class="prog-bar"><div class="prog-fill gold" style="width:100%"></div></div></div>
+      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">4–6 PM</span><span class="prog-val">Medium</span></div><div class="prog-bar"><div class="prog-fill blue" style="width:60%"></div></div></div>
+      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">10–12 PM</span><span class="prog-val">Low</span></div><div class="prog-bar"><div class="prog-fill orange" style="width:30%"></div></div></div>
+    </div>
+  </div>
+  <div class="sec-hdr"><h3>Recent Orders</h3><span class="see-all" onclick="ownerNav('orders',null)">See all →</span></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Order ID</th><th>Items</th><th>Total</th><th>Status</th><th>Time</th></tr></thead>
+      <tbody>
+        ${SAMPLE_ORDERS.map(o=>`<tr>
+          <td><span style="font-family:var(--font-m);color:var(--green)">${o.id}</span></td>
+          <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.items}</td>
+          <td style="font-weight:700;color:var(--white)">₹${o.total}</td>
+          <td><span class="badge ${o.status==='completed'?'green':o.status==='preparing'?'gold':'blue'}">${o.status}</span></td>
+          <td style="color:var(--muted)">${o.time}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+  <div style="margin-top:14px" class="sec-hdr"><h3>Recent Reviews</h3><span class="see-all" onclick="ownerNav('reviews',null)">See all →</span></div>
+  ${SAMPLE_REVIEWS.slice(0,2).map(reviewCard).join('')}`;
+}
+
+function ownerAnalytics(){
+  return `
+  <div class="stats-grid">
+    <div class="stat-card green"><div class="stat-ico">📅</div><div class="stat-val">₹5,840</div><div class="stat-lbl">Today</div><div class="stat-trend up">▲ +12%</div></div>
+    <div class="stat-card gold"><div class="stat-ico">📅</div><div class="stat-val">₹38,450</div><div class="stat-lbl">This Week</div><div class="stat-trend up">▲ +8%</div></div>
+    <div class="stat-card blue"><div class="stat-ico">📅</div><div class="stat-val">₹1,42,800</div><div class="stat-lbl">This Month</div><div class="stat-trend up">▲ +22%</div></div>
+    <div class="stat-card orange"><div class="stat-ico">📅</div><div class="stat-val">₹8,64,000</div><div class="stat-lbl">This Year</div><div class="stat-trend up">▲ Growing</div></div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">📈 Monthly Revenue Trend</div>
+    <div class="chart-area">
+      <div class="chart-bars">
+        ${[65,72,58,80,88,95,70,85,90,100,82,75].map((h,i)=>`<div class="cbar ${i===9?'gold':'green'}" style="height:${h}%" data-val="₹${Math.round(h*1428)}">.</div>`).join('')}
+      </div>
+      <div class="chart-labels">
+        ${['J','F','M','A','M','J','J','A','S','O','N','D'].map(m=>`<span>${m}</span>`).join('')}
+      </div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+    <div class="card">
+      <div class="card-title">🍽️ Menu Performance</div>
+      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍕 Margherita</span><span class="prog-val">286 sold</span></div><div class="prog-bar"><div class="prog-fill green" style="width:100%"></div></div></div>
+      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍗 Chicken Burger</span><span class="prog-val">241 sold</span></div><div class="prog-bar"><div class="prog-fill gold" style="width:84%"></div></div></div>
+      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍫 Choco Lava</span><span class="prog-val">198 sold</span></div><div class="prog-bar"><div class="prog-fill blue" style="width:69%"></div></div></div>
+      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">☕ Cold Coffee</span><span class="prog-val">175 sold</span></div><div class="prog-bar"><div class="prog-fill orange" style="width:61%"></div></div></div>
+      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍔 Veg Burger</span><span class="prog-val">143 sold</span></div><div class="prog-bar"><div class="prog-fill red" style="width:50%"></div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">👥 Customer Insights</div>
+      <div style="display:flex;flex-direction:column;gap:14px;padding-top:4px">
+        <div style="background:var(--bg3);border-radius:10px;padding:12px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Total Customers</div>
+          <div style="font-size:24px;font-weight:800;color:var(--white)">${STATE.customers.length + 47}</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:10px;padding:12px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Avg Order Value</div>
+          <div style="font-size:24px;font-weight:800;color:var(--gold)">₹284</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:10px;padding:12px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Repeat Customers</div>
+          <div style="font-size:24px;font-weight:800;color:var(--green)">68%</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function ownerReports(){
+  return `
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">📋 Generate Report</div>
+    <div class="form-grid">
+      <div class="form-row">
+        <div class="form-fld"><label>Report Type</label>
+          <select class="form-inp">
+            <option>Daily Sales Report</option>
+            <option>Weekly Summary</option>
+            <option>Monthly Revenue</option>
+            <option>Custom Date Range</option>
+            <option>Staff Performance</option>
+            <option>Menu Analysis</option>
+          </select>
+        </div>
+        <div class="form-fld"><label>Format</label>
+          <select class="form-inp"><option>On-Screen View</option><option>Print PDF</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-fld"><label>From Date</label><input class="form-inp" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
+        <div class="form-fld"><label>To Date</label><input class="form-inp" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
+      </div>
+      <button class="btn btn-primary" onclick="toast('Report generated successfully! 📋')">📊 Generate Report</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📅 Today's Report Preview</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Category</th><th>Items Sold</th><th>Revenue</th><th>% of Total</th></tr></thead>
+        <tbody>
+          <tr><td>🍕 Pizzas</td><td>24</td><td style="color:var(--green);font-weight:700">₹2,850</td><td><span class="badge green">42%</span></td></tr>
+          <tr><td>🍔 Burgers</td><td>19</td><td style="color:var(--green);font-weight:700">₹2,040</td><td><span class="badge gold">35%</span></td></tr>
+          <tr><td>🍹 Mocktails</td><td>8</td><td style="color:var(--green);font-weight:700">₹632</td><td><span class="badge blue">11%</span></td></tr>
+          <tr><td>🍫 Desserts</td><td>5</td><td style="color:var(--green);font-weight:700">₹318</td><td><span class="badge orange">7%</span></td></tr>
+          <tr><td colspan="2" style="font-weight:800;color:var(--white)">Total</td><td style="font-weight:800;color:var(--green);font-size:16px">₹5,840</td><td><span class="badge green">100%</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function ownerOrders(){
+  return `
+  <div class="search-bar"><span class="ico">🔍</span><input type="text" placeholder="Search orders by ID or items..."></div>
+  <div class="tabs">
+    <button class="tab active">All Orders</button>
+    <button class="tab">Pending</button>
+    <button class="tab">Preparing</button>
+    <button class="tab">Completed</button>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Order ID</th><th>Items</th><th>Total</th><th>Status</th><th>Staff</th><th>Time</th><th>Actions</th></tr></thead>
+      <tbody>
+        ${SAMPLE_ORDERS.map(o=>`<tr>
+          <td><span style="font-family:var(--font-m);color:var(--green);font-weight:600">${o.id}</span></td>
+          <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.items}</td>
+          <td style="font-weight:800;color:var(--white)">₹${o.total}</td>
+          <td><span class="badge ${o.status==='completed'?'green':o.status==='preparing'?'gold':'blue'}">${o.status}</span></td>
+          <td style="color:var(--muted)">Ravi K.</td>
+          <td style="color:var(--muted)">${o.time}</td>
+          <td><button class="btn btn-secondary btn-sm" onclick="viewReceipt('${o.id}','${o.items}',${o.total})">🧾</button></td>
+        </tr>`).join('')}
+        ${STATE.orders.map(o=>`<tr>
+          <td><span style="font-family:var(--font-m);color:var(--green);font-weight:600">${o.id}</span></td>
+          <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.summary}</td>
+          <td style="font-weight:800;color:var(--white)">₹${o.total}</td>
+          <td><span class="badge green">completed</span></td>
+          <td style="color:var(--muted)">Staff</td>
+          <td style="color:var(--muted)">${o.time}</td>
+          <td><button class="btn btn-secondary btn-sm" onclick="viewReceipt('${o.id}','${o.summary}',${o.total})">🧾</button></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function ownerMenu(){
+  return `
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="btn btn-primary" onclick="addMenuItemModal()">➕ Add Item</button>
+    <button class="btn btn-secondary">📤 Export Menu</button>
+  </div>
+  <div class="tabs">
+    <button class="tab active">All</button>
+    <button class="tab">🍕 Pizzas</button>
+    <button class="tab">🍔 Burgers</button>
+    <button class="tab">🍹 Mocktails</button>
+    <button class="tab">🍫 Desserts</button>
+  </div>
+  <div class="menu-grid">
+    ${MENU.map(item=>`
+    <div class="menu-item-card">
+      <div class="mic-img">${item.emoji}</div>
+      <div class="mic-body">
+        <div class="mic-name">${item.name}</div>
+        <div class="mic-cat">${item.cat.charAt(0).toUpperCase()+item.cat.slice(1)} · ${item.desc}</div>
+        <div class="mic-footer">
+          <span class="mic-price">₹${item.price}</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <label class="mic-toggle">
+              <input type="checkbox" ${item.available?'checked':''} onchange="toggleItem(${item.id},this)">
+              <span class="toggle-track"></span>
+            </label>
+            <button class="btn btn-secondary btn-icon btn-sm" onclick="editItemModal(${item.id})">✏️</button>
+            <button class="btn btn-danger btn-icon btn-sm" onclick="deleteItem(${item.id})">🗑️</button>
+          </div>
+        </div>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function ownerOffers(){
+  return `
+  <div style="display:flex;gap:10px;margin-bottom:16px">
+    <button class="btn btn-primary" onclick="addOfferModal()">➕ Create Offer</button>
+  </div>
+  <div style="display:grid;gap:12px">
+    ${OFFERS.map(o=>`
+    <div class="card" style="display:flex;align-items:center;gap:14px">
+      <span style="font-size:36px">${o.emoji}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px">${o.title}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${o.desc}</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px;font-weight:800;color:var(--green)">₹${o.price}</span>
+          <span style="font-size:12px;color:var(--muted);text-decoration:line-through">₹${o.original}</span>
+          <span class="badge green">Save ₹${o.original-o.price}</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0">
+        <span class="badge ${o.active?'green':'red'}">${o.active?'Active':'Paused'}</span>
+        <button class="btn btn-secondary btn-sm" onclick="toast('Offer updated!')">✏️ Edit</button>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function ownerStaff(){
+  return `
+  <div style="display:flex;gap:10px;margin-bottom:16px">
+    <button class="btn btn-primary" onclick="addStaffModal()">➕ Add Staff Member</button>
+  </div>
+  <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
+    <div class="stat-card blue"><div class="stat-ico">👥</div><div class="stat-val">3</div><div class="stat-lbl">Total Staff</div></div>
+    <div class="stat-card green"><div class="stat-ico">✅</div><div class="stat-val">3</div><div class="stat-lbl">Active</div></div>
+    <div class="stat-card gold"><div class="stat-ico">📦</div><div class="stat-val">54</div><div class="stat-lbl">Orders Today</div></div>
+  </div>
+  ${STAFF.map(s=>`
+  <div class="staff-card">
+    <div class="staff-av">${s.name[0]}</div>
+    <div class="staff-info">
+      <div class="staff-name">${s.name}</div>
+      <div class="staff-role">${s.role} · ${s.email}</div>
+      <div style="margin-top:4px;display:flex;align-items:center;gap:8px">
+        <span class="badge green">Active</span>
+        <span style="font-size:11px;color:var(--muted)">${s.orders_today} orders today</span>
+      </div>
+    </div>
+    <div class="staff-actions">
+      <button class="btn btn-secondary btn-sm" onclick="toast('Staff profile updated!')">✏️</button>
+      <button class="btn btn-danger btn-sm" onclick="toast('Staff account disabled','error')">⛔</button>
+    </div>
+  </div>`).join('')}`;
+}
+
+function ownerCustomers(){
+  const all = [...STATE.customers, ...Array(47).fill(0).map((_,i)=>({name:`Customer ${i+1}`,email:`c${i+1}@mail.com`,phone:'9876543210',joined:'Earlier',points:Math.floor(Math.random()*500)}))];
+  return `
+  <div class="search-bar"><span class="ico">🔍</span><input type="text" placeholder="Search customers..."></div>
+  <div class="stat-card blue" style="margin-bottom:14px;display:flex;align-items:center;gap:14px">
+    <div style="font-size:32px">👥</div>
+    <div><div style="font-size:28px;font-weight:800;color:var(--white)">${all.length}</div><div style="font-size:12px;color:var(--muted)">Total Registered Customers</div></div>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Loyalty Pts</th><th>Status</th></tr></thead>
+      <tbody>
+        ${STATE.customers.map((c,i)=>`<tr>
+          <td style="color:var(--muted)">${i+1}</td>
+          <td style="font-weight:600;color:var(--white)">${c.name}</td>
+          <td style="color:var(--muted)">${c.email}</td>
+          <td><span style="color:var(--gold);font-weight:700">${c.points||0} pts</span></td>
+          <td><span class="badge green">Active</span></td>
+        </tr>`).join('')}
+        ${all.slice(STATE.customers.length, 8).map((c,i)=>`<tr>
+          <td style="color:var(--muted)">${STATE.customers.length+i+1}</td>
+          <td style="font-weight:600;color:var(--white)">${c.name}</td>
+          <td style="color:var(--muted)">${c.email}</td>
+          <td><span style="color:var(--gold);font-weight:700">${c.points} pts</span></td>
+          <td><span class="badge green">Active</span></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function ownerReviews(){
+  const allRevs = [...SAMPLE_REVIEWS, ...STATE.reviews];
+  return `
+  <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
+    <div class="stat-card gold"><div class="stat-ico">⭐</div><div class="stat-val">4.8</div><div class="stat-lbl">Avg Rating</div></div>
+    <div class="stat-card blue"><div class="stat-ico">📝</div><div class="stat-val">${allRevs.length}</div><div class="stat-lbl">Total Reviews</div></div>
+    <div class="stat-card green"><div class="stat-ico">✅</div><div class="stat-val">${allRevs.filter(r=>r.replied).length}</div><div class="stat-lbl">Replied</div></div>
+    <div class="stat-card orange"><div class="stat-ico">⏳</div><div class="stat-val">${allRevs.filter(r=>!r.replied).length}</div><div class="stat-lbl">Pending Reply</div></div>
+  </div>
+  ${allRevs.map(r=>reviewCard(r, true)).join('')}`;
+}
+
+function ownerAudit(){
+  const logs = [
+    {ico:'🔑',type:'green',title:'Owner Login',sub:'Logged in from Chrome, Maharashtra',time:'10:02 AM'},
+    {ico:'➕',type:'blue',title:'Order Created',sub:'ORD-103 · ₹515 · by Ravi K.',time:'12:04 PM'},
+    {ico:'⭐',type:'gold',title:'New Review',sub:'Rahul M. left 5 stars',time:'11:45 AM'},
+    {ico:'🍽️',type:'green',title:'Menu Updated',sub:'Cold Coffee price updated to ₹79',time:'09:30 AM'},
+    {ico:'👤',type:'blue',title:'New Customer',sub:'Priya K. registered',time:'09:15 AM'},
+    {ico:'🔑',type:'green',title:'Staff Login',sub:'Meera Patil logged in',time:'09:00 AM'},
+    {ico:'❌',type:'red',title:'Failed Login',sub:'Invalid password attempt · Unknown',time:'08:45 AM'},
+  ];
+  return `
+  <div class="card">
+    <div class="card-title">🔍 System Audit Logs</div>
+    ${logs.map(l=>`
+    <div class="audit-row">
+      <div class="audit-icon ${l.type}">${l.ico}</div>
+      <div class="audit-info"><div class="audit-title">${l.title}</div><div class="audit-sub">${l.sub}</div></div>
+      <div class="audit-time">${l.time}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function ownerSettings(){
+  return `
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">🏪 Cafe Information</div>
+    <div class="form-grid">
+      <div class="form-fld"><label>Cafe Name</label><input class="form-inp" value="Bull's &amp; Trading Cafe"></div>
+      <div class="form-fld"><label>Address</label><input class="form-inp" value="Highway Center Building, Baburao Nagar, Shirur, MH 412210"></div>
+      <div class="form-row">
+        <div class="form-fld"><label>Opening Time</label><input class="form-inp" type="time" value="09:00"></div>
+        <div class="form-fld"><label>Closing Time</label><input class="form-inp" type="time" value="23:00"></div>
+      </div>
+      <div class="form-fld"><label>Instagram</label><input class="form-inp" value="@bulls_and_tradingcafe"></div>
+      <button class="btn btn-primary" onclick="toast('Settings saved successfully!')">💾 Save Changes</button>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">🔑 Supabase Configuration</div>
+    <div style="background:var(--bg3);border:1px solid rgba(34,197,94,0.15);border-radius:var(--r);padding:14px;font-family:var(--font-m);font-size:12px;color:var(--muted);line-height:2">
+      NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co<br>
+      NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key<br>
+      SUPABASE_SERVICE_ROLE_KEY=your-service-key<br>
+      NEXT_PUBLIC_SITE_URL=https://your-domain.com
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:10px">Add these to your <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">.env.local</code> file in the Next.js project.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">⚠️ Danger Zone</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-danger" onclick="toast('All demo data cleared','error');STATE.orders=[];STATE.reviews=[];STATE.customers=[];saveData();ownerNav('dashboard',null)">🗑️ Clear All Demo Data</button>
+      <button class="btn btn-danger" onclick="toast('Password reset email sent!','success')">🔑 Reset Owner Password</button>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════
+   REVIEW CARD HELPER
+═══════════════════════════════════════════ */
+function reviewCard(r, showReply=false){
+  return `
+  <div class="review-card">
+    <div class="rev-hdr">
+      <div class="rev-user">
+        <div class="rev-av">${r.initials||r.name[0]}</div>
+        <div><div class="rev-name">${r.name}</div><div class="rev-date">${r.date||'Just now'}</div></div>
+      </div>
+      <div class="rev-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+    </div>
+    <div class="rev-cats">
+      <span class="rev-cat"><span class="star">★</span>Food: ${r.food}/5</span>
+      <span class="rev-cat"><span class="star">★</span>Service: ${r.service}/5</span>
+      <span class="rev-cat"><span class="star">★</span>Ambience: ${r.ambience||5}/5</span>
+      <span class="rev-cat"><span class="star">★</span>Cleanliness: ${r.cleanliness}/5</span>
+    </div>
+    <div class="rev-text">${r.text}</div>
+    ${showReply ? `<button class="btn btn-secondary btn-sm" onclick="replyModal('${r.name}')">
+      ${r.replied ? '✅ View Reply' : '💬 Reply'}
+    </button>` : ''}
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════
+   OWNER MODALS
+═══════════════════════════════════════════ */
+function addMenuItemModal(){
+  openModal('Add Menu Item',`
+    <div class="form-grid">
+      <div class="form-fld"><label>Item Name</label><input class="form-inp" id="mi-name" placeholder="e.g. Veg Cheese Burst Pizza"></div>
+      <div class="form-row">
+        <div class="form-fld"><label>Category</label>
+          <select class="form-inp" id="mi-cat"><option value="pizza">Pizza</option><option value="burger">Burger</option><option value="mocktail">Mocktail</option><option value="dessert">Dessert</option></select>
+        </div>
+        <div class="form-fld"><label>Price (₹)</label><input class="form-inp" type="number" id="mi-price" placeholder="0"></div>
+      </div>
+      <div class="form-fld"><label>Description</label><textarea class="form-inp" id="mi-desc" placeholder="Short description..."></textarea></div>
+      <div class="form-fld"><label>Emoji</label><input class="form-inp" id="mi-emoji" placeholder="🍕" maxlength="2"></div>
+      <button class="btn btn-primary" onclick="saveMenuItem()">💾 Add Item</button>
+    </div>`);
+}
+
+function saveMenuItem(){
+  const name = document.getElementById('mi-name').value.trim();
+  if(!name){toast('Please enter item name','error');return;}
+  const price = parseFloat(document.getElementById('mi-price').value)||0;
+  MENU.push({id:Date.now(),cat:document.getElementById('mi-cat').value,emoji:document.getElementById('mi-emoji').value||'🍽️',name,desc:document.getElementById('mi-desc').value,price,available:true});
+  closeModal(); toast('Menu item added! 🍽️');
+  ownerNav('menu', null);
+}
+
+function editItemModal(id){
+  const item = MENU.find(m=>m.id===id);
+  if(!item) return;
+  openModal('Edit Item: '+item.name,`
+    <div class="form-grid">
+      <div class="form-fld"><label>Item Name</label><input class="form-inp" id="ei-name" value="${item.name}"></div>
+      <div class="form-fld"><label>Price (₹)</label><input class="form-inp" type="number" id="ei-price" value="${item.price}"></div>
+      <div class="form-fld"><label>Description</label><textarea class="form-inp" id="ei-desc">${item.desc}</textarea></div>
+      <button class="btn btn-primary" onclick="updateItem(${id})">💾 Save Changes</button>
+    </div>`);
+}
+function updateItem(id){
+  const item = MENU.find(m=>m.id===id);
+  if(item){item.name=document.getElementById('ei-name').value;item.price=parseFloat(document.getElementById('ei-price').value)||item.price;item.desc=document.getElementById('ei-desc').value;}
+  closeModal(); toast('Item updated!'); ownerNav('menu',null);
+}
+function deleteItem(id){
+  if(confirm('Delete this item?')){const i=MENU.findIndex(m=>m.id===id);if(i>-1)MENU.splice(i,1);toast('Item deleted','error');ownerNav('menu',null);}
+}
+function toggleItem(id,cb){const item=MENU.find(m=>m.id===id);if(item)item.available=cb.checked;toast(cb.checked?'Item enabled!':'Item disabled');}
+
+function addStaffModal(){
+  openModal('Add Staff Member',`
+    <div class="form-grid">
+      <div class="form-fld"><label>Full Name</label><input class="form-inp" id="st-name" placeholder="Staff full name"></div>
+      <div class="form-fld"><label>Email</label><input class="form-inp" type="email" id="st-email" placeholder="staff@bulls.cafe"></div>
+      <div class="form-fld"><label>Role</label>
+        <select class="form-inp" id="st-role"><option>Head Chef</option><option>Cashier</option><option>Server</option><option>Manager</option></select>
+      </div>
+      <div class="form-fld"><label>Temp Password</label><input class="form-inp" type="password" id="st-pass" placeholder="Set temporary password"></div>
+      <div style="background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);border-radius:var(--r);padding:12px;font-size:12px;color:rgba(255,255,255,0.7)">
+        📧 A welcome email with login credentials will be sent to the staff member via Supabase Auth.
+      </div>
+      <button class="btn btn-primary" onclick="saveStaff()">➕ Create Staff Account</button>
+    </div>`);
+}
+function saveStaff(){
+  const name=document.getElementById('st-name').value.trim();
+  if(!name){toast('Enter staff name','error');return;}
+  STAFF.push({id:Date.now(),name,role:document.getElementById('st-role').value,email:document.getElementById('st-email').value,status:'active',orders_today:0});
+  closeModal();toast('Staff member added! Welcome email sent 📧');ownerNav('staff',null);
+}
+
+function addOfferModal(){
+  openModal('Create New Offer',`
+    <div class="form-grid">
+      <div class="form-fld"><label>Offer Title</label><input class="form-inp" id="of-title" placeholder="e.g. 3 Pizzas Combo"></div>
+      <div class="form-fld"><label>Description</label><input class="form-inp" id="of-desc" placeholder="Short description"></div>
+      <div class="form-row">
+        <div class="form-fld"><label>Offer Price (₹)</label><input class="form-inp" type="number" id="of-price"></div>
+        <div class="form-fld"><label>Original Price (₹)</label><input class="form-inp" type="number" id="of-original"></div>
+      </div>
+      <div class="form-fld"><label>Emoji</label><input class="form-inp" id="of-emoji" placeholder="🔥" maxlength="2"></div>
+      <button class="btn btn-primary" onclick="saveOffer()">🔥 Create Offer</button>
+    </div>`);
+}
+function saveOffer(){
+  const title=document.getElementById('of-title').value.trim();
+  if(!title){toast('Enter offer title','error');return;}
+  OFFERS.push({id:Date.now(),title,desc:document.getElementById('of-desc').value,emoji:document.getElementById('of-emoji').value||'🔥',price:parseFloat(document.getElementById('of-price').value)||0,original:parseFloat(document.getElementById('of-original').value)||0,active:true});
+  closeModal();toast('Offer created! 🔥');ownerNav('offers',null);
+}
+
+function replyModal(name){
+  openModal('Reply to '+name,`
+    <div class="form-grid">
+      <div class="form-fld"><label>Your Reply</label>
+        <textarea class="form-inp" style="min-height:120px" placeholder="Thank you for your kind words! We're glad you enjoyed..."></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="closeModal();toast('Reply sent! ✅')">📤 Send Reply</button>
+    </div>`);
+}
+
+function viewReceipt(id, items, total){
+  openModal('Receipt — '+id,`
+    <div class="receipt">
+      <div class="receipt-hdr">
+        <h4>🐂 Bull's &amp; Trading Cafe</h4>
+        <p>Highway Center Building, Shirur, MH 412210</p>
+        <p style="margin-top:4px;font-size:10px">Order: ${id} · ${new Date().toLocaleString('en-IN')}</p>
+      </div>
+      ${items.split(',').map(i=>`<div class="receipt-row"><span>${i.trim()}</span><span>₹--</span></div>`).join('')}
+      <div class="receipt-total"><span>TOTAL</span><span>₹${total}</span></div>
+      <div class="receipt-footer">
+        <p>Thank you for visiting!</p>
+        <p>Trade Smart. Eat Better. 🐂</p>
+        <p style="margin-top:6px">Instagram: @bulls_and_tradingcafe</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn btn-primary" style="flex:1" onclick="window.print()">🖨️ Print</button>
+      <button class="btn btn-secondary" style="flex:1" onclick="closeModal()">Close</button>
+    </div>`);
+}
+
+/* ═══════════════════════════════════════════
+   STAFF NAVIGATION & VIEWS
+═══════════════════════════════════════════ */
+function staffNav(view, el){
+  if(el){
+    document.querySelectorAll('#staff-sidebar .sb-item').forEach(i=>i.classList.remove('active'));
+    el.classList.add('active');
+  }
+  const titles = {'new-order':'New Order','orders':'Order History','daily':'Daily Summary','menu-view':'Menu'};
+  document.getElementById('staff-page-title').textContent = titles[view] || view;
+  const c = document.getElementById('staff-content');
+  const views = {'new-order':staffNewOrder,'orders':staffOrders,'daily':staffDaily,'menu-view':staffMenuView};
+  c.innerHTML = '';
+  if(views[view]) c.innerHTML = views[view]();
+  closeSidebar('staff');
+  // init cart display
+  if(view==='new-order') updateCartDisplay();
+}
+
+function staffNewOrder(){
+  STATE.cart = {};
+  return `
+  <div style="margin-bottom:14px">
+    <div style="font-family:var(--font-m);font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em">New Order #ORD-${STATE.orderCounter+1}</div>
+    <div style="font-size:14px;color:var(--text)">Select items and quantities below</div>
+  </div>
+  <div class="ob-grid" id="order-builder">
+    ${MENU.filter(m=>m.available).map(item=>`
+    <div class="ob-item">
+      <span class="ob-emoji">${item.emoji}</span>
+      <div class="ob-info">
+        <div class="ob-name">${item.name}</div>
+        <div class="ob-price">₹${item.price}</div>
+      </div>
+      <div class="ob-qty">
+        <button class="qty-btn" onclick="updateCart(${item.id},-1)">−</button>
+        <span class="qty-num" id="qty-${item.id}">0</span>
+        <button class="qty-btn" onclick="updateCart(${item.id},1)">+</button>
+      </div>
+    </div>`).join('')}
+  </div>
+  <div style="margin-top:16px" class="ob-total-box">
+    <div>
+      <div class="ob-total-lbl">Order Total</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px" id="cart-summary">No items selected</div>
+    </div>
+    <div class="ob-total-val" id="cart-total">₹0</div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:14px">
+    <button class="btn btn-secondary" style="flex:1" onclick="clearCart()">🗑️ Clear</button>
+    <button class="btn btn-primary" style="flex:1" onclick="placeOrder()">✅ Place Order</button>
+  </div>`;
+}
+
+function updateCart(id, delta){
+  STATE.cart[id] = Math.max(0, (STATE.cart[id]||0) + delta);
+  if(STATE.cart[id]===0) delete STATE.cart[id];
+  const el = document.getElementById('qty-'+id);
+  if(el) el.textContent = STATE.cart[id]||0;
+  updateCartDisplay();
+}
+
+function updateCartDisplay(){
+  const total = Object.entries(STATE.cart).reduce((s,[id,qty])=>{
+    const item = MENU.find(m=>m.id===parseInt(id));
+    return item ? s + item.price*qty : s;
+  },0);
+  const summary = Object.entries(STATE.cart).map(([id,qty])=>{
+    const item = MENU.find(m=>m.id===parseInt(id));
+    return item ? `${qty}× ${item.name}` : '';
+  }).filter(Boolean).join(', ');
+  const totalEl = document.getElementById('cart-total');
+  const sumEl = document.getElementById('cart-summary');
+  if(totalEl) totalEl.textContent = '₹'+total;
+  if(sumEl) sumEl.textContent = summary || 'No items selected';
+}
+
+function clearCart(){STATE.cart={};document.querySelectorAll('.qty-num').forEach(el=>el.textContent='0');updateCartDisplay();}
+
+function placeOrder(){
+  const total = Object.entries(STATE.cart).reduce((s,[id,qty])=>{
+    const item = MENU.find(m=>m.id===parseInt(id));
+    return item ? s + item.price*qty : s;
+  },0);
+  if(total===0){toast('Add items to the order first','error');return;}
+  const summary = Object.entries(STATE.cart).map(([id,qty])=>{
+    const item = MENU.find(m=>m.id===parseInt(id));
+    return item ? `${qty}× ${item.name}` : '';
+  }).filter(Boolean).join(', ');
+  STATE.orderCounter++;
+  const orderId = 'ORD-'+STATE.orderCounter;
+  const order = {id:orderId,summary,total,time:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}),date:'Today'};
+  STATE.orders.push(order);
+  saveData();
+  toast('Order placed! '+orderId+' · ₹'+total);
+  setTimeout(()=>viewReceipt(orderId, summary, total),500);
+  clearCart();
+}
+
+function staffOrders(){
+  const allOrders = [...SAMPLE_ORDERS, ...STATE.orders];
+  return `
+  <div class="search-bar"><span class="ico">🔍</span><input type="text" placeholder="Search by order ID..."></div>
+  ${allOrders.map(o=>`
+  <div class="order-card">
+    <div class="order-hdr">
+      <span class="order-num">${o.id}</span>
+      <span class="badge ${o.status==='completed'||!o.status?'green':o.status==='preparing'?'gold':'blue'}">${o.status||'completed'}</span>
+    </div>
+    <div class="order-items">${o.items||o.summary}</div>
+    <div class="order-footer">
+      <div class="order-total">₹${o.total}</div>
+      <div style="display:flex;gap:8px">
+        <span class="order-time">${o.time}</span>
+        <button class="btn btn-secondary btn-sm" onclick="viewReceipt('${o.id}','${o.items||o.summary}',${o.total})">🧾 Receipt</button>
+      </div>
+    </div>
+  </div>`).join('')}`;
+}
+
+function staffDaily(){
+  const todayOrders = [...SAMPLE_ORDERS, ...STATE.orders];
+  const total = todayOrders.reduce((s,o)=>s+o.total,0);
+  return `
+  <div class="stats-grid">
+    <div class="stat-card green"><div class="stat-ico">💰</div><div class="stat-val">₹${total}</div><div class="stat-lbl">Today's Revenue</div></div>
+    <div class="stat-card gold"><div class="stat-ico">📦</div><div class="stat-val">${todayOrders.length}</div><div class="stat-lbl">Orders Today</div></div>
+    <div class="stat-card blue"><div class="stat-ico">📊</div><div class="stat-val">₹${Math.round(total/Math.max(todayOrders.length,1))}</div><div class="stat-lbl">Avg Order Value</div></div>
+    <div class="stat-card orange"><div class="stat-ico">✅</div><div class="stat-val">${todayOrders.filter(o=>!o.status||o.status==='completed').length}</div><div class="stat-lbl">Completed</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📅 Daily Summary — ${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</div>
+    <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍕 Pizzas</span><span class="prog-val">₹1,428</span></div><div class="prog-bar"><div class="prog-fill green" style="width:42%"></div></div></div>
+    <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍔 Burgers</span><span class="prog-val">₹1,020</span></div><div class="prog-bar"><div class="prog-fill gold" style="width:35%"></div></div></div>
+    <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍹 Mocktails</span><span class="prog-val">₹632</span></div><div class="prog-bar"><div class="prog-fill blue" style="width:14%"></div></div></div>
+    <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍫 Desserts</span><span class="prog-val">₹318</span></div><div class="prog-bar"><div class="prog-fill orange" style="width:9%"></div></div></div>
+  </div>`;
+}
+
+function staffMenuView(){
+  return `
+  <div class="menu-grid">
+    ${MENU.filter(m=>m.available).map(item=>`
+    <div class="menu-item-card">
+      <div class="mic-img">${item.emoji}</div>
+      <div class="mic-body">
+        <div class="mic-name">${item.name}</div>
+        <div class="mic-cat">${item.desc}</div>
+        <div class="mic-footer">
+          <span class="mic-price">₹${item.price}</span>
+          <span class="badge green">Available</span>
+        </div>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════
+   CUSTOMER AUTH
+═══════════════════════════════════════════ */
+function switchAuthTab(tab){
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='signup'?0:1)));
+  document.getElementById('auth-signup').style.display = tab==='signup'?'block':'none';
+  document.getElementById('auth-login').style.display = tab==='login'?'block':'none';
+  document.getElementById('auth-msg').className='msg';
+}
+function showAuthMsg(msg,type){const el=document.getElementById('auth-msg');el.textContent=msg;el.className=`msg show ${type}`;}
+
+function customerSignup(){
+  const name=document.getElementById('c-name').value.trim();
+  const email=document.getElementById('c-email').value.trim();
+  const phone=document.getElementById('c-phone').value.trim();
+  const pass=document.getElementById('c-pass').value;
+  if(!name||!email||!pass){showAuthMsg('Please fill all required fields','error');return;}
+  if(STATE.customers.find(c=>c.email===email)){showAuthMsg('Email already registered. Please sign in.','error');return;}
+  const customer = {id:Date.now(),name,email,phone,pass,points:50,joined:new Date().toLocaleDateString('en-IN'),reviews:[]};
+  STATE.customers.push(customer);
+  saveData();
+  showAuthMsg('✅ Account created! You earned 50 welcome points!','success');
+  setTimeout(()=>{STATE.user=customer;enterCustomer();},1500);
+}
+
+function customerLogin(){
+  const email=document.getElementById('cl-email').value.trim();
+  const pass=document.getElementById('cl-pass').value;
+  const customer = STATE.customers.find(c=>c.email===email&&c.pass===pass);
+  if(!customer){showAuthMsg('Invalid email or password','error');return;}
+  STATE.user = customer;
+  enterCustomer();
+}
+
+function enterCustomer(){
+  document.getElementById('cust-name-display').textContent = STATE.user.name;
+  showPage('page-customer');
+  customerNav('home', document.querySelector('#customer-sidebar .sb-item'));
+}
+
+/* ═══════════════════════════════════════════
+   CUSTOMER NAVIGATION & VIEWS
+═══════════════════════════════════════════ */
+function customerNav(view, el){
+  if(el){
+    document.querySelectorAll('#customer-sidebar .sb-item').forEach(i=>i.classList.remove('active'));
+    el.classList.add('active');
+  }
+  const titles={home:'Home',menu:'Our Menu',offers:"Today's Offers",profile:'My Profile',orders:'My Orders',reviews:'My Reviews',loyalty:'Loyalty Points',visit:'Visit Us'};
+  document.getElementById('customer-page-title').textContent = titles[view]||view;
+  const c = document.getElementById('customer-content');
+  const views={home:customerHome,menu:customerMenu,offers:customerOffers,profile:customerProfile,orders:customerOrders,reviews:customerReviews,loyalty:customerLoyalty,visit:customerVisit};
+  c.innerHTML='';
+  if(views[view]) c.innerHTML = views[view]();
+  closeSidebar('customer');
+}
+
+function customerHome(){
+  const u = STATE.user;
+  return `
+  <div style="background:linear-gradient(135deg,var(--card2),var(--card3));border:1px solid rgba(34,197,94,0.15);border-radius:var(--rl);padding:20px;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="width:52px;height:52px;border-radius:50%;background:var(--green-dim);border:2px solid rgba(34,197,94,0.3);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--green)">${u.name[0]}</div>
+      <div>
+        <div style="font-size:18px;font-weight:800;color:var(--white)">Hey, ${u.name.split(' ')[0]}! 👋</div>
+        <div style="font-size:13px;color:var(--muted)">Welcome back to Bull's &amp; Trading Cafe</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;background:var(--bg3);border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:space-between">
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Loyalty Points</div><div style="font-size:24px;font-weight:800;color:var(--gold)">${u.points||50} pts</div></div>
+      <button class="btn btn-gold btn-sm" onclick="customerNav('loyalty',null)">View Rewards →</button>
+    </div>
+  </div>
+  <div class="sec-hdr"><h3>🔥 Today's Offers</h3><span class="see-all" onclick="customerNav('offers',null)">See all →</span></div>
+  <div style="display:grid;gap:10px;margin-bottom:16px">
+    ${OFFERS.slice(0,3).map(o=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;align-items:center;gap:12px">
+      <span style="font-size:28px">${o.emoji}</span>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:var(--white)">${o.title}</div>
+        <div style="font-size:11px;color:var(--muted)">${o.desc}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:18px;font-weight:800;color:var(--green)">₹${o.price}</div>
+        <div style="font-size:10px;color:var(--muted);text-decoration:line-through">₹${o.original}</div>
+      </div>
+    </div>`).join('')}
+  </div>
+  <div class="sec-hdr"><h3>📍 Cafe Info</h3></div>
+  <div class="card">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;gap:10px;align-items:flex-start"><span>📍</span><div><div style="font-size:13px;font-weight:600;color:var(--white)">Highway Center Building</div><div style="font-size:12px;color:var(--muted)">Baburao Nagar, Shirur, MH 412210</div></div></div>
+      <div style="display:flex;gap:10px;align-items:flex-start"><span>⏰</span><div><div style="font-size:13px;font-weight:600;color:var(--white)">Mon–Fri: 9 AM – 11 PM</div><div style="font-size:12px;color:var(--muted)">Sat–Sun: 8 AM – 11:30 PM</div></div></div>
+      <a href="https://www.instagram.com/bulls_and_tradingcafe?igsh=MTkyczd3dDc4NXlkbw==" target="_blank" style="display:flex;gap:10px;align-items:center;color:var(--text)"><span>📷</span><div style="font-size:13px;font-weight:600;color:var(--green)">@bulls_and_tradingcafe on Instagram →</div></a>
+    </div>
+  </div>`;
+}
+
+function customerMenu(){
+  return `
+  <div class="tabs">
+    <button class="tab active" onclick="filterCustMenu('all',this)">All</button>
+    <button class="tab" onclick="filterCustMenu('pizza',this)">🍕</button>
+    <button class="tab" onclick="filterCustMenu('burger',this)">🍔</button>
+    <button class="tab" onclick="filterCustMenu('mocktail',this)">🍹</button>
+    <button class="tab" onclick="filterCustMenu('dessert',this)">🍫</button>
+  </div>
+  <div class="menu-grid" id="cust-menu-grid">
+    ${MENU.filter(m=>m.available).map(m=>`
+    <div class="menu-item-card">
+      <div class="mic-img">${m.emoji}</div>
+      <div class="mic-body">
+        <div class="mic-name">${m.name}</div>
+        <div class="mic-cat">${m.desc}</div>
+        <div class="mic-footer">
+          <span class="mic-price">₹${m.price}</span>
+          <span class="badge green">Available</span>
+        </div>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+function filterCustMenu(cat, btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  const items = cat==='all' ? MENU.filter(m=>m.available) : MENU.filter(m=>m.available&&m.cat===cat);
+  document.getElementById('cust-menu-grid').innerHTML = items.map(m=>`
+    <div class="menu-item-card">
+      <div class="mic-img">${m.emoji}</div>
+      <div class="mic-body">
+        <div class="mic-name">${m.name}</div>
+        <div class="mic-cat">${m.desc}</div>
+        <div class="mic-footer"><span class="mic-price">₹${m.price}</span><span class="badge green">Available</span></div>
+      </div>
+    </div>`).join('');
+}
+
+function customerOffers(){
+  return `
+  <div style="display:grid;gap:12px">
+    ${OFFERS.map(o=>`
+    <div class="card" style="position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--green),rgba(34,197,94,0.3))"></div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <span style="font-size:40px">${o.emoji}</span>
+        <div style="flex:1">
+          <div style="font-size:16px;font-weight:800;color:var(--white);margin-bottom:4px">${o.title}</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:10px">${o.desc}</div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:24px;font-weight:800;color:var(--green)">₹${o.price}</span>
+            <span style="font-size:13px;color:var(--muted);text-decoration:line-through">₹${o.original}</span>
+            <span class="badge green">Save ₹${o.original-o.price}</span>
+          </div>
+        </div>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function customerProfile(){
+  const u = STATE.user;
+  return `
+  <div class="card" style="margin-bottom:14px;text-align:center;padding:28px 20px">
+    <div style="width:72px;height:72px;border-radius:50%;background:var(--green-dim);border:3px solid rgba(34,197,94,0.3);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:var(--green);margin:0 auto 14px">${u.name[0]}</div>
+    <div style="font-size:20px;font-weight:800;color:var(--white);margin-bottom:4px">${u.name}</div>
+    <div style="font-size:13px;color:var(--muted)">${u.email}</div>
+    <div style="margin-top:14px;display:flex;gap:16px;justify-content:center">
+      <div><div style="font-size:20px;font-weight:800;color:var(--gold)">${u.points||50}</div><div style="font-size:11px;color:var(--muted)">Points</div></div>
+      <div><div style="font-size:20px;font-weight:800;color:var(--green)">${STATE.reviews.filter(r=>r.userId===u.id).length}</div><div style="font-size:11px;color:var(--muted)">Reviews</div></div>
+      <div><div style="font-size:20px;font-weight:800;color:var(--blue)">${u.joined||'Today'}</div><div style="font-size:11px;color:var(--muted)">Joined</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">✏️ Edit Profile</div>
+    <div class="form-grid">
+      <div class="form-fld"><label>Full Name</label><input class="form-inp" id="pr-name" value="${u.name}"></div>
+      <div class="form-fld"><label>Email</label><input class="form-inp" value="${u.email}" disabled style="opacity:0.5"></div>
+      <div class="form-fld"><label>Phone</label><input class="form-inp" id="pr-phone" value="${u.phone||''}"></div>
+      <div class="form-fld"><label>New Password</label><input class="form-inp" type="password" id="pr-pass" placeholder="Leave blank to keep current"></div>
+      <button class="btn btn-primary" onclick="updateProfile()">💾 Save Profile</button>
+    </div>
+  </div>`;
+}
+function updateProfile(){
+  const u=STATE.user;
+  u.name=document.getElementById('pr-name').value.trim()||u.name;
+  u.phone=document.getElementById('pr-phone').value.trim();
+  const np=document.getElementById('pr-pass').value;if(np)u.pass=np;
+  document.getElementById('cust-name-display').textContent=u.name;
+  saveData();toast('Profile updated! ✅');
+}
+
+function customerOrders(){
+  const myOrders = STATE.orders.slice(0,5);
+  if(myOrders.length===0) return `<div style="text-align:center;padding:48px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:16px">📦</div><div style="font-size:16px;font-weight:600">No orders yet</div><div style="font-size:13px;margin-top:8px">Your order history will appear here</div></div>`;
+  return myOrders.map(o=>`
+  <div class="order-card">
+    <div class="order-hdr"><span class="order-num">${o.id}</span><span class="badge green">completed</span></div>
+    <div class="order-items">${o.summary}</div>
+    <div class="order-footer">
+      <div class="order-total">₹${o.total}</div>
+      <button class="btn btn-secondary btn-sm" onclick="viewReceipt('${o.id}','${o.summary}',${o.total})">🧾 Receipt</button>
+    </div>
+  </div>`).join('');
+}
+
+function customerReviews(){
+  const myRevs = STATE.reviews.filter(r=>r.userId===STATE.user.id);
+  return `
+  <div style="margin-bottom:16px">
+    <button class="btn btn-primary" onclick="writeReviewModal()">✍️ Write a Review</button>
+  </div>
+  ${myRevs.length===0 ? `<div style="text-align:center;padding:40px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:16px">⭐</div><div>No reviews yet. Share your experience!</div></div>` : myRevs.map(r=>reviewCard(r)).join('')}
+  <div class="sec-hdr" style="margin-top:16px"><h3>All Reviews</h3></div>
+  ${SAMPLE_REVIEWS.slice(0,2).map(r=>reviewCard(r)).join('')}`;
+}
+
+function writeReviewModal(){
+  openModal('Write a Review',`
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:13px;color:var(--muted)">How was your experience at Bull's &amp; Trading Cafe?</div>
+    </div>
+    <div class="form-grid">
+      <div class="form-fld">
+        <label>Overall Rating</label>
+        <div class="rating-input" id="overall-rating">
+          <input type="radio" name="overall" id="s5" value="5"><label for="s5">★</label>
+          <input type="radio" name="overall" id="s4" value="4"><label for="s4">★</label>
+          <input type="radio" name="overall" id="s3" value="3"><label for="s3">★</label>
+          <input type="radio" name="overall" id="s2" value="2"><label for="s2">★</label>
+          <input type="radio" name="overall" id="s1" value="1"><label for="s1">★</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-fld"><label>Food (1-5)</label><input class="form-inp" type="number" id="rv-food" min="1" max="5" value="5" placeholder="5"></div>
+        <div class="form-fld"><label>Service (1-5)</label><input class="form-inp" type="number" id="rv-service" min="1" max="5" value="5" placeholder="5"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-fld"><label>Ambience (1-5)</label><input class="form-inp" type="number" id="rv-ambience" min="1" max="5" value="5" placeholder="5"></div>
+        <div class="form-fld"><label>Cleanliness (1-5)</label><input class="form-inp" type="number" id="rv-clean" min="1" max="5" value="5" placeholder="5"></div>
+      </div>
+      <div class="form-fld">
+        <label>Your Review</label>
+        <textarea class="form-inp" id="rv-text" style="min-height:100px" placeholder="Tell us about your visit..."></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="submitReview()">⭐ Submit Review (+20 points)</button>
+    </div>`);
+}
+
+function submitReview(){
+  const text = document.getElementById('rv-text').value.trim();
+  if(!text){toast('Please write your review','error');return;}
+  const rating = parseInt(document.querySelector('input[name="overall"]:checked')?.value||5);
+  const review = {
+    id:Date.now(), userId:STATE.user.id, name:STATE.user.name,
+    initials:STATE.user.name[0], rating,
+    food:parseInt(document.getElementById('rv-food').value)||5,
+    service:parseInt(document.getElementById('rv-service').value)||5,
+    ambience:parseInt(document.getElementById('rv-ambience').value)||5,
+    cleanliness:parseInt(document.getElementById('rv-clean').value)||5,
+    text, date:'Just now', replied:false
+  };
+  STATE.reviews.push(review);
+  STATE.user.points = (STATE.user.points||50) + 20;
+  saveData();
+  closeModal(); toast('Review submitted! +20 loyalty points ⭐');
+  customerNav('reviews', null);
+}
+
+function customerLoyalty(){
+  const u = STATE.user;
+  const pts = u.points||50;
+  const nextReward = 200;
+  const progress = Math.min(pts/nextReward*100,100);
+  return `
+  <div class="loyalty-card">
+    <div style="font-size:11px;color:rgba(245,158,11,0.7);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px;font-weight:700">Loyalty Points</div>
+    <div class="loyalty-pts">${pts}</div>
+    <div class="loyalty-sub">Points Balance · Earn more with every review!</div>
+    <div class="loyalty-bar-wrap" style="margin-top:16px"><div class="loyalty-bar" style="width:${progress}%"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px"><span style="font-size:11px;color:var(--muted)">${pts} pts</span><span style="font-size:11px;color:var(--muted)">${nextReward} pts = Free Item 🎁</span></div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">🎁 How to Earn Points</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:10px;padding:12px"><span style="font-size:22px">⭐</span><div><div style="font-size:13px;font-weight:600;color:var(--white)">Write a Review</div><div style="font-size:12px;color:var(--muted)">+20 points per review</div></div></div>
+      <div style="display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:10px;padding:12px"><span style="font-size:22px">🎂</span><div><div style="font-size:13px;font-weight:600;color:var(--white)">Birthday Registration</div><div style="font-size:12px;color:var(--muted)">+50 points bonus</div></div></div>
+      <div style="display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:10px;padding:12px"><span style="font-size:22px">📷</span><div><div style="font-size:13px;font-weight:600;color:var(--white)">Instagram Follow</div><div style="font-size:12px;color:var(--muted)">+10 points</div></div></div>
+      <div style="display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:10px;padding:12px"><span style="font-size:22px">🤝</span><div><div style="font-size:13px;font-weight:600;color:var(--white)">Refer a Friend</div><div style="font-size:12px;color:var(--muted)">+30 points per referral</div></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🏆 Rewards Catalogue</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:10px;padding:12px"><div><div style="font-size:13px;font-weight:600;color:var(--white)">Free Choco Lava Cake</div><div style="font-size:12px;color:var(--muted)">200 points</div></div><button class="btn btn-gold btn-sm" ${pts>=200?'':'disabled'} onclick="redeemPoints(200,'Choco Lava Cake')">Redeem</button></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:10px;padding:12px"><div><div style="font-size:13px;font-weight:600;color:var(--white)">Free Mocktail</div><div style="font-size:12px;color:var(--muted)">300 points</div></div><button class="btn btn-gold btn-sm" ${pts>=300?'':'disabled'} onclick="redeemPoints(300,'Mocktail')">Redeem</button></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:10px;padding:12px"><div><div style="font-size:13px;font-weight:600;color:var(--white)">Free Burger</div><div style="font-size:12px;color:var(--muted)">500 points</div></div><button class="btn btn-gold btn-sm" ${pts>=500?'':'disabled'} onclick="redeemPoints(500,'Burger')">Redeem</button></div>
+    </div>
+  </div>`;
+}
+function redeemPoints(pts, item){
+  if(STATE.user.points<pts){toast('Not enough points','error');return;}
+  STATE.user.points -= pts;
+  saveData();
+  toast(`🎁 Redeemed! Free ${item} coupon generated. Show this to staff!`);
+  setTimeout(()=>customerNav('loyalty',null),500);
+}
+
+function customerVisit(){
+  return `
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">📍 Our Location</div>
+    <div style="background:var(--bg3);border-radius:var(--r);padding:16px;margin-bottom:14px">
+      <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:6px">Bull's &amp; Trading Cafe</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.8">Highway Center Building<br>Baburao Nagar, Shirur<br>Maharashtra 412210</div>
+    </div>
+    <a href="https://maps.google.com/?q=Shirur,Maharashtra+412210" target="_blank" class="btn btn-primary" style="width:100%;justify-content:center;display:flex">📍 Open in Google Maps</a>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">⏰ Opening Hours</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center"><div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700">MON – FRI</div><div style="font-size:14px;font-weight:700;color:var(--white)">9 AM – 11 PM</div></div>
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center"><div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700">SAT – SUN</div><div style="font-size:14px;font-weight:700;color:var(--white)">8 AM – 11:30 PM</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📷 Follow Us</div>
+    <a href="https://www.instagram.com/bulls_and_tradingcafe?igsh=MTkyczd3dDc4NXlkbw==" target="_blank" class="btn" style="width:100%;justify-content:center;display:flex;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#bc1888);color:white">
+      📷 @bulls_and_tradingcafe on Instagram
+    </a>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════
+   DATA PERSISTENCE
+═══════════════════════════════════════════ */
+function saveData(){
+  localStorage.setItem('btc_customers', JSON.stringify(STATE.customers));
+  localStorage.setItem('btc_orders', JSON.stringify(STATE.orders));
+  localStorage.setItem('btc_reviews', JSON.stringify(STATE.reviews));
+  localStorage.setItem('btc_order_counter', STATE.orderCounter);
+}
+
+/* ═══════════════════════════════════════════
+   CHART INIT (animate bars)
+═══════════════════════════════════════════ */
+function initCharts(){
+  // Already set via inline styles, just ensure they're visible
+  document.querySelectorAll('.cbar').forEach((bar,i)=>{
+    const h = bar.style.height;
+    bar.style.height = '0';
+    setTimeout(()=>bar.style.height=h, i*60+200);
+  });
+  document.querySelectorAll('.prog-fill').forEach((bar,i)=>{
+    const w = bar.style.width;
+    bar.style.width='0';
+    setTimeout(()=>bar.style.width=w, i*100+400);
+  });
+}
+
+/* ═══════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════ */
+// Close notif panel when clicking outside
+document.addEventListener('click', function(e){
+  document.querySelectorAll('.notif-panel.show').forEach(p=>{
+    if(!p.parentElement.contains(e.target)) p.classList.remove('show');
+  });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabase = window.supabase.createClient(
+  "https://zqaxjajpucjfbwvzhkzg.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxYXhqYWpwdWNqZmJ3dnpoa3pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzOTA2NDIsImV4cCI6MjA5Nzk2NjY0Mn0.JDK1PWPnl7mB-9OyWUmbuSmfav9Lv-E0DKCD7WPwpuU"
+);
+console.log("Supabase Connected");
+
+async function testSupabase() {
+  const { data, error } = await supabase.auth.getSession();
+
+  console.log("Data:", data);
+  console.log("Error:", error);
+
+  alert("Supabase connection successful!");
+}
+
+testSupabase();
+</script>
+</body>
+</html>
