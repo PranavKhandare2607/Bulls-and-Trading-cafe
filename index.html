@@ -886,8 +886,17 @@ async function customerLogin(){
     const { error } = await sb.auth.signInWithPassword({ email, password: pass });
     if(error) throw error;
     await routeAfterAuth();
-  }catch(e){ showAuthMsg('customer', e.message||'Invalid email or password','error'); }
-  finally{ setBtnLoading('c-login-btn', false, '🚀 Sign In'); }
+}catch(e){
+    console.error("Signup Error:", e);
+    alert("Signup Error: " + JSON.stringify(e));
+
+    showAuthMsg(
+        'customer',
+        e.message || JSON.stringify(e) || 'Signup failed',
+        'error'
+    );
+}finally{
+    setBtnLoading('c-signup-btn', false, '🎉 Create Account');
 }
 
 /* ═══════════════════════════════════════════════════════════════
