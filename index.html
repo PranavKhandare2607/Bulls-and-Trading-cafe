@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Bull's & Trading Cafe — Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0A0F0A; --bg2:#0F160F; --bg3:#141D14;
+  --card:#111811; --card2:#162016; --card3:#1A271A;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.12);
+  --green:#22C55E; --green2:#16A34A; --green3:#15803D;
+  --green-dim:rgba(34,197,94,0.10); --green-glow:rgba(34,197,94,0.20);
+  --gold:#F59E0B; --gold-dim:rgba(245,158,11,0.12);
+  --red:#EF4444; --red-dim:rgba(239,68,68,0.12);
+  --blue:#3B82F6; --blue-dim:rgba(59,130,246,0.12);
+  --orange:#F97316; --orange-dim:rgba(249,115,22,0.12);
+  --white:#FFFFFF; --muted:rgba(255,255,255,0.5); --muted2:rgba(255,255,255,0.25);
+  --text:rgba(255,255,255,0.88);
+  --font:'DM Sans',sans-serif; --font-d:'Playfair Display',serif; --font-m:'DM Mono',monospace;
+  --r:12px; --rs:8px; --rl:16px;
+  --sidebar:240px;
+  --transition:0.2s cubic-bezier(.4,0,.2,1);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:var(--green);color:#000}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+img{display:block;max-width:100%}
+input,select,textarea,button{font-family:var(--font)}
+a{color:inherit;text-decoration:none}
+
+/* ═══════════════════════════════════════════
+   PAGE SYSTEM
+═══════════════════════════════════════════ */
+.page{display:none;min-height:100vh;animation:fadeIn 0.3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══════════════════════════════════════════
+   AUTH PAGES
+═══════════════════════════════════════════ */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);position:relative;overflow:hidden}
+.auth-wrap::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(34,197,94,0.06),transparent)}
+.auth-card{width:100%;max-width:440px;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:40px 36px;position:relative;z-index:1;box-shadow:0 32px 80px rgba(0,0,0,0.5)}
+.auth-logo{text-align:center;margin-bottom:32px}
+.auth-logo .mark{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);border-radius:18px;font-size:32px;margin-bottom:14px}
+.auth-logo h1{font-family:var(--font-d);font-size:22px;color:var(--white);margin-bottom:4px}
+.auth-logo p{font-size:13px;color:var(--muted)}
+.auth-tabs{display:flex;background:var(--bg3);border-radius:10px;padding:4px;margin-bottom:28px;gap:4px}
+.auth-tab{flex:1;padding:9px;border-radius:7px;border:none;background:transparent;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all var(--transition)}
+.auth-tab.active{background:var(--card2);color:var(--white)}
+.fld{margin-bottom:16px}
+.fld label{display:block;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:7px}
+.inp{width:100%;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--white);font-size:14px;outline:none;transition:border-color var(--transition)}
+.inp:focus{border-color:rgba(34,197,94,0.4)}
+.inp::placeholder{color:var(--muted2)}
+select.inp{cursor:pointer}
+.btn-auth{width:100%;padding:14px;background:var(--green);color:#000;font-weight:800;font-size:15px;border:none;border-radius:var(--r);cursor:pointer;transition:all var(--transition);margin-top:8px;min-height:50px}
+.btn-auth:hover{background:var(--green2);transform:translateY(-1px)}
+.auth-divider{text-align:center;color:var(--muted2);font-size:12px;margin:20px 0;position:relative}
+.auth-divider::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border)}
+.auth-divider span{background:var(--card);padding:0 12px;position:relative}
+.auth-link{text-align:center;font-size:13px;color:var(--muted);margin-top:20px}
+.auth-link a{color:var(--green);font-weight:600;cursor:pointer}
+.role-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.role-btn{padding:12px 8px;background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;text-align:center;transition:all var(--transition)}
+.role-btn.active{border-color:var(--green);background:var(--green-dim);color:var(--green)}
+.role-btn .rico{font-size:22px;display:block;margin-bottom:4px}
+.msg{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none}
+.msg.show{display:block}
+.msg.success{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);color:#6EE89A}
+.msg.error{background:var(--red-dim);border:1px solid rgba(239,68,68,0.2);color:#FCA5A5}
+
+/* ═══════════════════════════════════════════
+   APP SHELL — SIDEBAR + MAIN
+═══════════════════════════════════════════ */
+.app-shell{display:flex;min-height:100vh}
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--card);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;z-index:200;
+  transform:translateX(-100%);transition:transform var(--transition);
+  overflow-y:auto;
+}
+.sidebar.open{transform:translateX(0)}
+.sb-head{padding:20px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sb-logo{display:flex;align-items:center;gap:10px}
+.sb-logo .dot{width:36px;height:36px;background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sb-logo-text{font-size:14px;font-weight:700;color:var(--white);line-height:1.2}
+.sb-logo-text small{display:block;font-size:10px;color:var(--muted);font-weight:400;letter-spacing:0.05em}
+.sb-user{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-avatar{width:34px;height:34px;border-radius:50%;background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--green);flex-shrink:0}
+.sb-user-info{flex:1;min-width:0}
+.sb-user-name{font-size:13px;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-user-role{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em}
+.sb-badge{padding:2px 7px;border-radius:100px;font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase}
+.sb-badge.owner{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(245,158,11,0.2)}
+.sb-badge.staff{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,130,246,0.2)}
+.sb-badge.customer{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,0.2)}
+.sb-nav{flex:1;padding:12px 10px;overflow-y:auto}
+.sb-section-label{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted2);padding:8px 8px 4px;margin-top:8px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:10px;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:all var(--transition);margin-bottom:2px;border:1px solid transparent}
+.sb-item:hover{background:var(--bg3);color:var(--white)}
+.sb-item.active{background:var(--green-dim);color:var(--green);border-color:rgba(34,197,94,0.15)}
+.sb-item .ico{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-item .badge-count{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:100px}
+.sb-foot{padding:14px 10px;border-top:1px solid var(--border)}
+.sb-logout{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;color:var(--muted);font-size:13px;cursor:pointer;transition:all var(--transition);width:100%;background:none;border:1px solid transparent}
+.sb-logout:hover{background:var(--red-dim);color:var(--red);border-color:rgba(239,68,68,0.15)}
+/* Overlay */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:199;display:none;backdrop-filter:blur(4px)}
+.overlay.show{display:block}
+/* Main content */
+.main{flex:1;min-height:100vh;background:var(--bg)}
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(10,15,10,0.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:14px 20px;display:flex;align-items:center;gap:14px;
+}
+.menu-btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;color:var(--white);font-size:18px;display:flex;align-items:center;justify-content:center;transition:background var(--transition)}
+.menu-btn:hover{background:var(--card2)}
+.topbar-title{flex:1;font-size:16px;font-weight:700;color:var(--white)}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.notif-btn{position:relative;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;color:var(--muted);font-size:16px;display:flex;align-items:center;transition:all var(--transition)}
+.notif-btn:hover{color:var(--white)}
+.notif-dot{position:absolute;top:6px;right:6px;width:6px;height:6px;background:var(--red);border-radius:50%}
+.content{padding:20px}
+
+/* ═══════════════════════════════════════════
+   COMPONENTS
+═══════════════════════════════════════════ */
+/* Stats Grid */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:18px 16px;position:relative;overflow:hidden;transition:border-color var(--transition)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0}
+.stat-card.green::before{background:var(--green)}
+.stat-card.gold::before{background:var(--gold)}
+.stat-card.blue::before{background:var(--blue)}
+.stat-card.red::before{background:var(--red)}
+.stat-card.orange::before{background:var(--orange)}
+.stat-card:hover{border-color:var(--border2)}
+.stat-ico{font-size:22px;margin-bottom:10px}
+.stat-val{font-size:26px;font-weight:800;color:var(--white);line-height:1;margin-bottom:4px;font-family:var(--font-d)}
+.stat-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:600}
+.stat-trend{font-size:11px;margin-top:6px;display:flex;align-items:center;gap:4px}
+.stat-trend.up{color:var(--green)}
+.stat-trend.down{color:var(--red)}
+
+/* Section title */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-hdr h3{font-size:15px;font-weight:700;color:var(--white)}
+.sec-hdr .see-all{font-size:12px;color:var(--green);cursor:pointer;font-weight:600}
+
+/* Card */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:18px}
+.card-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
+/* Table */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;min-width:500px}
+th{background:var(--bg3);padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap}
+td{padding:12px 14px;font-size:13px;color:var(--text);border-top:1px solid var(--border)}
+tr:hover td{background:rgba(255,255,255,0.02)}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase}
+.badge.green{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,0.2)}
+.badge.red{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
+.badge.gold{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(245,158,11,0.2)}
+.badge.blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,130,246,0.2)}
+.badge.orange{background:var(--orange-dim);color:var(--orange);border:1px solid rgba(249,115,22,0.2)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;transition:all var(--transition);border:none;min-height:40px}
+.btn-primary{background:var(--green);color:#000}
+.btn-primary:hover{background:var(--green2);transform:translateY(-1px)}
+.btn-secondary{background:var(--bg3);color:var(--white);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--border2);background:var(--card2)}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
+.btn-danger:hover{background:rgba(239,68,68,0.2)}
+.btn-gold{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(245,158,11,0.2)}
+.btn-sm{padding:6px 12px;font-size:12px;min-height:32px}
+.btn-icon{width:36px;height:36px;padding:0;justify-content:center}
+
+/* Forms */
+.form-grid{display:grid;gap:14px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-fld label{display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+.form-inp{width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--white);font-size:13px;outline:none;transition:border-color var(--transition);font-family:var(--font)}
+.form-inp:focus{border-color:rgba(34,197,94,0.4)}
+.form-inp::placeholder{color:var(--muted2)}
+select.form-inp{cursor:pointer}
+textarea.form-inp{resize:vertical;min-height:80px}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:none;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(6px)}
+.modal-bg.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:24px 20px;animation:slideUp 0.3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-hdr h3{font-size:16px;font-weight:800;color:var(--white)}
+.modal-close{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;transition:color var(--transition)}
+.modal-close:hover{color:var(--white)}
+
+/* Chart placeholder */
+.chart-area{background:var(--bg3);border-radius:var(--r);padding:20px;position:relative;overflow:hidden}
+.chart-bars{display:flex;align-items:flex-end;gap:8px;height:120px;margin-top:12px}
+.cbar{flex:1;border-radius:4px 4px 0 0;transition:height 0.6s ease;position:relative;cursor:pointer;min-width:0}
+.cbar.green{background:linear-gradient(180deg,var(--green),rgba(34,197,94,0.3))}
+.cbar.gold{background:linear-gradient(180deg,var(--gold),rgba(245,158,11,0.3))}
+.cbar:hover::after{content:attr(data-val);position:absolute;top:-24px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--white);font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap}
+.chart-labels{display:flex;gap:8px;margin-top:6px}
+.chart-labels span{flex:1;text-align:center;font-size:10px;color:var(--muted);min-width:0}
+
+/* Order card */
+.order-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:16px;margin-bottom:10px;transition:border-color var(--transition)}
+.order-card:hover{border-color:var(--border2)}
+.order-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.order-num{font-family:var(--font-m);font-size:13px;color:var(--green);font-weight:500}
+.order-time{font-size:11px;color:var(--muted)}
+.order-items{font-size:13px;color:var(--text);margin-bottom:10px;line-height:1.7}
+.order-footer{display:flex;align-items:center;justify-content:space-between}
+.order-total{font-size:16px;font-weight:800;color:var(--white)}
+
+/* Menu item */
+.menu-item-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:transform var(--transition),border-color var(--transition)}
+.menu-item-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+.mic-img{height:130px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:52px;position:relative}
+.mic-body{padding:14px}
+.mic-name{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px}
+.mic-cat{font-size:11px;color:var(--muted);margin-bottom:10px}
+.mic-footer{display:flex;align-items:center;justify-content:space-between}
+.mic-price{font-size:18px;font-weight:800;color:var(--green)}
+.mic-toggle{position:relative;display:inline-flex;align-items:center;cursor:pointer}
+.mic-toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{width:36px;height:20px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);position:relative;transition:background var(--transition)}
+.mic-toggle input:checked + .toggle-track{background:var(--green-dim);border-color:rgba(34,197,94,0.3)}
+.toggle-track::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:var(--muted2);border-radius:50%;transition:all var(--transition)}
+.mic-toggle input:checked + .toggle-track::after{transform:translateX(16px);background:var(--green)}
+
+/* Review card */
+.review-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:16px;margin-bottom:10px}
+.rev-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.rev-user{display:flex;align-items:center;gap:10px}
+.rev-av{width:34px;height:34px;border-radius:50%;background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--green);flex-shrink:0}
+.rev-name{font-size:13px;font-weight:700;color:var(--white)}
+.rev-date{font-size:11px;color:var(--muted)}
+.rev-stars{color:#FBBF24;font-size:14px;letter-spacing:1px}
+.rev-text{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.7;margin-bottom:10px}
+.rev-cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.rev-cat{font-size:11px;color:var(--muted);background:var(--bg3);padding:3px 8px;border-radius:6px;display:flex;align-items:center;gap:4px}
+.rev-cat .star{color:#FBBF24;font-size:10px}
+
+/* Notification panel */
+.notif-panel{position:absolute;top:100%;right:0;width:320px;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);box-shadow:0 20px 60px rgba(0,0,0,0.5);z-index:300;display:none;max-height:400px;overflow:hidden;flex-direction:column}
+.notif-panel.show{display:flex}
+.notif-panel-hdr{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.notif-panel-hdr h4{font-size:14px;font-weight:700;color:var(--white)}
+.notif-list{overflow-y:auto;flex:1}
+.notif-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background var(--transition)}
+.notif-item:hover{background:var(--bg3)}
+.notif-item.unread{border-left:3px solid var(--green)}
+.notif-item .ni-title{font-size:13px;font-weight:600;color:var(--white);margin-bottom:3px}
+.notif-item .ni-sub{font-size:12px;color:var(--muted)}
+.notif-item .ni-time{font-size:10px;color:var(--muted2);margin-top:4px}
+
+/* Order builder */
+.ob-grid{display:grid;grid-template-columns:1fr;gap:14px}
+.ob-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px}
+.ob-emoji{font-size:28px;flex-shrink:0}
+.ob-info{flex:1;min-width:0}
+.ob-name{font-size:13px;font-weight:700;color:var(--white)}
+.ob-price{font-size:12px;color:var(--green);font-weight:600}
+.ob-qty{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.qty-btn{width:28px;height:28px;border-radius:8px;background:var(--card);border:1px solid var(--border);color:var(--white);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition)}
+.qty-btn:hover{border-color:var(--green);color:var(--green)}
+.qty-num{font-size:14px;font-weight:700;color:var(--white);min-width:20px;text-align:center}
+.ob-total-box{background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);border-radius:var(--rl);padding:16px;display:flex;align-items:center;justify-content:space-between}
+.ob-total-lbl{font-size:13px;color:var(--muted);font-weight:600}
+.ob-total-val{font-size:24px;font-weight:800;color:var(--green);font-family:var(--font-d)}
+
+/* Staff card */
+.staff-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:16px;display:flex;align-items:center;gap:14px;margin-bottom:10px;transition:border-color var(--transition)}
+.staff-card:hover{border-color:var(--border2)}
+.staff-av{width:44px;height:44px;border-radius:50%;background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--blue);flex-shrink:0}
+.staff-info{flex:1;min-width:0}
+.staff-name{font-size:14px;font-weight:700;color:var(--white)}
+.staff-role{font-size:12px;color:var(--muted)}
+.staff-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* Loyalty */
+.loyalty-card{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid rgba(245,158,11,0.2);border-radius:var(--rl);padding:20px;margin-bottom:16px;position:relative;overflow:hidden}
+.loyalty-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(245,158,11,0.08),transparent 70%)}
+.loyalty-pts{font-size:40px;font-weight:800;color:var(--gold);font-family:var(--font-d);line-height:1}
+.loyalty-sub{font-size:13px;color:var(--muted);margin-top:4px}
+.loyalty-bar-wrap{background:var(--bg3);border-radius:100px;height:8px;margin-top:16px}
+.loyalty-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--gold),#FBBF24);transition:width 1s ease}
+
+/* Analytics mini chart */
+.sparkline{display:flex;align-items:flex-end;gap:3px;height:40px}
+.sp-bar{flex:1;border-radius:2px;background:var(--green-dim);transition:background var(--transition)}
+.sp-bar.active{background:var(--green)}
+
+/* Receipt */
+.receipt{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px;font-family:var(--font-m);font-size:12px}
+.receipt-hdr{text-align:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px dashed var(--border)}
+.receipt-hdr h4{font-size:14px;color:var(--white);font-weight:700}
+.receipt-hdr p{color:var(--muted);font-size:11px}
+.receipt-row{display:flex;justify-content:space-between;color:var(--text);padding:3px 0}
+.receipt-total{display:flex;justify-content:space-between;color:var(--white);font-weight:700;font-size:14px;padding-top:10px;margin-top:8px;border-top:1px dashed var(--border)}
+.receipt-footer{text-align:center;color:var(--muted);font-size:11px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)}
+
+/* Audit log */
+.audit-row{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.audit-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.audit-icon.green{background:var(--green-dim)}
+.audit-icon.blue{background:var(--blue-dim)}
+.audit-icon.gold{background:var(--gold-dim)}
+.audit-icon.red{background:var(--red-dim)}
+.audit-info{flex:1;min-width:0}
+.audit-title{font-size:13px;font-weight:600;color:var(--white)}
+.audit-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.audit-time{font-size:11px;color:var(--muted2);flex-shrink:0;font-family:var(--font-m)}
+
+/* Progress bar */
+.prog-item{margin-bottom:12px}
+.prog-hdr{display:flex;justify-content:space-between;margin-bottom:5px}
+.prog-name{font-size:12px;color:var(--text);font-weight:500}
+.prog-val{font-size:12px;color:var(--muted);font-family:var(--font-m)}
+.prog-bar{height:6px;background:var(--bg3);border-radius:100px;overflow:hidden}
+.prog-fill{height:100%;border-radius:100px;transition:width 1s ease}
+.prog-fill.green{background:var(--green)}
+.prog-fill.gold{background:var(--gold)}
+.prog-fill.blue{background:var(--blue)}
+.prog-fill.orange{background:var(--orange)}
+.prog-fill.red{background:var(--red)}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;background:var(--bg3);padding:4px;border-radius:10px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:8px 16px;border-radius:7px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all var(--transition);white-space:nowrap;border:none;background:transparent}
+.tab.active{background:var(--card2);color:var(--white)}
+
+/* Search */
+.search-bar{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:16px}
+.search-bar .ico{font-size:16px;color:var(--muted);flex-shrink:0}
+.search-bar input{flex:1;background:none;border:none;color:var(--white);font-size:13px;outline:none;font-family:var(--font)}
+.search-bar input::placeholder{color:var(--muted2)}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:13px;font-weight:600;color:var(--white);z-index:1000;transition:transform 0.3s ease;display:flex;align-items:center;gap:8px;box-shadow:0 20px 60px rgba(0,0,0,0.5);white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:rgba(34,197,94,0.3);color:var(--green)}
+.toast.error{border-color:rgba(239,68,68,0.3);color:var(--red)}
+
+/* Welcome screen */
+.welcome-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:var(--bg);position:relative;overflow:hidden}
+.welcome-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 30%,rgba(34,197,94,0.06),transparent)}
+.welcome-inner{position:relative;z-index:1;max-width:480px}
+.welcome-logo{font-size:64px;margin-bottom:20px;animation:pulse 3s ease infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.welcome-title{font-family:var(--font-d);font-size:clamp(28px,6vw,42px);color:var(--white);line-height:1.1;margin-bottom:12px}
+.welcome-sub{font-size:15px;color:var(--muted);line-height:1.75;margin-bottom:36px}
+.welcome-actions{display:flex;flex-direction:column;gap:10px}
+.welcome-btn{display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);cursor:pointer;transition:all var(--transition);text-align:left}
+.welcome-btn:hover{border-color:var(--border2);background:var(--card2);transform:translateX(4px)}
+.welcome-btn .wico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.welcome-btn .wtext .wt{font-size:14px;font-weight:700;color:var(--white)}
+.welcome-btn .wtext .ws{font-size:12px;color:var(--muted);margin-top:2px}
+.welcome-btn .warrow{margin-left:auto;color:var(--muted2);font-size:18px}
+
+/* Rating input */
+.rating-input{display:flex;gap:6px;flex-direction:row-reverse;justify-content:flex-end}
+.rating-input input{display:none}
+.rating-input label{font-size:26px;cursor:pointer;transition:transform 0.1s;color:var(--muted2);filter:grayscale(100%)}
+.rating-input input:checked ~ label,.rating-input label:hover,.rating-input label:hover ~ label{color:#FBBF24;filter:none;transform:scale(1.1)}
+
+/* ═══════════════════════════════════════════
+   DESKTOP
+═══════════════════════════════════════════ */
+@media(min-width:768px){
+  .sidebar{transform:translateX(0);position:sticky;height:100vh;top:0;align-self:flex-start}
+  .overlay{display:none!important}
+  .menu-btn{display:none}
+  .stats-grid{grid-template-columns:repeat(4,1fr)}
+  .form-row{grid-template-columns:1fr 1fr}
+  .content{padding:24px 28px}
+  .modal-bg{align-items:center}
+  .modal{border-radius:20px;max-width:520px}
+  @keyframes slideUp{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+  .menu-grid{grid-template-columns:repeat(3,1fr)}
+  .ob-grid{grid-template-columns:1fr}
+}
+@media(min-width:1024px){
+  .stats-grid{grid-template-columns:repeat(4,1fr)}
+  .menu-grid{grid-template-columns:repeat(4,1fr)}
+}
+.menu-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════
+   FULL-SCREEN LOADER (session check)
+═══════════════════════════════════════ -->
+<div id="boot-loader" style="position:fixed;inset:0;background:var(--bg);z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px">
+  <div style="font-size:44px;animation:pulse 1.4s ease infinite">🐂</div>
+  <div style="font-size:13px;color:var(--muted)">Loading Bull's &amp; Trading Cafe…</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   PAGE: WELCOME
+═══════════════════════════════════════ -->
+<div class="page" id="page-welcome">
+  <div class="welcome-screen">
+    <div class="welcome-inner">
+      <div class="welcome-logo">🐂</div>
+      <h1 class="welcome-title">Bull's &amp; Trading Cafe</h1>
+      <p class="welcome-sub">Management System — Select your role to continue. Every account is real: data is created, stored and read from Supabase.</p>
+      <div class="welcome-actions">
+        <div class="welcome-btn" onclick="showPage('page-auth-owner')">
+          <div class="wico" style="background:var(--gold-dim)">👑</div>
+          <div class="wtext"><div class="wt">Owner / Admin</div><div class="ws">Full access · Analytics · Reports</div></div>
+          <div class="warrow">→</div>
+        </div>
+        <div class="welcome-btn" onclick="showPage('page-auth-staff')">
+          <div class="wico" style="background:var(--blue-dim)">👨‍🍳</div>
+          <div class="wtext"><div class="wt">Staff</div><div class="ws">Orders · Billing · Daily summary</div></div>
+          <div class="warrow">→</div>
+        </div>
+        <div class="welcome-btn" onclick="showPage('page-auth-customer')">
+          <div class="wico" style="background:var(--green-dim)">🛍️</div>
+          <div class="wtext"><div class="wt">Customer</div><div class="ws">Menu · Reviews · Loyalty points</div></div>
+          <div class="warrow">→</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   PAGE: CUSTOMER AUTH
+═══════════════════════════════════════ -->
+<div class="page" id="page-auth-customer">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="mark">🐂</div>
+        <h1>Bull's &amp; Trading Cafe</h1>
+        <p>Customer Portal · Trade Smart. Eat Better.</p>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('customer','signup')">Sign Up</button>
+        <button class="auth-tab" onclick="switchAuthTab('customer','login')">Sign In</button>
+      </div>
+      <div id="customer-auth-msg" class="msg"></div>
+      <div id="customer-auth-signup">
+        <div class="fld"><label>Full Name</label><input class="inp" type="text" id="c-name" placeholder="Your full name"></div>
+        <div class="fld"><label>Email Address</label><input class="inp" type="email" id="c-email" placeholder="your@email.com"></div>
+        <div class="fld"><label>Phone Number</label><input class="inp" type="tel" id="c-phone" placeholder="+91 98765 43210"></div>
+        <div class="fld"><label>Password</label><input class="inp" type="password" id="c-pass" placeholder="Create password (min 6 chars)"></div>
+        <button class="btn-auth" id="c-signup-btn" onclick="customerSignup()">🎉 Create Account</button>
+        <div class="auth-link">Already have an account? <a onclick="switchAuthTab('customer','login')">Sign In</a></div>
+      </div>
+      <div id="customer-auth-login" style="display:none">
+        <div class="fld"><label>Email Address</label><input class="inp" type="email" id="cl-email" placeholder="your@email.com"></div>
+        <div class="fld"><label>Password</label><input class="inp" type="password" id="cl-pass" placeholder="Your password"></div>
+        <button class="btn-auth" id="c-login-btn" onclick="customerLogin()">🚀 Sign In</button>
+        <div class="auth-link">No account? <a onclick="switchAuthTab('customer','signup')">Sign Up Free</a></div>
+        <div class="auth-link"><a onclick="forgotPassword('cl-email')">Forgot password?</a></div>
+        <div class="auth-divider"><span>or</span></div>
+        <div style="text-align:center"><a onclick="showPage('page-welcome')" style="font-size:13px;color:var(--muted);cursor:pointer">← Back to Home</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   PAGE: STAFF AUTH
+═══════════════════════════════════════ -->
+<div class="page" id="page-auth-staff">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="mark" style="background:var(--blue-dim);border-color:rgba(59,130,246,0.2)">👨‍🍳</div>
+        <h1>Bull's &amp; Trading Cafe</h1>
+        <p>Staff Portal · Orders &amp; Billing</p>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('staff','login')">Sign In</button>
+        <button class="auth-tab" onclick="switchAuthTab('staff','signup')">Activate Invite</button>
+      </div>
+      <div id="staff-auth-msg" class="msg"></div>
+      <div id="staff-auth-login">
+        <div class="fld"><label>Email Address</label><input class="inp" type="email" id="sl-email" placeholder="you@bulls.cafe"></div>
+        <div class="fld"><label>Password</label><input class="inp" type="password" id="sl-pass" placeholder="Your password"></div>
+        <button class="btn-auth" id="s-login-btn" onclick="staffLogin()" style="background:var(--blue)">🚀 Sign In</button>
+        <div class="auth-link">New here? <a onclick="switchAuthTab('staff','signup')">Activate your invite</a></div>
+        <div class="auth-link"><a onclick="forgotPassword('sl-email')">Forgot password?</a></div>
+        <div class="auth-divider"><span>or</span></div>
+        <div style="text-align:center"><a onclick="showPage('page-welcome')" style="font-size:13px;color:var(--muted);cursor:pointer">← Back to Home</a></div>
+      </div>
+      <div id="staff-auth-signup" style="display:none">
+        <div style="background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);border-radius:var(--r);padding:12px;font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:16px">
+          🔑 Ask the Owner for your invite code first — it's tied to your email and required to activate a staff account.
+        </div>
+        <div class="fld"><label>Full Name</label><input class="inp" type="text" id="s-name" placeholder="Your full name"></div>
+        <div class="fld"><label>Email Address</label><input class="inp" type="email" id="s-email" placeholder="Must match the invited email"></div>
+        <div class="fld"><label>Invite Code</label><input class="inp" id="s-code" placeholder="6-character code from Owner" style="text-transform:uppercase"></div>
+        <div class="fld"><label>Create Password</label><input class="inp" type="password" id="s-pass" placeholder="Min 6 characters"></div>
+        <button class="btn-auth" id="s-signup-btn" onclick="staffSignup()" style="background:var(--blue)">✅ Activate Account</button>
+        <div class="auth-link">Already activated? <a onclick="switchAuthTab('staff','login')">Sign In</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   PAGE: OWNER AUTH
+═══════════════════════════════════════ -->
+<div class="page" id="page-auth-owner">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="mark" style="background:var(--gold-dim);border-color:rgba(245,158,11,0.2)">👑</div>
+        <h1>Bull's &amp; Trading Cafe</h1>
+        <p>Owner Portal · Administrator Access</p>
+      </div>
+      <div id="owner-auth-msg" class="msg"></div>
+      <div class="fld"><label>Email Address</label><input class="inp" type="email" id="ol-email" placeholder="owner@bulls.cafe"></div>
+      <div class="fld"><label>Password</label><input class="inp" type="password" id="ol-pass" placeholder="Your password"></div>
+      <button class="btn-auth" id="o-login-btn" onclick="ownerLogin()" style="background:var(--gold);color:#000">👑 Sign In</button>
+      <div class="auth-link"><a onclick="forgotPassword('ol-email')">Forgot password?</a></div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-size:11px;color:var(--muted);margin-top:16px;line-height:1.7">
+        ℹ️ Owner accounts aren't self-service. The first Owner account is created once in the Supabase dashboard (see SETUP-GUIDE.md).
+      </div>
+      <div class="auth-divider"><span>or</span></div>
+      <div style="text-align:center"><a onclick="showPage('page-welcome')" style="font-size:13px;color:var(--muted);cursor:pointer">← Back to Home</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   APP: OWNER DASHBOARD
+═══════════════════════════════════════ -->
+<div class="page" id="page-owner">
+  <div class="app-shell">
+    <aside class="sidebar" id="owner-sidebar">
+      <div class="sb-head">
+        <div class="sb-logo">
+          <div class="dot">🐂</div>
+          <div class="sb-logo-text">Bull's &amp; Trading<small>Management System</small></div>
+        </div>
+      </div>
+      <div class="sb-user">
+        <div class="sb-avatar" id="owner-sb-av">O</div>
+        <div class="sb-user-info">
+          <div class="sb-user-name" id="owner-sb-name">Cafe Owner</div>
+          <div class="sb-user-role">Administrator</div>
+        </div>
+        <span class="sb-badge owner">Owner</span>
+      </div>
+      <nav class="sb-nav">
+        <div class="sb-section-label">Overview</div>
+        <div class="sb-item active" onclick="ownerNav('dashboard',this)"><span class="ico">📊</span>Dashboard</div>
+        <div class="sb-item" onclick="ownerNav('analytics',this)"><span class="ico">📈</span>Analytics</div>
+        <div class="sb-item" onclick="ownerNav('reports',this)"><span class="ico">📋</span>Reports</div>
+        <div class="sb-section-label">Operations</div>
+        <div class="sb-item" onclick="ownerNav('orders',this)"><span class="ico">🧾</span>All Orders</div>
+        <div class="sb-item" onclick="ownerNav('menu',this)"><span class="ico">🍽️</span>Menu Management</div>
+        <div class="sb-item" onclick="ownerNav('offers',this)"><span class="ico">🔥</span>Offers &amp; Deals</div>
+        <div class="sb-section-label">People</div>
+        <div class="sb-item" onclick="ownerNav('staff',this)"><span class="ico">👥</span>Staff Management</div>
+        <div class="sb-item" onclick="ownerNav('customers',this)"><span class="ico">👤</span>Customers</div>
+        <div class="sb-item" onclick="ownerNav('reviews',this)"><span class="ico">⭐</span>Reviews</div>
+        <div class="sb-section-label">System</div>
+        <div class="sb-item" onclick="ownerNav('audit',this)"><span class="ico">🔍</span>Audit Logs</div>
+        <div class="sb-item" onclick="ownerNav('settings',this)"><span class="ico">⚙️</span>Settings</div>
+      </nav>
+      <div class="sb-foot">
+        <button class="sb-logout" onclick="logout()"><span>🚪</span>Sign Out</button>
+      </div>
+    </aside>
+    <div class="overlay" id="owner-overlay" onclick="closeSidebar('owner')"></div>
+    <main class="main">
+      <div class="topbar">
+        <button class="menu-btn" onclick="openSidebar('owner')">☰</button>
+        <span class="topbar-title" id="owner-page-title">Dashboard</span>
+        <div class="topbar-actions" style="position:relative">
+          <button class="notif-btn" onclick="toggleNotif('owner-notif')">🔔<span class="notif-dot" id="owner-notif-dot" style="display:none"></span></button>
+          <div class="notif-panel" id="owner-notif">
+            <div class="notif-panel-hdr"><h4>Notifications</h4><span style="font-size:11px;color:var(--green);cursor:pointer" onclick="markAllNotifsRead()">Mark all read</span></div>
+            <div class="notif-list" id="owner-notif-list"></div>
+          </div>
+        </div>
+      </div>
+      <div class="content" id="owner-content"></div>
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   APP: STAFF DASHBOARD
+═══════════════════════════════════════ -->
+<div class="page" id="page-staff">
+  <div class="app-shell">
+    <aside class="sidebar" id="staff-sidebar">
+      <div class="sb-head">
+        <div class="sb-logo">
+          <div class="dot">🐂</div>
+          <div class="sb-logo-text">Bull's &amp; Trading<small>Staff Panel</small></div>
+        </div>
+      </div>
+      <div class="sb-user">
+        <div class="sb-avatar" id="staff-sb-av" style="background:var(--blue-dim);color:var(--blue)">S</div>
+        <div class="sb-user-info">
+          <div class="sb-user-name" id="staff-sb-name">Staff Member</div>
+          <div class="sb-user-role" id="staff-sb-role">Operational Access</div>
+        </div>
+        <span class="sb-badge staff">Staff</span>
+      </div>
+      <nav class="sb-nav">
+        <div class="sb-section-label">Operations</div>
+        <div class="sb-item active" onclick="staffNav('new-order',this)"><span class="ico">➕</span>New Order</div>
+        <div class="sb-item" onclick="staffNav('orders',this)"><span class="ico">🧾</span>Order History</div>
+        <div class="sb-item" onclick="staffNav('daily',this)"><span class="ico">📅</span>Daily Summary</div>
+        <div class="sb-item" onclick="staffNav('menu-view',this)"><span class="ico">🍽️</span>View Menu</div>
+      </nav>
+      <div class="sb-foot">
+        <button class="sb-logout" onclick="logout()"><span>🚪</span>Sign Out</button>
+      </div>
+    </aside>
+    <div class="overlay" id="staff-overlay" onclick="closeSidebar('staff')"></div>
+    <main class="main">
+      <div class="topbar">
+        <button class="menu-btn" onclick="openSidebar('staff')">☰</button>
+        <span class="topbar-title" id="staff-page-title">New Order</span>
+        <div class="topbar-actions">
+          <span style="font-size:12px;color:var(--muted);font-family:var(--font-m)" id="staff-clock"></span>
+        </div>
+      </div>
+      <div class="content" id="staff-content"></div>
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   APP: CUSTOMER DASHBOARD
+═══════════════════════════════════════ -->
+<div class="page" id="page-customer">
+  <div class="app-shell">
+    <aside class="sidebar" id="customer-sidebar">
+      <div class="sb-head">
+        <div class="sb-logo">
+          <div class="dot">🐂</div>
+          <div class="sb-logo-text">Bull's &amp; Trading<small>Customer Portal</small></div>
+        </div>
+      </div>
+      <div class="sb-user">
+        <div class="sb-avatar" id="cust-sb-av">C</div>
+        <div class="sb-user-info">
+          <div class="sb-user-name" id="cust-name-display">Customer</div>
+          <div class="sb-user-role">Loyalty Member</div>
+        </div>
+        <span class="sb-badge customer">Member</span>
+      </div>
+      <nav class="sb-nav">
+        <div class="sb-section-label">Explore</div>
+        <div class="sb-item active" onclick="customerNav('home',this)"><span class="ico">🏠</span>Home</div>
+        <div class="sb-item" onclick="customerNav('menu',this)"><span class="ico">🍽️</span>View Menu</div>
+        <div class="sb-item" onclick="customerNav('offers',this)"><span class="ico">🔥</span>Today's Offers</div>
+        <div class="sb-section-label">My Account</div>
+        <div class="sb-item" onclick="customerNav('profile',this)"><span class="ico">👤</span>My Profile</div>
+        <div class="sb-item" onclick="customerNav('orders',this)"><span class="ico">🧾</span>My Orders</div>
+        <div class="sb-item" onclick="customerNav('reviews',this)"><span class="ico">⭐</span>My Reviews</div>
+        <div class="sb-item" onclick="customerNav('loyalty',this)"><span class="ico">🏆</span>Loyalty Points</div>
+        <div class="sb-section-label">Cafe Info</div>
+        <div class="sb-item" onclick="customerNav('visit',this)"><span class="ico">📍</span>Visit Us</div>
+      </nav>
+      <div class="sb-foot">
+        <button class="sb-logout" onclick="logout()"><span>🚪</span>Sign Out</button>
+      </div>
+    </aside>
+    <div class="overlay" id="customer-overlay" onclick="closeSidebar('customer')"></div>
+    <main class="main">
+      <div class="topbar">
+        <button class="menu-btn" onclick="openSidebar('customer')">☰</button>
+        <span class="topbar-title" id="customer-page-title">Home</span>
+        <div class="topbar-actions">
+          <span style="font-size:16px;cursor:pointer" onclick="customerNav('loyalty',null)">🏆</span>
+        </div>
+      </div>
+      <div class="content" id="customer-content"></div>
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   MODAL
+═══════════════════════════════════════ -->
+<div class="modal-bg" id="modalBg" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal">
+    <div class="modal-hdr">
+      <h3 id="modal-title">Modal</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   SUPABASE CLIENT
+═══════════════════════════════════════════════════════════════ */
+const sb = window.supabase.createClient(
+  "https://zqaxjajpucjfbwvzhkzg.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxYXhqYWpwdWNqZmJ3dnpoa3pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzOTA2NDIsImV4cCI6MjA5Nzk2NjY0Mn0.JDK1PWPnl7mB-9OyWUmbuSmfav9Lv-E0DKCD7WPwpuU"
+);
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL STATE — no demo data. Everything below is populated
+   live from Supabase after auth.
+═══════════════════════════════════════════════════════════════ */
+const APP = {
+  authUser: null,   // supabase auth user
+  profile: null,    // row from profiles
+  extra: null,      // row from customers / staff (role-specific)
+  cart: {},         // staff order builder cart {menuItemId: qty}
+  menuCache: [],
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE / UI PRIMITIVES
+═══════════════════════════════════════════════════════════════ */
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function openSidebar(role){
+  document.getElementById(role+'-sidebar').classList.add('open');
+  const ov=document.getElementById(role+'-overlay'); if(ov) ov.classList.add('show');
+}
+function closeSidebar(role){
+  document.getElementById(role+'-sidebar').classList.remove('open');
+  const ov=document.getElementById(role+'-overlay'); if(ov) ov.classList.remove('show');
+}
+function openModal(title, bodyHTML){
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHTML;
+  document.getElementById('modalBg').classList.add('show');
+}
+function closeModal(){document.getElementById('modalBg').classList.remove('show')}
+function closeModalOutside(e){if(e.target===document.getElementById('modalBg'))closeModal()}
+function toast(msg, type='success'){
+  const t=document.getElementById('toast');
+  t.className=`toast ${type}`;
+  t.innerHTML=(type==='success'?'✅':'❌')+' '+msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+function loadingHTML(msg='Loading…'){
+  return `<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:36px;margin-bottom:12px;animation:pulse 1.4s ease infinite">🐂</div>${msg}</div>`;
+}
+function esc(s){ return (s??'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmtDate(iso){ return new Date(iso).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}); }
+function fmtTime(iso){ return new Date(iso).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
+function todayStartISO(){ const d=new Date(); d.setHours(0,0,0,0); return d.toISOString(); }
+function daysAgoISO(n){ const d=new Date(); d.setDate(d.getDate()-n); d.setHours(0,0,0,0); return d.toISOString(); }
+
+/* ═══════════════════════════════════════════════════════════════
+   AUDIT LOG (best-effort; never blocks the UI)
+═══════════════════════════════════════════════════════════════ */
+async function logAudit(action, table_name, record_id, new_data){
+  try{
+    await sb.from('audit_logs').insert({
+      user_id: APP.authUser?.id || null,
+      action, table_name, record_id: record_id||null,
+      new_data: new_data||null
+    });
+  }catch(e){ /* non-fatal */ }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   AUTH TAB SWITCHING
+═══════════════════════════════════════════════════════════════ */
+function switchAuthTab(role, tab){
+  document.querySelectorAll(`#page-auth-${role} .auth-tab`).forEach((t,i)=>{
+    const order = role==='customer' ? ['signup','login'] : ['login','signup'];
+    t.classList.toggle('active', order[i]===tab);
+  });
+  document.getElementById(`${role}-auth-signup`)?.style && (document.getElementById(`${role}-auth-signup`).style.display = tab==='signup'?'block':'none');
+  document.getElementById(`${role}-auth-login`).style.display = tab==='login'?'block':'none';
+  const msg=document.getElementById(`${role}-auth-msg`); if(msg) msg.className='msg';
+}
+function showAuthMsg(role, msg, type){
+  const el=document.getElementById(`${role}-auth-msg`);
+  el.textContent=msg; el.className=`msg show ${type}`;
+}
+function setBtnLoading(id, loading, label){
+  const b=document.getElementById(id);
+  if(!b) return;
+  b.disabled = loading;
+  b.style.opacity = loading ? 0.6 : 1;
+  if(loading) b.dataset.orig = b.dataset.orig || b.textContent;
+  b.textContent = loading ? '⏳ Please wait…' : (label || b.dataset.orig || b.textContent);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FORGOT PASSWORD (all roles)
+═══════════════════════════════════════════════════════════════ */
+async function forgotPassword(inputId){
+  const email = document.getElementById(inputId).value.trim();
+  if(!email){ toast('Enter your email first','error'); return; }
+  try{
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href.split('#')[0] });
+    if(error) throw error;
+    toast('Password reset email sent! Check your inbox 📧');
+  }catch(e){ toast(e.message||'Could not send reset email','error'); }
+}
+function newPasswordModal(){
+  openModal('Set New Password', `
+    <div class="form-grid">
+      <div class="form-fld"><label>New Password</label><input class="form-inp" type="password" id="np-pass" placeholder="Min 6 characters"></div>
+      <button class="btn btn-primary" onclick="submitNewPassword()">💾 Update Password</button>
+    </div>`);
+}
+async function submitNewPassword(){
+  const pass=document.getElementById('np-pass').value;
+  if(!pass||pass.length<6){toast('Password must be at least 6 characters','error');return;}
+  try{
+    const { error } = await sb.auth.updateUser({ password: pass });
+    if(error) throw error;
+    closeModal(); toast('Password updated! You can sign in now ✅');
+  }catch(e){ toast(e.message||'Could not update password','error'); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CUSTOMER AUTH
+═══════════════════════════════════════════════════════════════ */
+async function customerSignup(){
+  const name=document.getElementById('c-name').value.trim();
+  const email=document.getElementById('c-email').value.trim();
+  const phone=document.getElementById('c-phone').value.trim();
+  const pass=document.getElementById('c-pass').value;
+  if(!name||!email||!pass){showAuthMsg('customer','Please fill all required fields','error');return;}
+  if(pass.length<6){showAuthMsg('customer','Password must be at least 6 characters','error');return;}
+  setBtnLoading('c-signup-btn', true);
+  try{
+    const { data, error } = await sb.auth.signUp({
+      email, password: pass,
+      options: { data: { role:'customer', full_name:name, phone } }
+    });
+    if(error) throw error;
+    if(data.session){
+      showAuthMsg('customer','✅ Account created! You earned 50 welcome points!','success');
+      setTimeout(()=>routeAfterAuth(), 1200);
+    } else {
+      showAuthMsg('customer','✅ Account created! Check your email to verify, then sign in.','success');
+      setTimeout(()=>switchAuthTab('customer','login'), 1800);
+    }
+  }catch(e){
+    showAuthMsg('customer', e.message||'Signup failed','error');
+  }finally{ setBtnLoading('c-signup-btn', false, '🎉 Create Account'); }
+}
+async function customerLogin(){
+  const email=document.getElementById('cl-email').value.trim();
+  const pass=document.getElementById('cl-pass').value;
+  if(!email||!pass){showAuthMsg('customer','Enter email and password','error');return;}
+  setBtnLoading('c-login-btn', true);
+  try{
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if(error) throw error;
+    await routeAfterAuth();
+  }catch(e){ showAuthMsg('customer', e.message||'Invalid email or password','error'); }
+  finally{ setBtnLoading('c-login-btn', false, '🚀 Sign In'); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STAFF AUTH
+═══════════════════════════════════════════════════════════════ */
+async function staffSignup(){
+  const name=document.getElementById('s-name').value.trim();
+  const email=document.getElementById('s-email').value.trim();
+  const code=document.getElementById('s-code').value.trim().toUpperCase();
+  const pass=document.getElementById('s-pass').value;
+  if(!name||!email||!code||!pass){showAuthMsg('staff','Fill all fields including invite code','error');return;}
+  if(pass.length<6){showAuthMsg('staff','Password must be at least 6 characters','error');return;}
+  setBtnLoading('s-signup-btn', true);
+  try{
+    const { data: valid, error: checkErr } = await sb.rpc('check_staff_invite', { p_email: email, p_code: code });
+    if(checkErr) throw checkErr;
+    if(!valid){ showAuthMsg('staff','Invalid or expired invite code for this email. Ask the Owner to re-check.','error'); return; }
+
+    const { data, error } = await sb.auth.signUp({
+      email, password: pass,
+      options: { data: { role:'staff', invite_code: code, full_name:name } }
+    });
+    if(error) throw error;
+    if(data.session){
+      showAuthMsg('staff','✅ Staff account activated!','success');
+      setTimeout(()=>routeAfterAuth(), 1000);
+    } else {
+      showAuthMsg('staff','✅ Account created! Verify your email, then sign in.','success');
+      setTimeout(()=>switchAuthTab('staff','login'), 1800);
+    }
+  }catch(e){ showAuthMsg('staff', e.message||'Activation failed','error'); }
+  finally{ setBtnLoading('s-signup-btn', false, '✅ Activate Account'); }
+}
+async function staffLogin(){
+  const email=document.getElementById('sl-email').value.trim();
+  const pass=document.getElementById('sl-pass').value;
+  if(!email||!pass){showAuthMsg('staff','Enter email and password','error');return;}
+  setBtnLoading('s-login-btn', true);
+  try{
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if(error) throw error;
+    await routeAfterAuth();
+  }catch(e){ showAuthMsg('staff', e.message||'Invalid email or password','error'); }
+  finally{ setBtnLoading('s-login-btn', false, '🚀 Sign In'); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   OWNER AUTH (login only — owner is provisioned manually)
+═══════════════════════════════════════════════════════════════ */
+async function ownerLogin(){
+  const email=document.getElementById('ol-email').value.trim();
+  const pass=document.getElementById('ol-pass').value;
+  if(!email||!pass){showAuthMsg('owner','Enter email and password','error');return;}
+  setBtnLoading('o-login-btn', true);
+  try{
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if(error) throw error;
+    const { data:{ user } } = await sb.auth.getUser();
+    const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single();
+    if(profile?.role !== 'owner'){
+      await sb.auth.signOut();
+      showAuthMsg('owner','This account is not an Owner account.','error');
+      return;
+    }
+    await routeAfterAuth();
+  }catch(e){ showAuthMsg('owner', e.message||'Invalid email or password','error'); }
+  finally{ setBtnLoading('o-login-btn', false, '👑 Sign In'); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SESSION ROUTING
+═══════════════════════════════════════════════════════════════ */
+async function routeAfterAuth(){
+  const { data:{ user } } = await sb.auth.getUser();
+  if(!user){ document.getElementById('boot-loader').style.display='none'; showPage('page-welcome'); return; }
+  APP.authUser = user;
+
+  const { data: profile, error: pErr } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  if(pErr || !profile){
+    document.getElementById('boot-loader').style.display='none';
+    toast('Could not load your profile. Please sign in again.','error');
+    await sb.auth.signOut();
+    showPage('page-welcome');
+    return;
+  }
+  APP.profile = profile;
+
+  if(profile.role === 'owner'){
+    document.getElementById('owner-sb-name').textContent = profile.full_name;
+    document.getElementById('owner-sb-av').textContent = (profile.full_name||'O')[0].toUpperCase();
+    document.getElementById('boot-loader').style.display='none';
+    showPage('page-owner');
+    ownerNav('dashboard', document.querySelector('#owner-sidebar .sb-item'));
+    logAudit('login','profiles',user.id,{role:'owner'});
+  } else if(profile.role === 'staff'){
+    const { data: staffRow } = await sb.from('staff').select('*').eq('id', user.id).single();
+    APP.extra = staffRow;
+    document.getElementById('staff-sb-name').textContent = profile.full_name;
+    document.getElementById('staff-sb-role').textContent = staffRow?.staff_role || 'Staff';
+    document.getElementById('staff-sb-av').textContent = (profile.full_name||'S')[0].toUpperCase();
+    document.getElementById('boot-loader').style.display='none';
+    showPage('page-staff');
+    startClock();
+    staffNav('new-order', document.querySelector('#staff-sidebar .sb-item'));
+    logAudit('login','profiles',user.id,{role:'staff'});
+  } else {
+    const { data: custRow } = await sb.from('customers').select('*').eq('id', user.id).single();
+    APP.extra = custRow;
+    document.getElementById('cust-name-display').textContent = profile.full_name;
+    document.getElementById('cust-sb-av').textContent = (profile.full_name||'C')[0].toUpperCase();
+    document.getElementById('boot-loader').style.display='none';
+    showPage('page-customer');
+    customerNav('home', document.querySelector('#customer-sidebar .sb-item'));
+    logAudit('login','profiles',user.id,{role:'customer'});
+  }
+}
+
+async function logout(){
+  await sb.auth.signOut();
+  APP.authUser=null; APP.profile=null; APP.extra=null; APP.cart={};
+  showPage('page-welcome');
+}
+
+/* Boot: check for existing session on load + listen for auth events */
+sb.auth.onAuthStateChange((event, session)=>{
+  if(event === 'PASSWORD_RECOVERY'){ newPasswordModal(); }
+});
+(async function boot(){
+  try{
+    const { data:{ session } } = await sb.auth.getSession();
+    if(session){ await routeAfterAuth(); }
+    else{ document.getElementById('boot-loader').style.display='none'; showPage('page-welcome'); }
+  }catch(e){
+    document.getElementById('boot-loader').style.display='none';
+    showPage('page-welcome');
+  }
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   NOTIFICATIONS (owner)
+═══════════════════════════════════════════════════════════════ */
+async function loadOwnerNotifications(){
+  const list=document.getElementById('owner-notif-list');
+  const dot=document.getElementById('owner-notif-dot');
+  const { data, error } = await sb.from('notifications').select('*').eq('user_id', APP.authUser.id).order('created_at',{ascending:false}).limit(15);
+  if(error || !data){ list.innerHTML=''; return; }
+  dot.style.display = data.some(n=>!n.is_read) ? 'block' : 'none';
+  list.innerHTML = data.length ? data.map(n=>`
+    <div class="notif-item ${n.is_read?'':'unread'}">
+      <div class="ni-title">${esc(n.title)}</div>
+      <div class="ni-sub">${esc(n.body||'')}</div>
+      <div class="ni-time">${fmtTime(n.created_at)} · ${fmtDate(n.created_at)}</div>
+    </div>`).join('') : `<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">No notifications yet</div>`;
+}
+async function markAllNotifsRead(){
+  await sb.from('notifications').update({is_read:true}).eq('user_id', APP.authUser.id).eq('is_read', false);
+  loadOwnerNotifications();
+}
+function toggleNotif(id){
+  const p=document.getElementById(id);
+  p.classList.toggle('show');
+  document.addEventListener('click', function handler(e){
+    if(!p.contains(e.target)){p.classList.remove('show');document.removeEventListener('click',handler);}
+  });
+}
+function startClock(){
+  const el=document.getElementById('staff-clock'); if(!el) return;
+  const upd=()=>{const n=new Date();el.textContent=n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});};
+  upd(); setInterval(upd,1000);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA LAYER — every read/write below hits Supabase directly.
+═══════════════════════════════════════════════════════════════ */
+async function fetchMenu(availableOnly=false){
+  let q = sb.from('menu_items').select('*').order('category').order('sort_order');
+  if(availableOnly) q = q.eq('is_available', true);
+  const { data, error } = await q;
+  if(error){ toast('Could not load menu','error'); return []; }
+  APP.menuCache = data;
+  return data;
+}
+async function fetchOffers(activeOnly=false){
+  let q = sb.from('offers').select('*').order('created_at',{ascending:false});
+  if(activeOnly) q = q.eq('is_active', true);
+  const { data, error } = await q;
+  return error ? [] : data;
+}
+async function fetchOrders({ mine=false, sinceISO=null, limit=50 } = {}){
+  let q = sb.from('orders').select('*, order_items(*)').order('created_at',{ascending:false}).limit(limit);
+  if(mine) q = q.eq('customer_id', APP.authUser.id);
+  if(sinceISO) q = q.gte('created_at', sinceISO);
+  const { data, error } = await q;
+  if(error){ toast('Could not load orders','error'); return []; }
+  return data;
+}
+async function fetchReviews(limit=50){
+  const { data, error } = await sb.from('reviews').select('*').order('created_at',{ascending:false}).limit(limit);
+  return error ? [] : data;
+}
+async function fetchProfilesByIds(ids){
+  const uniq = [...new Set(ids.filter(Boolean))];
+  if(!uniq.length) return {};
+  const { data } = await sb.from('profiles').select('id, full_name').in('id', uniq);
+  const map={}; (data||[]).forEach(p=>map[p.id]=p.full_name);
+  return map;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   OWNER NAVIGATION
+═══════════════════════════════════════════════════════════════ */
+async function ownerNav(view, el){
+  if(el){ document.querySelectorAll('#owner-sidebar .sb-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); }
+  const titles={dashboard:'Dashboard',analytics:'Analytics',reports:'Reports',orders:'All Orders',menu:'Menu Management',offers:'Offers & Deals',staff:'Staff Management',customers:'Customers',reviews:'Reviews',audit:'Audit Logs',settings:'Settings'};
+  document.getElementById('owner-page-title').textContent = titles[view]||view;
+  const c=document.getElementById('owner-content');
+  c.innerHTML = loadingHTML();
+  closeSidebar('owner');
+  loadOwnerNotifications();
+  const views={dashboard:ownerDashboard,analytics:ownerAnalytics,reports:ownerReports,orders:ownerOrders,menu:ownerMenu,offers:ownerOffers,staff:ownerStaff,customers:ownerCustomers,reviews:ownerReviews,audit:ownerAudit,settings:ownerSettings};
+  try{ c.innerHTML = await views[view](); initCharts(); }
+  catch(e){ c.innerHTML = `<div class="card">Failed to load: ${esc(e.message)}</div>`; }
+}
+
+async function ownerDashboard(){
+  const [todayOrders, weekOrders, reviews, custCountRes] = await Promise.all([
+    fetchOrders({ sinceISO: todayStartISO(), limit: 200 }),
+    fetchOrders({ sinceISO: daysAgoISO(7), limit: 500 }),
+    fetchReviews(2),
+    sb.from('customers').select('id',{count:'exact',head:true})
+  ]);
+  const todayRev = todayOrders.reduce((s,o)=>s+Number(o.total),0);
+  const avgRating = (await fetchReviews(200)).reduce((acc,r,_,arr)=>acc+r.rating_overall/arr.length,0) || 0;
+
+  // 7-day bars
+  const dayBuckets = Array.from({length:7},(_,i)=>{ const d=new Date(); d.setDate(d.getDate()-(6-i)); d.setHours(0,0,0,0); return d; });
+  const dayTotals = dayBuckets.map((d,i)=>{
+    const next = new Date(d); next.setDate(next.getDate()+1);
+    return weekOrders.filter(o=>{const t=new Date(o.created_at); return t>=d && t<next;}).reduce((s,o)=>s+Number(o.total),0);
+  });
+  const maxDay = Math.max(...dayTotals, 1);
+  const dayLabels = dayBuckets.map(d=>d.toLocaleDateString('en-IN',{weekday:'short'}));
+
+  // category breakdown today
+  const catTotals = {};
+  todayOrders.forEach(o=> (o.order_items||[]).forEach(it=>{
+    const menu = APP.menuCache.find(m=>m.id===it.menu_item_id);
+    const cat = menu?.category || 'other';
+    catTotals[cat] = (catTotals[cat]||0) + Number(it.subtotal||it.price*it.quantity);
+  }));
+  const catTotal = Object.values(catTotals).reduce((a,b)=>a+b,0) || 1;
+  const catIcons = {pizza:'🍕',burger:'🍔',mocktail:'🍹',dessert:'🍫',other:'🍽️'};
+  const catColors = {pizza:'green',burger:'gold',mocktail:'blue',dessert:'orange',other:'red'};
+
+  const recentOrders = todayOrders.slice(0,5);
+  const custIds = recentOrders.map(o=>o.customer_id);
+  const nameMap = await fetchProfilesByIds(custIds);
+
+  return `
+  <div class="stats-grid">
+    <div class="stat-card green"><div class="stat-ico">💰</div><div class="stat-val">₹${todayRev.toFixed(0)}</div><div class="stat-lbl">Today's Revenue</div></div>
+    <div class="stat-card gold"><div class="stat-ico">📦</div><div class="stat-val">${todayOrders.length}</div><div class="stat-lbl">Today's Orders</div></div>
+    <div class="stat-card blue"><div class="stat-ico">👥</div><div class="stat-val">${custCountRes.count||0}</div><div class="stat-lbl">Total Customers</div></div>
+    <div class="stat-card orange"><div class="stat-ico">⭐</div><div class="stat-val">${avgRating?avgRating.toFixed(1):'—'}</div><div class="stat-lbl">Avg Rating</div></div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">📊 Last 7 Days Revenue</div>
+    <div class="chart-area">
+      <div class="chart-bars">
+        ${dayTotals.map((v,i)=>`<div class="cbar ${i===6?'gold':'green'}" style="height:${Math.max(v/maxDay*100,3)}%" data-val="₹${v.toFixed(0)}">.</div>`).join('')}
+      </div>
+      <div class="chart-labels">${dayLabels.map(l=>`<span>${l}</span>`).join('')}</div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">🏆 Today's Category Split</div>
+    ${Object.keys(catTotals).length ? Object.entries(catTotals).map(([cat,val])=>`
+      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">${catIcons[cat]||'🍽️'} ${cat.charAt(0).toUpperCase()+cat.slice(1)}</span><span class="prog-val">${Math.round(val/catTotal*100)}%</span></div><div class="prog-bar"><div class="prog-fill ${catColors[cat]||'green'}" style="width:${Math.round(val/catTotal*100)}%"></div></div></div>
+    `).join('') : `<div style="color:var(--muted);font-size:13px;padding:8px 0">No orders yet today</div>`}
+  </div>
+  <div class="sec-hdr"><h3>Recent Orders</h3><span class="see-all" onclick="ownerNav('orders',null)">See all →</span></div>
+  ${recentOrders.length ? `<div class="tbl-wrap"><table>
+    <thead><tr><th>Order</th><th>Items</th><th>Total</th><th>Status</th><th>Time</th></tr></thead>
+    <tbody>${recentOrders.map(o=>`<tr>
+      <td><span style="font-family:var(--font-m);color:var(--green)">${o.order_number}</span></td>
+      <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${(o.order_items||[]).map(it=>`${it.quantity}× ${esc(it.name)}`).join(', ')}</td>
+      <td style="font-weight:700;color:var(--white)">₹${Number(o.total).toFixed(0)}</td>
+      <td><span class="badge ${o.status==='completed'?'green':o.status==='preparing'?'gold':'blue'}">${o.status}</span></td>
+      <td style="color:var(--muted)">${fmtTime(o.created_at)}</td>
+    </tr>`).join('')}</tbody></table></div>` : `<div class="card" style="text-align:center;color:var(--muted)">No orders yet today — once Staff places orders, they'll show up here in real time.</div>`}
+  <div style="margin-top:14px" class="sec-hdr"><h3>Recent Reviews</h3><span class="see-all" onclick="ownerNav('reviews',null)">See all →</span></div>
+  ${reviews.length ? reviews.map(r=>reviewCard(r,true)).join('') : `<div class="card" style="text-align:center;color:var(--muted)">No reviews yet</div>`}`;
+}
+
+async function ownerAnalytics(){
+  const [today, week, month, year] = await Promise.all([
+    fetchOrders({sinceISO: todayStartISO(), limit:1000}),
+    fetchOrders({sinceISO: daysAgoISO(7), limit:2000}),
+    fetchOrders({sinceISO: daysAgoISO(30), limit:5000}),
+    fetchOrders({sinceISO: daysAgoISO(365), limit:5000}),
+  ]);
+  const sum = arr=>arr.reduce((s,o)=>s+Number(o.total),0);
+  // top items over last 30 days
+  const itemTotals={};
+  month.forEach(o=>(o.order_items||[]).forEach(it=>{ itemTotals[it.name]=(itemTotals[it.name]||0)+it.quantity; }));
+  const topItems = Object.entries(itemTotals).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxQty = topItems.length ? topItems[0][1] : 1;
+  const colors=['green','gold','blue','orange','red'];
+  // repeat customers in last 30 days
+  const custOrderCounts={};
+  month.forEach(o=>{ if(o.customer_id) custOrderCounts[o.customer_id]=(custOrderCounts[o.customer_id]||0)+1; });
+  const totalCust = Object.keys(custOrderCounts).length;
+  const repeatCust = Object.values(custOrderCounts).filter(c=>c>1).length;
+  const repeatPct = totalCust ? Math.round(repeatCust/totalCust*100) : 0;
+  const { count: custCount } = await sb.from('customers').select('id',{count:'exact',head:true});
+
+  return `
+  <div class="stats-grid">
+    <div class="stat-card green"><div class="stat-ico">📅</div><div class="stat-val">₹${sum(today).toFixed(0)}</div><div class="stat-lbl">Today</div></div>
+    <div class="stat-card gold"><div class="stat-ico">📅</div><div class="stat-val">₹${sum(week).toFixed(0)}</div><div class="stat-lbl">This Week</div></div>
+    <div class="stat-card blue"><div class="stat-ico">📅</div><div class="stat-val">₹${sum(month).toFixed(0)}</div><div class="stat-lbl">This Month</div></div>
+    <div class="stat-card orange"><div class="stat-ico">📅</div><div class="stat-val">₹${sum(year).toFixed(0)}</div><div class="stat-lbl">This Year</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+    <div class="card">
+      <div class="card-title">🍽️ Top Items (30 days)</div>
+      ${topItems.length ? topItems.map(([name,qty],i)=>`
+        <div class="prog-item"><div class="prog-hdr"><span class="prog-name">${esc(name)}</span><span class="prog-val">${qty} sold</span></div><div class="prog-bar"><div class="prog-fill ${colors[i%colors.length]}" style="width:${Math.round(qty/maxQty*100)}%"></div></div></div>
+      `).join('') : `<div style="color:var(--muted);font-size:13px">No order data yet</div>`}
+    </div>
+    <div class="card">
+      <div class="card-title">👥 Customer Insights</div>
+      <div style="display:flex;flex-direction:column;gap:14px;padding-top:4px">
+        <div style="background:var(--bg3);border-radius:10px;padding:12px"><div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Total Customers</div><div style="font-size:24px;font-weight:800;color:var(--white)">${custCount||0}</div></div>
+        <div style="background:var(--bg3);border-radius:10px;padding:12px"><div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Avg Order Value (30d)</div><div style="font-size:24px;font-weight:800;color:var(--gold)">₹${month.length?Math.round(sum(month)/month.length):0}</div></div>
+        <div style="background:var(--bg3);border-radius:10px;padding:12px"><div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Repeat Customers (30d)</div><div style="font-size:24px;font-weight:800;color:var(--green)">${repeatPct}%</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function ownerReports(){
+  const today = await fetchOrders({sinceISO: todayStartISO(), limit:1000});
+  const catTotals={}, catQty={};
+  today.forEach(o=>(o.order_items||[]).forEach(it=>{
+    const menu = APP.menuCache.find(m=>m.id===it.menu_item_id);
+    const cat = menu?.category || 'other';
+    catTotals[cat]=(catTotals[cat]||0)+Number(it.subtotal||it.price*it.quantity);
+    catQty[cat]=(catQty[cat]||0)+it.quantity;
+  }));
+  const grand = Object.values(catTotals).reduce((a,b)=>a+b,0);
+  const catIcons={pizza:'🍕',burger:'🍔',mocktail:'🍹',dessert:'🍫',other:'🍽️'};
+  const badgeColor={pizza:'green',burger:'gold',mocktail:'blue',dessert:'orange',other:'red'};
+  return `
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">📋 Generate Report</div>
+    <div class="form-grid">
+      <div class="form-row">
+        <div class="form-fld"><label>Report Type</label><select class="form-inp" id="rep-type"><option>Daily Sales Report</option><option>Weekly Summary</option><option>Monthly Revenue</option></select></div>
+        <div class="form-fld"><label>Format</label><select class="form-inp"><option>On-Screen View</option><option>Print PDF</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-fld"><label>From Date</label><input class="form-inp" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
+        <div class="form-fld"><label>To Date</label><input class="form-inp" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
+      </div>
+      <button class="btn btn-primary" onclick="toast('Showing live data below — this reflects real orders 📋')">📊 Generate Report</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📅 Today's Report (Live)</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Category</th><th>Items Sold</th><th>Revenue</th><th>% of Total</th></tr></thead>
+      <tbody>
+        ${Object.keys(catTotals).length ? Object.entries(catTotals).map(([cat,val])=>`
+          <tr><td>${catIcons[cat]||'🍽️'} ${cat.charAt(0).toUpperCase()+cat.slice(1)}</td><td>${catQty[cat]}</td><td style="color:var(--green);font-weight:700">₹${val.toFixed(0)}</td><td><span class="badge ${badgeColor[cat]||'green'}">${Math.round(val/grand*100)}%</span></td></tr>
+        `).join('') : `<tr><td colspan="4" style="text-align:center;color:var(--muted)">No orders yet today</td></tr>`}
+        ${grand ? `<tr><td colspan="2" style="font-weight:800;color:var(--white)">Total</td><td style="font-weight:800;color:var(--green);font-size:16px">₹${grand.toFixed(0)}</td><td><span class="badge green">100%</span></td></tr>` : ''}
+      </tbody>
+    </table></div>
+  </div>`;
+}
+
+async function ownerOrders(){
+  const orders = await fetchOrders({ limit: 100 });
+  const ids = orders.flatMap(o=>[o.customer_id, o.staff_id]);
+  const nameMap = await fetchProfilesByIds(ids);
+  return `
+  <div class="search-bar"><span class="ico">🔍</span><input type="text" id="ord-search" oninput="filterOwnerOrders()" placeholder="Search orders by ID or items..."></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Order</th><th>Items</th><th>Total</th><th>Status</th><th>Customer</th><th>Staff</th><th>Time</th></tr></thead>
+    <tbody id="owner-orders-body">
+      ${orders.length ? orders.map(o=>`<tr data-search="${esc(o.order_number+' '+(o.order_items||[]).map(i=>i.name).join(' '))}">
+        <td><span style="font-family:var(--font-m);color:var(--green);font-weight:600">${o.order_number}</span></td>
+        <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${(o.order_items||[]).map(it=>`${it.quantity}× ${esc(it.name)}`).join(', ')}</td>
+        <td style="font-weight:800;color:var(--white)">₹${Number(o.total).toFixed(0)}</td>
+        <td><span class="badge ${o.status==='completed'?'green':o.status==='preparing'?'gold':'blue'}">${o.status}</span></td>
+        <td style="color:var(--muted)">${esc(nameMap[o.customer_id]||'Walk-in')}</td>
+        <td style="color:var(--muted)">${esc(nameMap[o.staff_id]||'—')}</td>
+        <td style="color:var(--muted)">${fmtTime(o.created_at)}</td>
+      </tr>`).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">No orders yet</td></tr>`}
+    </tbody>
+  </table></div>`;
+}
+function filterOwnerOrders(){
+  const q=document.getElementById('ord-search').value.toLowerCase();
+  document.querySelectorAll('#owner-orders-body tr').forEach(tr=>{
+    tr.style.display = (tr.dataset.search||'').toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+async function ownerMenu(){
+  const menu = await fetchMenu(false);
+  return `
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="btn btn-primary" onclick="addMenuItemModal()">➕ Add Item</button>
+  </div>
+  ${menu.length===0 ? `<div class="card" style="text-align:center;color:var(--muted)">No menu items yet. Add your first item, or run the seed data in supabase-schema.sql.</div>` : `
+  <div class="menu-grid">
+    ${menu.map(item=>`
+    <div class="menu-item-card">
+      <div class="mic-img">${item.emoji||'🍽️'}</div>
+      <div class="mic-body">
+        <div class="mic-name">${esc(item.name)}</div>
+        <div class="mic-cat">${item.category.charAt(0).toUpperCase()+item.category.slice(1)} · ${esc(item.description||'')}</div>
+        <div class="mic-footer">
+          <span class="mic-price">₹${Number(item.price).toFixed(0)}</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <label class="mic-toggle"><input type="checkbox" ${item.is_available?'checked':''} onchange="toggleMenuItem('${item.id}',this.checked)"><span class="toggle-track"></span></label>
+            <button class="btn btn-secondary btn-icon btn-sm" onclick="editItemModal('${item.id}')">✏️</button>
+            <button class="btn btn-danger btn-icon btn-sm" onclick="deleteMenuItemConfirm('${item.id}')">🗑️</button>
+          </div>
+        </div>
+      </div>
+    </div>`).join('')}
+  </div>`}`;
+}
+function addMenuItemModal(){
+  openModal('Add Menu Item', `
+    <div class="form-grid">
+      <div class="form-fld"><label>Item Name</label><input class="form-inp" id="mi-name" placeholder="e.g. Veg Cheese Burst Pizza"></div>
+      <div class="form-row">
+        <div class="form-fld"><label>Category</label><select class="form-inp" id="mi-cat"><option value="pizza">Pizza</option><option value="burger">Burger</option><option value="mocktail">Mocktail</option><option value="dessert">Dessert</option><option value="other">Other</option></select></div>
+        <div class="form-fld"><label>Price (₹)</label><input class="form-inp" type="number" id="mi-price" placeholder="0"></div>
+      </div>
+      <div class="form-fld"><label>Description</label><textarea class="form-inp" id="mi-desc" placeholder="Short description..."></textarea></div>
+      <div class="form-fld"><label>Emoji</label><input class="form-inp" id="mi-emoji" placeholder="🍕" maxlength="2"></div>
+      <button class="btn btn-primary" onclick="saveMenuItem()">💾 Add Item</button>
+    </div>`);
+}
+async function saveMenuItem(){
+  const name=document.getElementById('mi-name').value.trim();
+  if(!name){toast('Enter item name','error');return;}
+  const price=parseFloat(document.getElementById('mi-price').value)||0;
+  const { error } = await sb.from('menu_items').insert({
+    name, category: document.getElementById('mi-cat').value,
+    price, description: document.getElementById('mi-desc').value,
+    emoji: document.getElementById('mi-emoji').value||'🍽️',
+    is_available: true, created_by: APP.authUser.id
+  });
+  if(error){ toast(error.message,'error'); return; }
+  logAudit('create','menu_items',null,{name,price});
+  closeModal(); toast('Menu item added! 🍽️'); ownerNav('menu',null);
+}
+function editItemModal(id){
+  const item = APP.menuCache.find(m=>m.id===id); if(!item) return;
+  openModal('Edit: '+item.name, `
+    <div class="form-grid">
+      <div class="form-fld"><label>Item Name</label><input class="form-inp" id="ei-name" value="${esc(item.name)}"></div>
+      <div class="form-fld"><label>Price (₹)</label><input class="form-inp" type="number" id="ei-price" value="${item.price}"></div>
+      <div class="form-fld"><label>Description</label><textarea class="form-inp" id="ei-desc">${esc(item.description||'')}</textarea></div>
+      <button class="btn btn-primary" onclick="updateMenuItem('${id}')">💾 Save Changes</button>
+    </div>`);
+}
+async function updateMenuItem(id){
+  const { error } = await sb.from('menu_items').update({
+    name: document.getElementById('ei-name').value,
+    price: parseFloat(document.getElementById('ei-price').value)||0,
+    description: document.getElementById('ei-desc').value
+  }).eq('id', id);
+  if(error){ toast(error.message,'error'); return; }
+  logAudit('update','menu_items',id,null);
+  closeModal(); toast('Item updated!'); ownerNav('menu',null);
+}
+async function toggleMenuItem(id, checked){
+  const { error } = await sb.from('menu_items').update({ is_available: checked }).eq('id', id);
+  if(error){ toast(error.message,'error'); return; }
+  toast(checked?'Item enabled!':'Item disabled');
+}
+async function deleteMenuItemConfirm(id){
+  if(!confirm('Delete this item?')) return;
+  const { error } = await sb.from('menu_items').delete().eq('id', id);
+  if(error){ toast(error.message,'error'); return; }
+  logAudit('delete','menu_items',id,null);
+  toast('Item deleted','error'); ownerNav('menu',null);
+}
+
+async function ownerOffers(){
+  const offers = await fetchOffers(false);
+  return `
+  <div style="display:flex;gap:10px;margin-bottom:16px"><button class="btn btn-primary" onclick="addOfferModal()">➕ Create Offer</button></div>
+  ${offers.length===0 ? `<div class="card" style="text-align:center;color:var(--muted)">No offers yet.</div>` : `
+  <div style="display:grid;gap:12px">
+    ${offers.map(o=>`
+    <div class="card" style="display:flex;align-items:center;gap:14px">
+      <span style="font-size:36px">${o.emoji||'🔥'}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px">${esc(o.title)}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${esc(o.description||'')}</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px;font-weight:800;color:var(--green)">₹${Number(o.offer_price).toFixed(0)}</span>
+          <span style="font-size:12px;color:var(--muted);text-decoration:line-through">₹${Number(o.original_price).toFixed(0)}</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0">
+        <span class="badge ${o.is_active?'green':'red'}">${o.is_active?'Active':'Paused'}</span>
+        <button class="btn btn-secondary btn-sm" onclick="toggleOffer('${o.id}',${!o.is_active})">${o.is_active?'Pause':'Activate'}</button>
+      </div>
+    </div>`).join('')}
+  </div>`}`;
+}
+function addOfferModal(){
+  openModal('Create New Offer', `
+    <div class="form-grid">
+      <div class="form-fld"><label>Offer Title</label><input class="form-inp" id="of-title" placeholder="e.g. 3 Pizzas Combo"></div>
+      <div class="form-fld"><label>Description</label><input class="form-inp" id="of-desc" placeholder="Short description"></div>
+      <div class="form-row">
+        <div class="form-fld"><label>Offer Price (₹)</label><input class="form-inp" type="number" id="of-price"></div>
+        <div class="form-fld"><label>Original Price (₹)</label><input class="form-inp" type="number" id="of-original"></div>
+      </div>
+      <div class="form-fld"><label>Emoji</label><input class="form-inp" id="of-emoji" placeholder="🔥" maxlength="2"></div>
+      <button class="btn btn-primary" onclick="saveOffer()">🔥 Create Offer</button>
+    </div>`);
+}
+async function saveOffer(){
+  const title=document.getElementById('of-title').value.trim();
+  if(!title){toast('Enter offer title','error');return;}
+  const { error } = await sb.from('offers').insert({
+    title, description: document.getElementById('of-desc').value,
+    emoji: document.getElementById('of-emoji').value||'🔥',
+    offer_price: parseFloat(document.getElementById('of-price').value)||0,
+    original_price: parseFloat(document.getElementById('of-original').value)||0,
+    is_active: true, created_by: APP.authUser.id
+  });
+  if(error){ toast(error.message,'error'); return; }
+  closeModal(); toast('Offer created! 🔥'); ownerNav('offers',null);
+}
+async function toggleOffer(id, active){
+  const { error } = await sb.from('offers').update({ is_active: active }).eq('id', id);
+  if(error){ toast(error.message,'error'); return; }
+  toast(active?'Offer activated':'Offer paused'); ownerNav('offers',null);
+}
+
+async function ownerStaff(){
+  const { data: staffRows, error } = await sb.from('staff').select('*, profiles(full_name, is_active)').order('created_at',{ascending:false});
+  const { data: invites } = await sb.from('staff_invites').select('*').eq('used', false).gt('expires_at', new Date().toISOString()).order('created_at',{ascending:false});
+  const list = error ? [] : staffRows;
+  return `
+  <div style="display:flex;gap:10px;margin-bottom:16px"><button class="btn btn-primary" onclick="addStaffModal()">➕ Invite Staff Member</button></div>
+  <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
+    <div class="stat-card blue"><div class="stat-ico">👥</div><div class="stat-val">${list.length}</div><div class="stat-lbl">Total Staff</div></div>
+    <div class="stat-card green"><div class="stat-ico">✅</div><div class="stat-val">${list.filter(s=>s.profiles?.is_active).length}</div><div class="stat-lbl">Active</div></div>
+    <div class="stat-card gold"><div class="stat-ico">✉️</div><div class="stat-val">${(invites||[]).length}</div><div class="stat-lbl">Pending Invites</div></div>
+  </div>
+  ${(invites||[]).length ? `<div class="sec-hdr"><h3>Pending Invites</h3></div>${invites.map(inv=>`
+    <div class="staff-card"><div class="staff-av" style="background:var(--gold-dim);color:var(--gold)">✉️</div>
+      <div class="staff-info"><div class="staff-name">${esc(inv.full_name)}</div><div class="staff-role">${esc(inv.email)} · ${esc(inv.staff_role)}</div>
+        <div style="margin-top:4px"><span class="badge gold">Code: ${esc(inv.invite_code)}</span></div>
+      </div>
+    </div>`).join('')}` : ''}
+  <div class="sec-hdr" style="margin-top:16px"><h3>Active Staff</h3></div>
+  ${list.length ? list.map(s=>`
+  <div class="staff-card">
+    <div class="staff-av">${(s.profiles?.full_name||'S')[0].toUpperCase()}</div>
+    <div class="staff-info">
+      <div class="staff-name">${esc(s.profiles?.full_name||'Staff')}</div>
+      <div class="staff-role">${esc(s.staff_role)}</div>
+      <div style="margin-top:4px;display:flex;align-items:center;gap:8px">
+        <span class="badge ${s.profiles?.is_active?'green':'red'}">${s.profiles?.is_active?'Active':'Disabled'}</span>
+      </div>
+    </div>
+    <div class="staff-actions">
+      <button class="btn ${s.profiles?.is_active?'btn-danger':'btn-secondary'} btn-sm" onclick="toggleStaffActive('${s.id}',${!s.profiles?.is_active})">${s.profiles?.is_active?'⛔ Disable':'✅ Enable'}</button>
+    </div>
+  </div>`).join('') : `<div class="card" style="text-align:center;color:var(--muted)">No staff members yet</div>`}`;
+}
+function genInviteCode(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let c=''; for(let i=0;i<6;i++) c+=chars[Math.floor(Math.random()*chars.length)];
+  return c;
+}
+function addStaffModal(){
+  openModal('Invite Staff Member', `
+    <div class="form-grid">
+      <div class="form-fld"><label>Full Name</label><input class="form-inp" id="st-name" placeholder="Staff full name"></div>
+      <div class="form-fld"><label>Email</label><input class="form-inp" type="email" id="st-email" placeholder="staff@bulls.cafe"></div>
+      <div class="form-fld"><label>Role</label><select class="form-inp" id="st-role"><option>Head Chef</option><option>Cashier</option><option>Server</option><option>Manager</option></select></div>
+      <div style="background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);border-radius:var(--r);padding:12px;font-size:12px;color:rgba(255,255,255,0.7)">
+        📧 This generates a one-time invite code. Share it with them along with the app link — they'll enter it on the Staff → "Activate Invite" tab.
+      </div>
+      <button class="btn btn-primary" onclick="saveStaffInvite()">➕ Generate Invite</button>
+    </div>`);
+}
+async function saveStaffInvite(){
+  const name=document.getElementById('st-name').value.trim();
+  const email=document.getElementById('st-email').value.trim().toLowerCase();
+  const role=document.getElementById('st-role').value;
+  if(!name||!email){toast('Enter name and email','error');return;}
+  const code=genInviteCode();
+  const { error } = await sb.from('staff_invites').insert({ email, full_name:name, staff_role:role, invite_code:code, created_by: APP.authUser.id });
+  if(error){ toast(error.message,'error'); return; }
+  logAudit('create','staff_invites',null,{email});
+  closeModal();
+  openModal('Invite Created ✅', `
+    <div style="text-align:center;padding:10px 0">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Share this code with <strong style="color:var(--white)">${esc(name)}</strong> (${esc(email)})</div>
+      <div style="font-family:var(--font-m);font-size:32px;font-weight:800;letter-spacing:4px;color:var(--green);background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:20px">${code}</div>
+      <div style="font-size:11px;color:var(--muted2);margin-top:10px">Expires in 7 days · Tied to ${esc(email)} only</div>
+    </div>`);
+  ownerNav('staff', null);
+}
+async function toggleStaffActive(staffId, active){
+  const { error } = await sb.from('profiles').update({ is_active: active }).eq('id', staffId);
+  if(error){ toast(error.message,'error'); return; }
+  toast(active?'Staff account enabled':'Staff account disabled', active?'success':'error');
+  ownerNav('staff', null);
+}
+
+async function ownerCustomers(){
+  const { data, error } = await sb.from('customers').select('*, profiles(full_name)').order('total_spent',{ascending:false}).limit(100);
+  const list = error ? [] : data;
+  return `
+  <div class="search-bar"><span class="ico">🔍</span><input type="text" id="cust-search" oninput="filterOwnerCustomers()" placeholder="Search customers..."></div>
+  <div class="stat-card blue" style="margin-bottom:14px;display:flex;align-items:center;gap:14px">
+    <div style="font-size:32px">👥</div>
+    <div><div style="font-size:28px;font-weight:800;color:var(--white)">${list.length}</div><div style="font-size:12px;color:var(--muted)">Total Registered Customers</div></div>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>#</th><th>Name</th><th>Loyalty Pts</th><th>Orders</th><th>Total Spent</th></tr></thead>
+    <tbody id="owner-cust-body">
+      ${list.length ? list.map((c,i)=>`<tr data-search="${esc((c.profiles?.full_name||'').toLowerCase())}">
+        <td style="color:var(--muted)">${i+1}</td>
+        <td style="font-weight:600;color:var(--white)">${esc(c.profiles?.full_name||'Customer')}</td>
+        <td><span style="color:var(--gold);font-weight:700">${c.loyalty_points} pts</span></td>
+        <td>${c.total_orders}</td>
+        <td>₹${Number(c.total_spent).toFixed(0)}</td>
+      </tr>`).join('') : `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">No customers yet</td></tr>`}
+    </tbody>
+  </table></div>`;
+}
+function filterOwnerCustomers(){
+  const q=document.getElementById('cust-search').value.toLowerCase();
+  document.querySelectorAll('#owner-cust-body tr').forEach(tr=>{ tr.style.display=(tr.dataset.search||'').includes(q)?'':'none'; });
+}
+
+async function ownerReviews(){
+  const reviews = await fetchReviews(100);
+  const avg = reviews.length ? (reviews.reduce((s,r)=>s+r.rating_overall,0)/reviews.length).toFixed(1) : '—';
+  return `
+  <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
+    <div class="stat-card gold"><div class="stat-ico">⭐</div><div class="stat-val">${avg}</div><div class="stat-lbl">Avg Rating</div></div>
+    <div class="stat-card blue"><div class="stat-ico">📝</div><div class="stat-val">${reviews.length}</div><div class="stat-lbl">Total Reviews</div></div>
+    <div class="stat-card green"><div class="stat-ico">✅</div><div class="stat-val">${reviews.filter(r=>r.owner_reply).length}</div><div class="stat-lbl">Replied</div></div>
+    <div class="stat-card orange"><div class="stat-ico">⏳</div><div class="stat-val">${reviews.filter(r=>!r.owner_reply).length}</div><div class="stat-lbl">Pending Reply</div></div>
+  </div>
+  ${reviews.length ? reviews.map(r=>reviewCard(r,true)).join('') : `<div class="card" style="text-align:center;color:var(--muted)">No reviews yet</div>`}`;
+}
+
+async function ownerAudit(){
+  const { data, error } = await sb.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(40);
+  const logs = error ? [] : data;
+  const nameMap = await fetchProfilesByIds(logs.map(l=>l.user_id));
+  const actionMeta = { login:{ico:'🔑',type:'green'}, create:{ico:'➕',type:'blue'}, update:{ico:'✏️',type:'gold'}, delete:{ico:'🗑️',type:'red'}, view:{ico:'👁️',type:'blue'}, logout:{ico:'🚪',type:'red'} };
+  return `
+  <div class="card">
+    <div class="card-title">🔍 System Audit Logs</div>
+    ${logs.length ? logs.map(l=>{
+      const m = actionMeta[l.action]||{ico:'📋',type:'green'};
+      return `<div class="audit-row">
+        <div class="audit-icon ${m.type}">${m.ico}</div>
+        <div class="audit-info"><div class="audit-title">${l.action.charAt(0).toUpperCase()+l.action.slice(1)}${l.table_name?' · '+esc(l.table_name):''}</div><div class="audit-sub">${esc(nameMap[l.user_id]||'System')}</div></div>
+        <div class="audit-time">${fmtTime(l.created_at)}</div>
+      </div>`;
+    }).join('') : `<div style="text-align:center;color:var(--muted);padding:20px">No activity logged yet</div>`}
+  </div>`;
+}
+
+async function ownerSettings(){
+  return `
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">🏪 Cafe Information</div>
+    <div class="form-grid">
+      <div class="form-fld"><label>Cafe Name</label><input class="form-inp" value="Bull's &amp; Trading Cafe" disabled style="opacity:0.6"></div>
+      <div class="form-fld"><label>Address</label><input class="form-inp" value="Highway Center Building, Baburao Nagar, Shirur, MH 412210" disabled style="opacity:0.6"></div>
+      <div class="form-fld"><label>Instagram</label><input class="form-inp" value="@bulls_and_tradingcafe" disabled style="opacity:0.6"></div>
+      <p style="font-size:11px;color:var(--muted)">Editable cafe settings need a small <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">cafe_settings</code> table — say the word and I'll add it.</p>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">🔑 Supabase Connection</div>
+    <div style="background:var(--bg3);border:1px solid rgba(34,197,94,0.15);border-radius:var(--r);padding:14px;font-family:var(--font-m);font-size:12px;color:var(--green)">✅ Connected — all data on this page is live from your Supabase project.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">⚠️ Account</div>
+    <button class="btn btn-danger" onclick="forgotPassword('ol-email')" style="opacity:0.5" disabled>Use the Owner login page's "Forgot password" link to reset your password.</button>
+  </div>`;
+}
+
+function reviewCard(r, showReply=false){
+  const initials = (r.customer_name || 'C')[0];
+  return `
+  <div class="review-card">
+    <div class="rev-hdr">
+      <div class="rev-user"><div class="rev-av">${initials}</div><div><div class="rev-name">Customer</div><div class="rev-date">${fmtDate(r.created_at)}</div></div></div>
+      <div class="rev-stars">${'★'.repeat(r.rating_overall)}${'☆'.repeat(5-r.rating_overall)}</div>
+    </div>
+    <div class="rev-cats">
+      <span class="rev-cat"><span class="star">★</span>Food: ${r.rating_food}/5</span>
+      <span class="rev-cat"><span class="star">★</span>Service: ${r.rating_service}/5</span>
+      <span class="rev-cat"><span class="star">★</span>Ambience: ${r.rating_ambience}/5</span>
+      <span class="rev-cat"><span class="star">★</span>Cleanliness: ${r.rating_cleanliness}/5</span>
+    </div>
+    <div class="rev-text">${esc(r.review_text||'')}</div>
+    ${r.owner_reply ? `<div style="background:var(--bg3);border-radius:8px;padding:10px;margin-top:8px;font-size:12px;color:var(--text)"><strong style="color:var(--green)">Owner reply:</strong> ${esc(r.owner_reply)}</div>` : ''}
+    ${showReply ? `<button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="replyModal('${r.id}')">${r.owner_reply?'✏️ Edit Reply':'💬 Reply'}</button>` : ''}
+  </div>`;
+}
+function replyModal(reviewId){
+  openModal('Reply to Review', `
+    <div class="form-grid">
+      <div class="form-fld"><label>Your Reply</label><textarea class="form-inp" id="reply-text" style="min-height:120px" placeholder="Thank you for your kind words!..."></textarea></div>
+      <button class="btn btn-primary" onclick="sendReply('${reviewId}')">📤 Send Reply</button>
+    </div>`);
+}
+async function sendReply(reviewId){
+  const text=document.getElementById('reply-text').value.trim();
+  if(!text){toast('Write a reply first','error');return;}
+  const { error } = await sb.from('reviews').update({ owner_reply:text, reply_at:new Date().toISOString() }).eq('id', reviewId);
+  if(error){ toast(error.message,'error'); return; }
+  closeModal(); toast('Reply sent! ✅'); ownerNav('reviews',null);
+}
+
+function viewReceipt(orderNumber, itemsText, total){
+  openModal('Receipt — '+orderNumber, `
+    <div class="receipt">
+      <div class="receipt-hdr"><h4>🐂 Bull's &amp; Trading Cafe</h4><p>Highway Center Building, Shirur, MH 412210</p><p style="margin-top:4px;font-size:10px">Order: ${esc(orderNumber)} · ${new Date().toLocaleString('en-IN')}</p></div>
+      ${itemsText.split(',').map(i=>`<div class="receipt-row"><span>${esc(i.trim())}</span></div>`).join('')}
+      <div class="receipt-total"><span>TOTAL</span><span>₹${Number(total).toFixed(0)}</span></div>
+      <div class="receipt-footer"><p>Thank you for visiting!</p><p>Trade Smart. Eat Better. 🐂</p><p style="margin-top:6px">Instagram: @bulls_and_tradingcafe</p></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px"><button class="btn btn-primary" style="flex:1" onclick="window.print()">🖨️ Print</button><button class="btn btn-secondary" style="flex:1" onclick="closeModal()">Close</button></div>`);
+}
+
+function initCharts(){
+  document.querySelectorAll('.cbar').forEach((bar,i)=>{ const h=bar.style.height; bar.style.height='0'; setTimeout(()=>bar.style.height=h, i*60+150); });
+  document.querySelectorAll('.prog-fill').forEach((bar,i)=>{ const w=bar.style.width; bar.style.width='0'; setTimeout(()=>bar.style.width=w, i*100+300); });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STAFF NAVIGATION
+═══════════════════════════════════════════════════════════════ */
+async function staffNav(view, el){
+  if(el){ document.querySelectorAll('#staff-sidebar .sb-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); }
+  const titles={'new-order':'New Order','orders':'Order History','daily':'Daily Summary','menu-view':'Menu'};
+  document.getElementById('staff-page-title').textContent = titles[view]||view;
+  const c=document.getElementById('staff-content');
+  c.innerHTML = loadingHTML();
+  closeSidebar('staff');
+  const views={'new-order':staffNewOrder,'orders':staffOrders,'daily':staffDaily,'menu-view':staffMenuView};
+  try{ c.innerHTML = await views[view](); if(view==='new-order') updateCartDisplay(); }
+  catch(e){ c.innerHTML = `<div class="card">Failed to load: ${esc(e.message)}</div>`; }
+}
+
+async function staffNewOrder(){
+  APP.cart = {};
+  const menu = await fetchMenu(true);
+  return `
+  <div style="margin-bottom:14px">
+    <div style="font-family:var(--font-m);font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em">New Order</div>
+    <div style="font-size:14px;color:var(--text)">Select items and quantities below</div>
+  </div>
+  ${menu.length===0 ? `<div class="card" style="text-align:center;color:var(--muted)">No available menu items. Ask the Owner to add some.</div>` : `
+  <div class="ob-grid" id="order-builder">
+    ${menu.map(item=>`
+    <div class="ob-item">
+      <span class="ob-emoji">${item.emoji||'🍽️'}</span>
+      <div class="ob-info"><div class="ob-name">${esc(item.name)}</div><div class="ob-price">₹${Number(item.price).toFixed(0)}</div></div>
+      <div class="ob-qty">
+        <button class="qty-btn" onclick="updateCart('${item.id}',-1)">−</button>
+        <span class="qty-num" id="qty-${item.id}">0</span>
+        <button class="qty-btn" onclick="updateCart('${item.id}',1)">+</button>
+      </div>
+    </div>`).join('')}
+  </div>
+  <div style="margin-top:16px" class="ob-total-box">
+    <div><div class="ob-total-lbl">Order Total</div><div style="font-size:12px;color:var(--muted);margin-top:2px" id="cart-summary">No items selected</div></div>
+    <div class="ob-total-val" id="cart-total">₹0</div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:14px">
+    <button class="btn btn-secondary" style="flex:1" onclick="clearCart()">🗑️ Clear</button>
+    <button class="btn btn-primary" style="flex:1" onclick="placeOrder()">✅ Place Order</button>
+  </div>`}`;
+}
+function updateCart(id, delta){
+  APP.cart[id] = Math.max(0, (APP.cart[id]||0)+delta);
+  if(APP.cart[id]===0) delete APP.cart[id];
+  const el=document.getElementById('qty-'+id); if(el) el.textContent = APP.cart[id]||0;
+  updateCartDisplay();
+}
+function updateCartDisplay(){
+  const total = Object.entries(APP.cart).reduce((s,[id,qty])=>{ const item=APP.menuCache.find(m=>m.id===id); return item?s+item.price*qty:s; },0);
+  const summary = Object.entries(APP.cart).map(([id,qty])=>{ const item=APP.menuCache.find(m=>m.id===id); return item?`${qty}× ${item.name}`:''; }).filter(Boolean).join(', ');
+  const totalEl=document.getElementById('cart-total'); const sumEl=document.getElementById('cart-summary');
+  if(totalEl) totalEl.textContent='₹'+total.toFixed(0);
+  if(sumEl) sumEl.textContent = summary || 'No items selected';
+}
+function clearCart(){ APP.cart={}; document.querySelectorAll('.qty-num').forEach(el=>el.textContent='0'); updateCartDisplay(); }
+
+async function placeOrder(){
+  const entries = Object.entries(APP.cart);
+  if(!entries.length){ toast('Add items to the order first','error'); return; }
+  const items = entries.map(([id,qty])=>{ const m=APP.menuCache.find(x=>x.id===id); return { menu_item_id:id, name:m.name, price:m.price, quantity:qty }; });
+  const total = items.reduce((s,it)=>s+it.price*it.quantity,0);
+
+  const { data: orderRow, error: orderErr } = await sb.from('orders').insert({
+    staff_id: APP.authUser.id, status:'pending', subtotal: total, total: total
+  }).select().single();
+  if(orderErr){ toast(orderErr.message,'error'); return; }
+
+  const { error: itemsErr } = await sb.from('order_items').insert(items.map(it=>({ ...it, order_id: orderRow.id })));
+  if(itemsErr){ toast(itemsErr.message,'error'); return; }
+
+  await sb.from('orders').update({ status:'completed' }).eq('id', orderRow.id);
+  logAudit('create','orders',orderRow.id,{total});
+
+  const summary = items.map(it=>`${it.quantity}× ${it.name}`).join(', ');
+  toast(`Order placed! ${orderRow.order_number} · ₹${total.toFixed(0)}`);
+  setTimeout(()=>viewReceipt(orderRow.order_number, summary, total), 400);
+  clearCart();
+  staffNav('new-order', document.querySelector('#staff-sidebar .sb-item'));
+}
+
+async function staffOrders(){
+  const orders = await fetchOrders({ limit: 50 });
+  return `
+  <div class="search-bar"><span class="ico">🔍</span><input type="text" placeholder="Search by order ID..." oninput="filterStaffOrders(this.value)"></div>
+  <div id="staff-orders-list">
+  ${orders.length ? orders.map(o=>`
+  <div class="order-card" data-search="${esc(o.order_number.toLowerCase())}">
+    <div class="order-hdr"><span class="order-num">${o.order_number}</span><span class="badge ${o.status==='completed'?'green':o.status==='preparing'?'gold':'blue'}">${o.status}</span></div>
+    <div class="order-items">${(o.order_items||[]).map(it=>`${it.quantity}× ${esc(it.name)}`).join(', ')}</div>
+    <div class="order-footer">
+      <div class="order-total">₹${Number(o.total).toFixed(0)}</div>
+      <div style="display:flex;gap:8px"><span class="order-time">${fmtTime(o.created_at)}</span>
+        <button class="btn btn-secondary btn-sm" onclick="viewReceipt('${o.order_number}','${(o.order_items||[]).map(it=>it.quantity+'x '+it.name).join(',').replace(/'/g,"")}',${o.total})">🧾 Receipt</button></div>
+    </div>
+  </div>`).join('') : `<div class="card" style="text-align:center;color:var(--muted)">No orders yet</div>`}
+  </div>`;
+}
+function filterStaffOrders(q){
+  q=q.toLowerCase();
+  document.querySelectorAll('#staff-orders-list .order-card').forEach(c=>{ c.style.display=(c.dataset.search||'').includes(q)?'':'none'; });
+}
+
+async function staffDaily(){
+  const orders = await fetchOrders({ sinceISO: todayStartISO(), limit: 500 });
+  const total = orders.reduce((s,o)=>s+Number(o.total),0);
+  const completed = orders.filter(o=>o.status==='completed').length;
+  const catTotals={};
+  orders.forEach(o=>(o.order_items||[]).forEach(it=>{
+    const menu=APP.menuCache.find(m=>m.id===it.menu_item_id);
+    const cat=menu?.category||'other';
+    catTotals[cat]=(catTotals[cat]||0)+Number(it.subtotal||it.price*it.quantity);
+  }));
+  const catTotal=Object.values(catTotals).reduce((a,b)=>a+b,0)||1;
+  const catIcons={pizza:'🍕',burger:'🍔',mocktail:'🍹',dessert:'🍫',other:'🍽️'};
+  const catColors={pizza:'green',burger:'gold',mocktail:'blue',dessert:'orange',other:'red'};
+  return `
+  <div class="stats-grid">
+    <div class="stat-card green"><div class="stat-ico">💰</div><div class="stat-val">₹${total.toFixed(0)}</div><div class="stat-lbl">Today's Revenue</div></div>
+    <div class="stat-card gold"><div class="stat-ico">📦</div><div class="stat-val">${orders.length}</div><div class="stat-lbl">Orders Today</div></div>
+    <div class="stat-card blue"><div class="stat-ico">📊</div><div class="stat-val">₹${orders.length?Math.round(total/orders.length):0}</div><div class="stat-lbl">Avg Order Value</div></div>
+    <div class="stat-card orange"><div class="stat-ico">✅</div><div class="stat-val">${completed}</div><div class="stat-lbl">Completed</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📅 Daily Summary — ${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</div>
+    ${Object.keys(catTotals).length ? Object.entries(catTotals).map(([cat,val])=>`
+      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">${catIcons[cat]||'🍽️'} ${cat.charAt(0).toUpperCase()+cat.slice(1)}</span><span class="prog-val">₹${val.toFixed(0)}</span></div><div class="prog-bar"><div class="prog-fill ${catColors[cat]||'green'}" style="width:${Math.round(val/catTotal*100)}%"></div></div></div>
+    `).join('') : `<div style="color:var(--muted);font-size:13px">No orders yet today</div>`}
+  </div>`;
+}
+
+async function staffMenuView(){
+  const menu = await fetchMenu(true);
+  return `<div class="menu-grid">${menu.map(item=>`
+    <div class="menu-item-card">
+      <div class="mic-img">${item.emoji||'🍽️'}</div>
+      <div class="mic-body"><div class="mic-name">${esc(item.name)}</div><div class="mic-cat">${esc(item.description||'')}</div>
+        <div class="mic-footer"><span class="mic-price">₹${Number(item.price).toFixed(0)}</span><span class="badge green">Available</span></div>
+      </div>
+    </div>`).join('') || `<div class="card" style="text-align:center;color:var(--muted)">No menu items yet</div>`}</div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CUSTOMER NAVIGATION
+═══════════════════════════════════════════════════════════════ */
+async function customerNav(view, el){
+  if(el){ document.querySelectorAll('#customer-sidebar .sb-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); }
+  const titles={home:'Home',menu:'Our Menu',offers:"Today's Offers",profile:'My Profile',orders:'My Orders',reviews:'My Reviews',loyalty:'Loyalty Points',visit:'Visit Us'};
+  document.getElementById('customer-page-title').textContent = titles[view]||view;
+  const c=document.getElementById('customer-content');
+  c.innerHTML = loadingHTML();
+  closeSidebar('customer');
+  const views={home:customerHome,menu:customerMenu,offers:customerOffers,profile:customerProfile,orders:customerOrders,reviews:customerReviews,loyalty:customerLoyalty,visit:customerVisit};
+  try{ c.innerHTML = await views[view](); }
+  catch(e){ c.innerHTML = `<div class="card">Failed to load: ${esc(e.message)}</div>`; }
+}
+
+async function customerHome(){
+  const [offers] = await Promise.all([ fetchOffers(true) ]);
+  const { data: cust } = await sb.from('customers').select('loyalty_points').eq('id', APP.authUser.id).single();
+  APP.extra = cust;
+  return `
+  <div style="background:linear-gradient(135deg,var(--card2),var(--card3));border:1px solid rgba(34,197,94,0.15);border-radius:var(--rl);padding:20px;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="width:52px;height:52px;border-radius:50%;background:var(--green-dim);border:2px solid rgba(34,197,94,0.3);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--green)">${(APP.profile.full_name||'C')[0]}</div>
+      <div><div style="font-size:18px;font-weight:800;color:var(--white)">Hey, ${esc(APP.profile.full_name.split(' ')[0])}! 👋</div><div style="font-size:13px;color:var(--muted)">Welcome back to Bull's &amp; Trading Cafe</div></div>
+    </div>
+    <div style="margin-top:16px;background:var(--bg3);border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:space-between">
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Loyalty Points</div><div style="font-size:24px;font-weight:800;color:var(--gold)">${cust?.loyalty_points ?? 0} pts</div></div>
+      <button class="btn btn-gold btn-sm" onclick="customerNav('loyalty',null)">View Rewards →</button>
+    </div>
+  </div>
+  <div class="sec-hdr"><h3>🔥 Today's Offers</h3><span class="see-all" onclick="customerNav('offers',null)">See all →</span></div>
+  <div style="display:grid;gap:10px;margin-bottom:16px">
+    ${offers.length ? offers.slice(0,3).map(o=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;align-items:center;gap:12px">
+      <span style="font-size:28px">${o.emoji||'🔥'}</span>
+      <div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--white)">${esc(o.title)}</div><div style="font-size:11px;color:var(--muted)">${esc(o.description||'')}</div></div>
+      <div style="text-align:right"><div style="font-size:18px;font-weight:800;color:var(--green)">₹${Number(o.offer_price).toFixed(0)}</div><div style="font-size:10px;color:var(--muted);text-decoration:line-through">₹${Number(o.original_price).toFixed(0)}</div></div>
+    </div>`).join('') : `<div style="color:var(--muted);font-size:13px">No active offers right now</div>`}
+  </div>
+  <div class="sec-hdr"><h3>📍 Cafe Info</h3></div>
+  <div class="card">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;gap:10px;align-items:flex-start"><span>📍</span><div><div style="font-size:13px;font-weight:600;color:var(--white)">Highway Center Building</div><div style="font-size:12px;color:var(--muted)">Baburao Nagar, Shirur, MH 412210</div></div></div>
+      <div style="display:flex;gap:10px;align-items:flex-start"><span>⏰</span><div><div style="font-size:13px;font-weight:600;color:var(--white)">Mon–Fri: 9 AM – 11 PM</div><div style="font-size:12px;color:var(--muted)">Sat–Sun: 8 AM – 11:30 PM</div></div></div>
+      <a href="https://www.instagram.com/bulls_and_tradingcafe?igsh=MTkyczd3dDc4NXlkbw==" target="_blank" style="display:flex;gap:10px;align-items:center;color:var(--text)"><span>📷</span><div style="font-size:13px;font-weight:600;color:var(--green)">@bulls_and_tradingcafe on Instagram →</div></a>
+    </div>
+  </div>`;
+}
+
+async function customerMenu(){
+  const menu = await fetchMenu(true);
+  return `
+  <div class="tabs">
+    <button class="tab active" onclick="filterCustMenu('all',this)">All</button>
+    <button class="tab" onclick="filterCustMenu('pizza',this)">🍕</button>
+    <button class="tab" onclick="filterCustMenu('burger',this)">🍔</button>
+    <button class="tab" onclick="filterCustMenu('mocktail',this)">🍹</button>
+    <button class="tab" onclick="filterCustMenu('dessert',this)">🍫</button>
+  </div>
+  <div class="menu-grid" id="cust-menu-grid">${menuCardsHTML(menu)}</div>`;
+}
+function menuCardsHTML(items){
+  if(!items.length) return `<div class="card" style="text-align:center;color:var(--muted)">No menu items available yet</div>`;
+  return items.map(m=>`
+    <div class="menu-item-card">
+      <div class="mic-img">${m.emoji||'🍽️'}</div>
+      <div class="mic-body"><div class="mic-name">${esc(m.name)}</div><div class="mic-cat">${esc(m.description||'')}</div>
+        <div class="mic-footer"><span class="mic-price">₹${Number(m.price).toFixed(0)}</span><span class="badge green">Available</span></div>
+      </div>
+    </div>`).join('');
+}
+function filterCustMenu(cat, btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); btn.classList.add('active');
+  const items = cat==='all' ? APP.menuCache.filter(m=>m.is_available) : APP.menuCache.filter(m=>m.is_available&&m.category===cat);
+  document.getElementById('cust-menu-grid').innerHTML = menuCardsHTML(items);
+}
+
+async function customerOffers(){
+  const offers = await fetchOffers(true);
+  return `<div style="display:grid;gap:12px">${offers.length ? offers.map(o=>`
+    <div class="card" style="position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--green),rgba(34,197,94,0.3))"></div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <span style="font-size:40px">${o.emoji||'🔥'}</span>
+        <div style="flex:1"><div style="font-size:16px;font-weight:800;color:var(--white);margin-bottom:4px">${esc(o.title)}</div><div style="font-size:13px;color:var(--muted);margin-bottom:10px">${esc(o.description||'')}</div>
+          <div style="display:flex;align-items:center;gap:12px"><span style="font-size:24px;font-weight:800;color:var(--green)">₹${Number(o.offer_price).toFixed(0)}</span><span style="font-size:13px;color:var(--muted);text-decoration:line-through">₹${Number(o.original_price).toFixed(0)}</span></div>
+        </div>
+      </div>
+    </div>`).join('') : `<div class="card" style="text-align:center;color:var(--muted)">No active offers right now</div>`}</div>`;
+}
+
+async function customerProfile(){
+  const { data: cust } = await sb.from('customers').select('*').eq('id', APP.authUser.id).single();
+  const { count: revCount } = await sb.from('reviews').select('id',{count:'exact',head:true}).eq('customer_id', APP.authUser.id);
+  return `
+  <div class="card" style="margin-bottom:14px;text-align:center;padding:28px 20px">
+    <div style="width:72px;height:72px;border-radius:50%;background:var(--green-dim);border:3px solid rgba(34,197,94,0.3);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:var(--green);margin:0 auto 14px">${(APP.profile.full_name||'C')[0]}</div>
+    <div style="font-size:20px;font-weight:800;color:var(--white);margin-bottom:4px">${esc(APP.profile.full_name)}</div>
+    <div style="font-size:13px;color:var(--muted)">${esc(APP.authUser.email)}</div>
+    <div style="margin-top:14px;display:flex;gap:16px;justify-content:center">
+      <div><div style="font-size:20px;font-weight:800;color:var(--gold)">${cust?.loyalty_points ?? 0}</div><div style="font-size:11px;color:var(--muted)">Points</div></div>
+      <div><div style="font-size:20px;font-weight:800;color:var(--green)">${revCount||0}</div><div style="font-size:11px;color:var(--muted)">Reviews</div></div>
+      <div><div style="font-size:20px;font-weight:800;color:var(--blue)">${fmtDate(cust?.created_at||APP.authUser.created_at)}</div><div style="font-size:11px;color:var(--muted)">Joined</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">✏️ Edit Profile</div>
+    <div class="form-grid">
+      <div class="form-fld"><label>Full Name</label><input class="form-inp" id="pr-name" value="${esc(APP.profile.full_name)}"></div>
+      <div class="form-fld"><label>Email</label><input class="form-inp" value="${esc(APP.authUser.email)}" disabled style="opacity:0.5"></div>
+      <div class="form-fld"><label>Phone</label><input class="form-inp" id="pr-phone" value="${esc(APP.profile.phone||'')}"></div>
+      <div class="form-fld"><label>Birthday 🎂</label><input class="form-inp" type="date" id="pr-birthday" value="${cust?.birthday||''}"></div>
+      <button class="btn btn-primary" onclick="updateProfile()">💾 Save Profile</button>
+    </div>
+  </div>`;
+}
+async function updateProfile(){
+  const name=document.getElementById('pr-name').value.trim()||APP.profile.full_name;
+  const phone=document.getElementById('pr-phone').value.trim();
+  const birthday=document.getElementById('pr-birthday').value || null;
+  const { error:e1 } = await sb.from('profiles').update({ full_name:name, phone }).eq('id', APP.authUser.id);
+  const { error:e2 } = await sb.from('customers').update({ birthday }).eq('id', APP.authUser.id);
+  if(e1||e2){ toast((e1||e2).message,'error'); return; }
+  APP.profile.full_name = name;
+  document.getElementById('cust-name-display').textContent = name;
+  toast('Profile updated! ✅');
+}
+
+async function customerOrders(){
+  const orders = await fetchOrders({ mine:true, limit: 30 });
+  if(!orders.length) return `<div style="text-align:center;padding:48px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:16px">📦</div><div style="font-size:16px;font-weight:600">No orders yet</div><div style="font-size:13px;margin-top:8px">Your order history will appear here</div></div>`;
+  return orders.map(o=>`
+  <div class="order-card">
+    <div class="order-hdr"><span class="order-num">${o.order_number}</span><span class="badge ${o.status==='completed'?'green':'blue'}">${o.status}</span></div>
+    <div class="order-items">${(o.order_items||[]).map(it=>`${it.quantity}× ${esc(it.name)}`).join(', ')}</div>
+    <div class="order-footer"><div class="order-total">₹${Number(o.total).toFixed(0)}</div><button class="btn btn-secondary btn-sm" onclick="viewReceipt('${o.order_number}','${(o.order_items||[]).map(it=>it.quantity+'x '+it.name).join(',').replace(/'/g,"")}',${o.total})">🧾 Receipt</button></div>
+  </div>`).join('');
+}
+
+async function customerReviews(){
+  const { data: mine } = await sb.from('reviews').select('*').eq('customer_id', APP.authUser.id).order('created_at',{ascending:false});
+  return `
+  <div style="margin-bottom:16px"><button class="btn btn-primary" onclick="writeReviewModal()">✍️ Write a Review</button></div>
+  ${(mine&&mine.length) ? mine.map(r=>reviewCard(r)).join('') : `<div style="text-align:center;padding:40px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:16px">⭐</div><div>No reviews yet. Share your experience!</div></div>`}`;
+}
+function writeReviewModal(){
+  openModal('Write a Review', `
+    <div style="text-align:center;margin-bottom:16px"><div style="font-size:13px;color:var(--muted)">How was your experience at Bull's &amp; Trading Cafe?</div></div>
+    <div class="form-grid">
+      <div class="form-fld"><label>Overall Rating</label>
+        <div class="rating-input" id="overall-rating">
+          <input type="radio" name="overall" id="s5" value="5" checked><label for="s5">★</label>
+          <input type="radio" name="overall" id="s4" value="4"><label for="s4">★</label>
+          <input type="radio" name="overall" id="s3" value="3"><label for="s3">★</label>
+          <input type="radio" name="overall" id="s2" value="2"><label for="s2">★</label>
+          <input type="radio" name="overall" id="s1" value="1"><label for="s1">★</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-fld"><label>Food (1-5)</label><input class="form-inp" type="number" id="rv-food" min="1" max="5" value="5"></div>
+        <div class="form-fld"><label>Service (1-5)</label><input class="form-inp" type="number" id="rv-service" min="1" max="5" value="5"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-fld"><label>Ambience (1-5)</label><input class="form-inp" type="number" id="rv-ambience" min="1" max="5" value="5"></div>
+        <div class="form-fld"><label>Cleanliness (1-5)</label><input class="form-inp" type="number" id="rv-clean" min="1" max="5" value="5"></div>
+      </div>
+      <div class="form-fld"><label>Your Review</label><textarea class="form-inp" id="rv-text" style="min-height:100px" placeholder="Tell us about your visit..."></textarea></div>
+      <button class="btn btn-primary" onclick="submitReview()">⭐ Submit Review (+20 points)</button>
+    </div>`);
+}
+async function submitReview(){
+  const text=document.getElementById('rv-text').value.trim();
+  if(!text){toast('Please write your review','error');return;}
+  const rating=parseInt(document.querySelector('input[name="overall"]:checked')?.value||5);
+  const { error } = await sb.from('reviews').insert({
+    customer_id: APP.authUser.id, rating_overall: rating,
+    rating_food: parseInt(document.getElementById('rv-food').value)||5,
+    rating_service: parseInt(document.getElementById('rv-service').value)||5,
+    rating_ambience: parseInt(document.getElementById('rv-ambience').value)||5,
+    rating_cleanliness: parseInt(document.getElementById('rv-clean').value)||5,
+    review_text: text
+  });
+  if(error){ toast(error.message,'error'); return; }
+  closeModal(); toast('Review submitted! +20 loyalty points ⭐'); customerNav('reviews', null);
+}
+
+async function customerLoyalty(){
+  const { data: cust } = await sb.from('customers').select('*').eq('id', APP.authUser.id).single();
+  const pts = cust?.loyalty_points ?? 0;
+  const nextReward=200; const progress=Math.min(pts/nextReward*100,100);
+  return `
+  <div class="loyalty-card">
+    <div style="font-size:11px;color:rgba(245,158,11,0.7);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px;font-weight:700">Loyalty Points</div>
+    <div class="loyalty-pts">${pts}</div>
+    <div class="loyalty-sub">Points Balance · Earn more with every review!</div>
+    <div class="loyalty-bar-wrap" style="margin-top:16px"><div class="loyalty-bar" style="width:${progress}%"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px"><span style="font-size:11px;color:var(--muted)">${pts} pts</span><span style="font-size:11px;color:var(--muted)">${nextReward} pts = Free Item 🎁</span></div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">🎁 How to Earn Points</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:10px;padding:12px"><span style="font-size:22px">⭐</span><div><div style="font-size:13px;font-weight:600;color:var(--white)">Write a Review</div><div style="font-size:12px;color:var(--muted)">+20 points per review</div></div></div>
+      <div style="display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:10px;padding:12px"><span style="font-size:22px">🎂</span><div><div style="font-size:13px;font-weight:600;color:var(--white)">Birthday Registered</div><div style="font-size:12px;color:var(--muted)">Add it in My Profile</div></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🏆 Rewards Catalogue</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:10px;padding:12px"><div><div style="font-size:13px;font-weight:600;color:var(--white)">Free Choco Lava Cake</div><div style="font-size:12px;color:var(--muted)">200 points</div></div><button class="btn btn-gold btn-sm" ${pts>=200?'':'disabled'} onclick="redeemPoints(200,'Choco Lava Cake')">Redeem</button></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:10px;padding:12px"><div><div style="font-size:13px;font-weight:600;color:var(--white)">Free Mocktail</div><div style="font-size:12px;color:var(--muted)">300 points</div></div><button class="btn btn-gold btn-sm" ${pts>=300?'':'disabled'} onclick="redeemPoints(300,'Mocktail')">Redeem</button></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:10px;padding:12px"><div><div style="font-size:13px;font-weight:600;color:var(--white)">Free Burger</div><div style="font-size:12px;color:var(--muted)">500 points</div></div><button class="btn btn-gold btn-sm" ${pts>=500?'':'disabled'} onclick="redeemPoints(500,'Burger')">Redeem</button></div>
+    </div>
+  </div>`;
+}
+async function redeemPoints(pts, item){
+  const { data: cust } = await sb.from('customers').select('loyalty_points').eq('id', APP.authUser.id).single();
+  if(!cust || cust.loyalty_points<pts){ toast('Not enough points','error'); return; }
+  const { error:e1 } = await sb.from('customers').update({ loyalty_points: cust.loyalty_points-pts }).eq('id', APP.authUser.id);
+  const { error:e2 } = await sb.from('loyalty_transactions').insert({ customer_id: APP.authUser.id, points: -pts, reason: 'redemption: '+item });
+  if(e1||e2){ toast((e1||e2).message,'error'); return; }
+  toast(`🎁 Redeemed! Free ${item} coupon generated. Show this to staff!`);
+  setTimeout(()=>customerNav('loyalty',null), 400);
+}
+
+async function customerVisit(){
+  return `
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">📍 Our Location</div>
+    <div style="background:var(--bg3);border-radius:var(--r);padding:16px;margin-bottom:14px">
+      <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:6px">Bull's &amp; Trading Cafe</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.8">Highway Center Building<br>Baburao Nagar, Shirur<br>Maharashtra 412210</div>
+    </div>
+    <a href="https://maps.google.com/?q=Shirur,Maharashtra+412210" target="_blank" class="btn btn-primary" style="width:100%;justify-content:center;display:flex">📍 Open in Google Maps</a>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">⏰ Opening Hours</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center"><div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700">MON – FRI</div><div style="font-size:14px;font-weight:700;color:var(--white)">9 AM – 11 PM</div></div>
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center"><div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700">SAT – SUN</div><div style="font-size:14px;font-weight:700;color:var(--white)">8 AM – 11:30 PM</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📷 Follow Us</div>
+    <a href="https://www.instagram.com/bulls_and_tradingcafe?igsh=MTkyczd3dDc4NXlkbw==" target="_blank" class="btn" style="width:100%;justify-content:center;display:flex;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#bc1888);color:white">📷 @bulls_and_tradingcafe on Instagram</a>
+  </div>`;
+}
+
+/* Close notif panel when clicking outside */
+document.addEventListener('click', function(e){
+  document.querySelectorAll('.notif-panel.show').forEach(p=>{ if(!p.parentElement.contains(e.target)) p.classList.remove('show'); });
+});
+</script>
+</body>
+</html>
