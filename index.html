@@ -414,21 +414,29 @@ textarea.form-inp{resize:vertical;min-height:80px}
 <div class="toast" id="toast"></div>
 
 <!-- ═══════════════════════════════════════
+   FULL-SCREEN LOADER (session check)
+═══════════════════════════════════════ -->
+<div id="boot-loader" style="position:fixed;inset:0;background:var(--bg);z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px">
+  <div style="font-size:44px;animation:pulse 1.4s ease infinite">🐂</div>
+  <div style="font-size:13px;color:var(--muted)">Loading Bull's &amp; Trading Cafe…</div>
+</div>
+
+<!-- ═══════════════════════════════════════
    PAGE: WELCOME
 ═══════════════════════════════════════ -->
-<div class="page active" id="page-welcome">
+<div class="page" id="page-welcome">
   <div class="welcome-screen">
     <div class="welcome-inner">
       <div class="welcome-logo">🐂</div>
       <h1 class="welcome-title">Bull's &amp; Trading Cafe</h1>
-      <p class="welcome-sub">Management System — Select your role to continue. All data is stored locally for this demo. Connect Supabase for production use.</p>
+      <p class="welcome-sub">Management System — Select your role to continue. Every account is real: data is created, stored and read from Supabase.</p>
       <div class="welcome-actions">
-        <div class="welcome-btn" onclick="loginAs('owner')">
+        <div class="welcome-btn" onclick="showPage('page-auth-owner')">
           <div class="wico" style="background:var(--gold-dim)">👑</div>
           <div class="wtext"><div class="wt">Owner / Admin</div><div class="ws">Full access · Analytics · Reports</div></div>
           <div class="warrow">→</div>
         </div>
-        <div class="welcome-btn" onclick="loginAs('staff')">
+        <div class="welcome-btn" onclick="showPage('page-auth-staff')">
           <div class="wico" style="background:var(--blue-dim)">👨‍🍳</div>
           <div class="wtext"><div class="wt">Staff</div><div class="ws">Orders · Billing · Daily summary</div></div>
           <div class="warrow">→</div>
@@ -455,26 +463,92 @@ textarea.form-inp{resize:vertical;min-height:80px}
         <p>Customer Portal · Trade Smart. Eat Better.</p>
       </div>
       <div class="auth-tabs">
-        <button class="auth-tab active" onclick="switchAuthTab('signup')">Sign Up</button>
-        <button class="auth-tab" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab active" onclick="switchAuthTab('customer','signup')">Sign Up</button>
+        <button class="auth-tab" onclick="switchAuthTab('customer','login')">Sign In</button>
       </div>
-      <div id="auth-msg" class="msg"></div>
-      <div id="auth-signup">
+      <div id="customer-auth-msg" class="msg"></div>
+      <div id="customer-auth-signup">
         <div class="fld"><label>Full Name</label><input class="inp" type="text" id="c-name" placeholder="Your full name"></div>
         <div class="fld"><label>Email Address</label><input class="inp" type="email" id="c-email" placeholder="your@email.com"></div>
         <div class="fld"><label>Phone Number</label><input class="inp" type="tel" id="c-phone" placeholder="+91 98765 43210"></div>
-        <div class="fld"><label>Password</label><input class="inp" type="password" id="c-pass" placeholder="Create password"></div>
-        <button class="btn-auth" onclick="customerSignup()">🎉 Create Account</button>
-        <div class="auth-link">Already have an account? <a onclick="switchAuthTab('login')">Sign In</a></div>
+        <div class="fld"><label>Password</label><input class="inp" type="password" id="c-pass" placeholder="Create password (min 6 chars)"></div>
+        <button class="btn-auth" id="c-signup-btn" onclick="customerSignup()">🎉 Create Account</button>
+        <div class="auth-link">Already have an account? <a onclick="switchAuthTab('customer','login')">Sign In</a></div>
       </div>
-      <div id="auth-login" style="display:none">
+      <div id="customer-auth-login" style="display:none">
         <div class="fld"><label>Email Address</label><input class="inp" type="email" id="cl-email" placeholder="your@email.com"></div>
         <div class="fld"><label>Password</label><input class="inp" type="password" id="cl-pass" placeholder="Your password"></div>
-        <button class="btn-auth" onclick="customerLogin()">🚀 Sign In</button>
-        <div class="auth-link">No account? <a onclick="switchAuthTab('signup')">Sign Up Free</a></div>
+        <button class="btn-auth" id="c-login-btn" onclick="customerLogin()">🚀 Sign In</button>
+        <div class="auth-link">No account? <a onclick="switchAuthTab('customer','signup')">Sign Up Free</a></div>
+        <div class="auth-link"><a onclick="forgotPassword('cl-email')">Forgot password?</a></div>
         <div class="auth-divider"><span>or</span></div>
         <div style="text-align:center"><a onclick="showPage('page-welcome')" style="font-size:13px;color:var(--muted);cursor:pointer">← Back to Home</a></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   PAGE: STAFF AUTH
+═══════════════════════════════════════ -->
+<div class="page" id="page-auth-staff">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="mark" style="background:var(--blue-dim);border-color:rgba(59,130,246,0.2)">👨‍🍳</div>
+        <h1>Bull's &amp; Trading Cafe</h1>
+        <p>Staff Portal · Orders &amp; Billing</p>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('staff','login')">Sign In</button>
+        <button class="auth-tab" onclick="switchAuthTab('staff','signup')">Activate Invite</button>
+      </div>
+      <div id="staff-auth-msg" class="msg"></div>
+      <div id="staff-auth-login">
+        <div class="fld"><label>Email Address</label><input class="inp" type="email" id="sl-email" placeholder="you@bulls.cafe"></div>
+        <div class="fld"><label>Password</label><input class="inp" type="password" id="sl-pass" placeholder="Your password"></div>
+        <button class="btn-auth" id="s-login-btn" onclick="staffLogin()" style="background:var(--blue)">🚀 Sign In</button>
+        <div class="auth-link">New here? <a onclick="switchAuthTab('staff','signup')">Activate your invite</a></div>
+        <div class="auth-link"><a onclick="forgotPassword('sl-email')">Forgot password?</a></div>
+        <div class="auth-divider"><span>or</span></div>
+        <div style="text-align:center"><a onclick="showPage('page-welcome')" style="font-size:13px;color:var(--muted);cursor:pointer">← Back to Home</a></div>
+      </div>
+      <div id="staff-auth-signup" style="display:none">
+        <div style="background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);border-radius:var(--r);padding:12px;font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:16px">
+          🔑 Ask the Owner for your invite code first — it's tied to your email and required to activate a staff account.
+        </div>
+        <div class="fld"><label>Full Name</label><input class="inp" type="text" id="s-name" placeholder="Your full name"></div>
+        <div class="fld"><label>Email Address</label><input class="inp" type="email" id="s-email" placeholder="Must match the invited email"></div>
+        <div class="fld"><label>Invite Code</label><input class="inp" id="s-code" placeholder="6-character code from Owner" style="text-transform:uppercase"></div>
+        <div class="fld"><label>Create Password</label><input class="inp" type="password" id="s-pass" placeholder="Min 6 characters"></div>
+        <button class="btn-auth" id="s-signup-btn" onclick="staffSignup()" style="background:var(--blue)">✅ Activate Account</button>
+        <div class="auth-link">Already activated? <a onclick="switchAuthTab('staff','login')">Sign In</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   PAGE: OWNER AUTH
+═══════════════════════════════════════ -->
+<div class="page" id="page-auth-owner">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="mark" style="background:var(--gold-dim);border-color:rgba(245,158,11,0.2)">👑</div>
+        <h1>Bull's &amp; Trading Cafe</h1>
+        <p>Owner Portal · Administrator Access</p>
+      </div>
+      <div id="owner-auth-msg" class="msg"></div>
+      <div class="fld"><label>Email Address</label><input class="inp" type="email" id="ol-email" placeholder="owner@bulls.cafe"></div>
+      <div class="fld"><label>Password</label><input class="inp" type="password" id="ol-pass" placeholder="Your password"></div>
+      <button class="btn-auth" id="o-login-btn" onclick="ownerLogin()" style="background:var(--gold);color:#000">👑 Sign In</button>
+      <div class="auth-link"><a onclick="forgotPassword('ol-email')">Forgot password?</a></div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-size:11px;color:var(--muted);margin-top:16px;line-height:1.7">
+        ℹ️ Owner accounts aren't self-service. The first Owner account is created once in the Supabase dashboard (see SETUP-GUIDE.md).
+      </div>
+      <div class="auth-divider"><span>or</span></div>
+      <div style="text-align:center"><a onclick="showPage('page-welcome')" style="font-size:13px;color:var(--muted);cursor:pointer">← Back to Home</a></div>
     </div>
   </div>
 </div>
@@ -484,7 +558,6 @@ textarea.form-inp{resize:vertical;min-height:80px}
 ═══════════════════════════════════════ -->
 <div class="page" id="page-owner">
   <div class="app-shell">
-    <!-- Sidebar -->
     <aside class="sidebar" id="owner-sidebar">
       <div class="sb-head">
         <div class="sb-logo">
@@ -493,9 +566,9 @@ textarea.form-inp{resize:vertical;min-height:80px}
         </div>
       </div>
       <div class="sb-user">
-        <div class="sb-avatar">O</div>
+        <div class="sb-avatar" id="owner-sb-av">O</div>
         <div class="sb-user-info">
-          <div class="sb-user-name">Cafe Owner</div>
+          <div class="sb-user-name" id="owner-sb-name">Cafe Owner</div>
           <div class="sb-user-role">Administrator</div>
         </div>
         <span class="sb-badge owner">Owner</span>
@@ -506,13 +579,13 @@ textarea.form-inp{resize:vertical;min-height:80px}
         <div class="sb-item" onclick="ownerNav('analytics',this)"><span class="ico">📈</span>Analytics</div>
         <div class="sb-item" onclick="ownerNav('reports',this)"><span class="ico">📋</span>Reports</div>
         <div class="sb-section-label">Operations</div>
-        <div class="sb-item" onclick="ownerNav('orders',this)"><span class="ico">🧾</span>All Orders <span class="badge-count">3</span></div>
+        <div class="sb-item" onclick="ownerNav('orders',this)"><span class="ico">🧾</span>All Orders</div>
         <div class="sb-item" onclick="ownerNav('menu',this)"><span class="ico">🍽️</span>Menu Management</div>
         <div class="sb-item" onclick="ownerNav('offers',this)"><span class="ico">🔥</span>Offers &amp; Deals</div>
         <div class="sb-section-label">People</div>
         <div class="sb-item" onclick="ownerNav('staff',this)"><span class="ico">👥</span>Staff Management</div>
         <div class="sb-item" onclick="ownerNav('customers',this)"><span class="ico">👤</span>Customers</div>
-        <div class="sb-item" onclick="ownerNav('reviews',this)"><span class="ico">⭐</span>Reviews <span class="badge-count">2</span></div>
+        <div class="sb-item" onclick="ownerNav('reviews',this)"><span class="ico">⭐</span>Reviews</div>
         <div class="sb-section-label">System</div>
         <div class="sb-item" onclick="ownerNav('audit',this)"><span class="ico">🔍</span>Audit Logs</div>
         <div class="sb-item" onclick="ownerNav('settings',this)"><span class="ico">⚙️</span>Settings</div>
@@ -522,24 +595,19 @@ textarea.form-inp{resize:vertical;min-height:80px}
       </div>
     </aside>
     <div class="overlay" id="owner-overlay" onclick="closeSidebar('owner')"></div>
-
-    <!-- Main -->
     <main class="main">
       <div class="topbar">
         <button class="menu-btn" onclick="openSidebar('owner')">☰</button>
         <span class="topbar-title" id="owner-page-title">Dashboard</span>
         <div class="topbar-actions" style="position:relative">
-          <button class="notif-btn" onclick="toggleNotif('owner-notif')">🔔<span class="notif-dot"></span></button>
+          <button class="notif-btn" onclick="toggleNotif('owner-notif')">🔔<span class="notif-dot" id="owner-notif-dot" style="display:none"></span></button>
           <div class="notif-panel" id="owner-notif">
-            <div class="notif-panel-hdr"><h4>Notifications</h4><span style="font-size:11px;color:var(--green);cursor:pointer">Mark all read</span></div>
+            <div class="notif-panel-hdr"><h4>Notifications</h4><span style="font-size:11px;color:var(--green);cursor:pointer" onclick="markAllNotifsRead()">Mark all read</span></div>
             <div class="notif-list" id="owner-notif-list"></div>
           </div>
         </div>
       </div>
-
-      <div class="content" id="owner-content">
-        <!-- Dashboard injected by JS -->
-      </div>
+      <div class="content" id="owner-content"></div>
     </main>
   </div>
 </div>
@@ -557,10 +625,10 @@ textarea.form-inp{resize:vertical;min-height:80px}
         </div>
       </div>
       <div class="sb-user">
-        <div class="sb-avatar" style="background:var(--blue-dim);color:var(--blue)">S</div>
+        <div class="sb-avatar" id="staff-sb-av" style="background:var(--blue-dim);color:var(--blue)">S</div>
         <div class="sb-user-info">
-          <div class="sb-user-name">Staff Member</div>
-          <div class="sb-user-role">Operational Access</div>
+          <div class="sb-user-name" id="staff-sb-name">Staff Member</div>
+          <div class="sb-user-role" id="staff-sb-role">Operational Access</div>
         </div>
         <span class="sb-badge staff">Staff</span>
       </div>
@@ -576,7 +644,6 @@ textarea.form-inp{resize:vertical;min-height:80px}
       </div>
     </aside>
     <div class="overlay" id="staff-overlay" onclick="closeSidebar('staff')"></div>
-
     <main class="main">
       <div class="topbar">
         <button class="menu-btn" onclick="openSidebar('staff')">☰</button>
@@ -603,7 +670,7 @@ textarea.form-inp{resize:vertical;min-height:80px}
         </div>
       </div>
       <div class="sb-user">
-        <div class="sb-avatar">C</div>
+        <div class="sb-avatar" id="cust-sb-av">C</div>
         <div class="sb-user-info">
           <div class="sb-user-name" id="cust-name-display">Customer</div>
           <div class="sb-user-role">Loyalty Member</div>
@@ -628,7 +695,6 @@ textarea.form-inp{resize:vertical;min-height:80px}
       </div>
     </aside>
     <div class="overlay" id="customer-overlay" onclick="closeSidebar('customer')"></div>
-
     <main class="main">
       <div class="topbar">
         <button class="menu-btn" onclick="openSidebar('customer')">☰</button>
@@ -655,120 +721,44 @@ textarea.form-inp{resize:vertical;min-height:80px}
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ═══════════════════════════════════════════
-   STATE
-═══════════════════════════════════════════ */
-const STATE = {
-  role: null,
-  user: null,
-  customers: JSON.parse(localStorage.getItem('btc_customers') || '[]'),
-  orders: JSON.parse(localStorage.getItem('btc_orders') || '[]'),
-  reviews: JSON.parse(localStorage.getItem('btc_reviews') || '[]'),
-  notifications: [],
-  cart: {},
-  orderCounter: parseInt(localStorage.getItem('btc_order_counter') || '100'),
+/* ═══════════════════════════════════════════════════════════════
+   SUPABASE CLIENT
+═══════════════════════════════════════════════════════════════ */
+const sb = window.supabase.createClient(
+  "https://zqaxjajpucjfbwvzhkzg.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxYXhqYWpwdWNqZmJ3dnpoa3pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzOTA2NDIsImV4cCI6MjA5Nzk2NjY0Mn0.JDK1PWPnl7mB-9OyWUmbuSmfav9Lv-E0DKCD7WPwpuU"
+);
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL STATE — no demo data. Everything below is populated
+   live from Supabase after auth.
+═══════════════════════════════════════════════════════════════ */
+const APP = {
+  authUser: null,   // supabase auth user
+  profile: null,    // row from profiles
+  extra: null,      // row from customers / staff (role-specific)
+  cart: {},         // staff order builder cart {menuItemId: qty}
+  menuCache: [],
 };
 
-const MENU = [
-  {id:1,cat:'pizza',emoji:'🍕',name:'Classic Margherita',desc:'Tomato sauce, mozzarella, basil',price:119,available:true},
-  {id:2,cat:'pizza',emoji:'🍕',name:'Paneer Tikka Pizza',desc:'Spiced paneer, capsicum, onion',price:129,available:true},
-  {id:3,cat:'pizza',emoji:'🍕',name:'Veg Supreme Pizza',desc:'Loaded veggies, olives, corn',price:139,available:true},
-  {id:4,cat:'burger',emoji:'🍔',name:'Crispy Veg Burger',desc:'Golden patty, lettuce, house sauce',price:119,available:true},
-  {id:5,cat:'burger',emoji:'🍗',name:'Spicy Chicken Burger',desc:'Juicy chicken, jalapeños, mayo',price:139,available:true},
-  {id:6,cat:'burger',emoji:'🍔',name:'Double Stack Burger',desc:'Two patties, double cheese',price:159,available:true},
-  {id:7,cat:'mocktail',emoji:'🍹',name:'Green Mojito',desc:'Mint, lime, sugar cane, ice',price:79,available:true},
-  {id:8,cat:'mocktail',emoji:'🥤',name:'Berry Blast',desc:'Mixed berries, citrus, soda',price:89,available:true},
-  {id:9,cat:'mocktail',emoji:'☕',name:'Cold Coffee',desc:'Creamy, strong, chilled',price:79,available:true},
-  {id:10,cat:'dessert',emoji:'🍫',name:'Choco Lava Cake',desc:'Warm molten chocolate centre',price:59,available:true},
-  {id:11,cat:'dessert',emoji:'🍦',name:'Vanilla Sundae',desc:'Ice cream, chocolate drizzle',price:69,available:true},
-  {id:12,cat:'dessert',emoji:'🍫',name:'Brownie Delight',desc:'Fudgy brownie + ice cream',price:79,available:true},
-];
-
-const OFFERS = [
-  {id:1,title:'2 Pizzas Combo',desc:'Any 2 pizzas at a special price',emoji:'🍕',price:119,original:238,active:true},
-  {id:2,title:'2 Veg Burgers',desc:'Great value burger deal',emoji:'🍔',price:119,original:238,active:true},
-  {id:3,title:'2 Non-Veg Burgers',desc:'Chicken burger combo',emoji:'🍗',price:139,original:278,active:true},
-  {id:4,title:'Mocktail Special',desc:'Any fresh mocktail',emoji:'🍹',price:79,original:89,active:true},
-  {id:5,title:'Choco Lava Cake',desc:'Indulgent dessert deal',emoji:'🍫',price:59,original:69,active:true},
-  {id:6,title:'Buy 20 Burgers',desc:'Get 4 Cold Coffees FREE!',emoji:'🔥',price:2780,original:3096,active:true},
-];
-
-const NOTIFICATIONS = [
-  {id:1,title:'New Review Submitted',sub:'Rahul M. left a 5-star review',time:'2m ago',unread:true,type:'review'},
-  {id:2,title:'Sales Milestone! 🎉',sub:'Today\'s revenue crossed ₹5,000',time:'1h ago',unread:true,type:'sales'},
-  {id:3,title:'New Customer Registered',sub:'Priya K. joined from Pune',time:'3h ago',unread:false,type:'customer'},
-  {id:4,title:'Low Stock Alert',sub:'Cold Coffee running low',time:'5h ago',unread:false,type:'alert'},
-];
-
-const SAMPLE_ORDERS = [
-  {id:'ORD-101',items:'2× Margherita, 1× Cold Coffee',total:317,status:'completed',time:'10:32 AM',date:'Today'},
-  {id:'ORD-102',items:'1× Chicken Burger, 1× Berry Blast',total:228,status:'completed',time:'11:15 AM',date:'Today'},
-  {id:'ORD-103',items:'3× Veg Burger, 2× Mocktail',total:515,status:'preparing',time:'12:04 PM',date:'Today'},
-  {id:'ORD-104',items:'1× Brownie Delight',total:79,status:'pending',time:'12:18 PM',date:'Today'},
-];
-
-const SAMPLE_REVIEWS = [
-  {id:1,name:'Rahul M.',initials:'R',rating:5,food:5,service:5,cleanliness:4,ambience:5,text:'The 2 pizza combo at ₹119 is unreal value! Best café in Shirur hands down.',date:'2h ago',replied:false},
-  {id:2,name:'Priya K.',initials:'P',rating:5,food:5,service:4,cleanliness:5,ambience:5,text:'The choco lava cake at ₹59 was divine. Will come back every single time!',date:'5h ago',replied:true},
-  {id:3,name:'Amol S.',initials:'A',rating:4,food:4,service:5,cleanliness:4,ambience:4,text:'Great value for money. Burgers are top notch. Staff very friendly.',date:'Yesterday',replied:false},
-  {id:4,name:'Sneha D.',initials:'S',rating:5,food:5,service:5,cleanliness:5,ambience:5,text:'Mocktails here are so fresh! The green mojito is my absolute favourite.',date:'Yesterday',replied:true},
-];
-
-const STAFF = [
-  {id:1,name:'Ravi Kulkarni',role:'Head Chef',email:'ravi@bulls.cafe',status:'active',orders_today:14},
-  {id:2,name:'Meera Patil',role:'Cashier',email:'meera@bulls.cafe',status:'active',orders_today:22},
-  {id:3,name:'Suresh Jadhav',role:'Server',email:'suresh@bulls.cafe',status:'active',orders_today:18},
-];
-
-/* ═══════════════════════════════════════════
-   PAGE & NAVIGATION
-═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   PAGE / UI PRIMITIVES
+═══════════════════════════════════════════════════════════════ */
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
 }
-
-function loginAs(role){
-  STATE.role = role;
-  if(role === 'owner'){
-    STATE.user = {name:'Cafe Owner',role:'owner'};
-    showPage('page-owner');
-    loadOwnerNotifications();
-    ownerNav('dashboard', document.querySelector('#owner-sidebar .sb-item'));
-  } else if(role === 'staff'){
-    STATE.user = {name:'Staff Member',role:'staff'};
-    showPage('page-staff');
-    staffNav('new-order', document.querySelector('#staff-sidebar .sb-item'));
-    startClock();
-  }
-}
-
-function logout(){
-  STATE.role = null;
-  STATE.user = null;
-  STATE.cart = {};
-  showPage('page-welcome');
-}
-
-/* ═══════════════════════════════════════════
-   SIDEBAR
-═══════════════════════════════════════════ */
 function openSidebar(role){
   document.getElementById(role+'-sidebar').classList.add('open');
-  const ov = document.getElementById(role+'-overlay');
-  if(ov) ov.classList.add('show');
+  const ov=document.getElementById(role+'-overlay'); if(ov) ov.classList.add('show');
 }
 function closeSidebar(role){
   document.getElementById(role+'-sidebar').classList.remove('open');
-  const ov = document.getElementById(role+'-overlay');
-  if(ov) ov.classList.remove('show');
+  const ov=document.getElementById(role+'-overlay'); if(ov) ov.classList.remove('show');
 }
-
-/* ═══════════════════════════════════════════
-   MODAL
-═══════════════════════════════════════════ */
 function openModal(title, bodyHTML){
   document.getElementById('modal-title').textContent = title;
   document.getElementById('modal-body').innerHTML = bodyHTML;
@@ -776,500 +766,570 @@ function openModal(title, bodyHTML){
 }
 function closeModal(){document.getElementById('modalBg').classList.remove('show')}
 function closeModalOutside(e){if(e.target===document.getElementById('modalBg'))closeModal()}
-
-/* ═══════════════════════════════════════════
-   TOAST
-═══════════════════════════════════════════ */
 function toast(msg, type='success'){
-  const t = document.getElementById('toast');
-  t.className = `toast ${type}`;
-  t.innerHTML = (type==='success'?'✅':'❌') + ' ' + msg;
+  const t=document.getElementById('toast');
+  t.className=`toast ${type}`;
+  t.innerHTML=(type==='success'?'✅':'❌')+' '+msg;
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3000);
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+function loadingHTML(msg='Loading…'){
+  return `<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:36px;margin-bottom:12px;animation:pulse 1.4s ease infinite">🐂</div>${msg}</div>`;
+}
+function esc(s){ return (s??'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmtDate(iso){ return new Date(iso).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}); }
+function fmtTime(iso){ return new Date(iso).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
+function todayStartISO(){ const d=new Date(); d.setHours(0,0,0,0); return d.toISOString(); }
+function daysAgoISO(n){ const d=new Date(); d.setDate(d.getDate()-n); d.setHours(0,0,0,0); return d.toISOString(); }
+
+/* ═══════════════════════════════════════════════════════════════
+   AUDIT LOG (best-effort; never blocks the UI)
+═══════════════════════════════════════════════════════════════ */
+async function logAudit(action, table_name, record_id, new_data){
+  try{
+    await sb.from('audit_logs').insert({
+      user_id: APP.authUser?.id || null,
+      action, table_name, record_id: record_id||null,
+      new_data: new_data||null
+    });
+  }catch(e){ /* non-fatal */ }
 }
 
-/* ═══════════════════════════════════════════
-   NOTIFICATIONS
-═══════════════════════════════════════════ */
-function loadOwnerNotifications(){
-  const list = document.getElementById('owner-notif-list');
-  if(!list) return;
-  list.innerHTML = NOTIFICATIONS.map(n=>`
-    <div class="notif-item ${n.unread?'unread':''}">
-      <div class="ni-title">${n.title}</div>
-      <div class="ni-sub">${n.sub}</div>
-      <div class="ni-time">${n.time}</div>
-    </div>`).join('');
+/* ═══════════════════════════════════════════════════════════════
+   AUTH TAB SWITCHING
+═══════════════════════════════════════════════════════════════ */
+function switchAuthTab(role, tab){
+  document.querySelectorAll(`#page-auth-${role} .auth-tab`).forEach((t,i)=>{
+    const order = role==='customer' ? ['signup','login'] : ['login','signup'];
+    t.classList.toggle('active', order[i]===tab);
+  });
+  document.getElementById(`${role}-auth-signup`)?.style && (document.getElementById(`${role}-auth-signup`).style.display = tab==='signup'?'block':'none');
+  document.getElementById(`${role}-auth-login`).style.display = tab==='login'?'block':'none';
+  const msg=document.getElementById(`${role}-auth-msg`); if(msg) msg.className='msg';
+}
+function showAuthMsg(role, msg, type){
+  const el=document.getElementById(`${role}-auth-msg`);
+  el.textContent=msg; el.className=`msg show ${type}`;
+}
+function setBtnLoading(id, loading, label){
+  const b=document.getElementById(id);
+  if(!b) return;
+  b.disabled = loading;
+  b.style.opacity = loading ? 0.6 : 1;
+  if(loading) b.dataset.orig = b.dataset.orig || b.textContent;
+  b.textContent = loading ? '⏳ Please wait…' : (label || b.dataset.orig || b.textContent);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FORGOT PASSWORD (all roles)
+═══════════════════════════════════════════════════════════════ */
+async function forgotPassword(inputId){
+  const email = document.getElementById(inputId).value.trim();
+  if(!email){ toast('Enter your email first','error'); return; }
+  try{
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href.split('#')[0] });
+    if(error) throw error;
+    toast('Password reset email sent! Check your inbox 📧');
+  }catch(e){ toast(e.message||'Could not send reset email','error'); }
+}
+function newPasswordModal(){
+  openModal('Set New Password', `
+    <div class="form-grid">
+      <div class="form-fld"><label>New Password</label><input class="form-inp" type="password" id="np-pass" placeholder="Min 6 characters"></div>
+      <button class="btn btn-primary" onclick="submitNewPassword()">💾 Update Password</button>
+    </div>`);
+}
+async function submitNewPassword(){
+  const pass=document.getElementById('np-pass').value;
+  if(!pass||pass.length<6){toast('Password must be at least 6 characters','error');return;}
+  try{
+    const { error } = await sb.auth.updateUser({ password: pass });
+    if(error) throw error;
+    closeModal(); toast('Password updated! You can sign in now ✅');
+  }catch(e){ toast(e.message||'Could not update password','error'); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CUSTOMER AUTH
+═══════════════════════════════════════════════════════════════ */
+async function customerSignup(){
+  const name=document.getElementById('c-name').value.trim();
+  const email=document.getElementById('c-email').value.trim();
+  const phone=document.getElementById('c-phone').value.trim();
+  const pass=document.getElementById('c-pass').value;
+  if(!name||!email||!pass){showAuthMsg('customer','Please fill all required fields','error');return;}
+  if(pass.length<6){showAuthMsg('customer','Password must be at least 6 characters','error');return;}
+  setBtnLoading('c-signup-btn', true);
+  try{
+    const { data, error } = await sb.auth.signUp({
+      email, password: pass,
+      options: { data: { role:'customer', full_name:name, phone } }
+    });
+    if(error) throw error;
+    if(data.session){
+      showAuthMsg('customer','✅ Account created! You earned 50 welcome points!','success');
+      setTimeout(()=>routeAfterAuth(), 1200);
+    } else {
+      showAuthMsg('customer','✅ Account created! Check your email to verify, then sign in.','success');
+      setTimeout(()=>switchAuthTab('customer','login'), 1800);
+    }
+  }catch(e){
+    showAuthMsg('customer', e.message||'Signup failed','error');
+  }finally{ setBtnLoading('c-signup-btn', false, '🎉 Create Account'); }
+}
+async function customerLogin(){
+  const email=document.getElementById('cl-email').value.trim();
+  const pass=document.getElementById('cl-pass').value;
+  if(!email||!pass){showAuthMsg('customer','Enter email and password','error');return;}
+  setBtnLoading('c-login-btn', true);
+  try{
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if(error) throw error;
+    await routeAfterAuth();
+  }catch(e){ showAuthMsg('customer', e.message||'Invalid email or password','error'); }
+  finally{ setBtnLoading('c-login-btn', false, '🚀 Sign In'); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STAFF AUTH
+═══════════════════════════════════════════════════════════════ */
+async function staffSignup(){
+  const name=document.getElementById('s-name').value.trim();
+  const email=document.getElementById('s-email').value.trim();
+  const code=document.getElementById('s-code').value.trim().toUpperCase();
+  const pass=document.getElementById('s-pass').value;
+  if(!name||!email||!code||!pass){showAuthMsg('staff','Fill all fields including invite code','error');return;}
+  if(pass.length<6){showAuthMsg('staff','Password must be at least 6 characters','error');return;}
+  setBtnLoading('s-signup-btn', true);
+  try{
+    const { data: valid, error: checkErr } = await sb.rpc('check_staff_invite', { p_email: email, p_code: code });
+    if(checkErr) throw checkErr;
+    if(!valid){ showAuthMsg('staff','Invalid or expired invite code for this email. Ask the Owner to re-check.','error'); return; }
+
+    const { data, error } = await sb.auth.signUp({
+      email, password: pass,
+      options: { data: { role:'staff', invite_code: code, full_name:name } }
+    });
+    if(error) throw error;
+    if(data.session){
+      showAuthMsg('staff','✅ Staff account activated!','success');
+      setTimeout(()=>routeAfterAuth(), 1000);
+    } else {
+      showAuthMsg('staff','✅ Account created! Verify your email, then sign in.','success');
+      setTimeout(()=>switchAuthTab('staff','login'), 1800);
+    }
+  }catch(e){ showAuthMsg('staff', e.message||'Activation failed','error'); }
+  finally{ setBtnLoading('s-signup-btn', false, '✅ Activate Account'); }
+}
+async function staffLogin(){
+  const email=document.getElementById('sl-email').value.trim();
+  const pass=document.getElementById('sl-pass').value;
+  if(!email||!pass){showAuthMsg('staff','Enter email and password','error');return;}
+  setBtnLoading('s-login-btn', true);
+  try{
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if(error) throw error;
+    await routeAfterAuth();
+  }catch(e){ showAuthMsg('staff', e.message||'Invalid email or password','error'); }
+  finally{ setBtnLoading('s-login-btn', false, '🚀 Sign In'); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   OWNER AUTH (login only — owner is provisioned manually)
+═══════════════════════════════════════════════════════════════ */
+async function ownerLogin(){
+  const email=document.getElementById('ol-email').value.trim();
+  const pass=document.getElementById('ol-pass').value;
+  if(!email||!pass){showAuthMsg('owner','Enter email and password','error');return;}
+  setBtnLoading('o-login-btn', true);
+  try{
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if(error) throw error;
+    const { data:{ user } } = await sb.auth.getUser();
+    const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single();
+    if(profile?.role !== 'owner'){
+      await sb.auth.signOut();
+      showAuthMsg('owner','This account is not an Owner account.','error');
+      return;
+    }
+    await routeAfterAuth();
+  }catch(e){ showAuthMsg('owner', e.message||'Invalid email or password','error'); }
+  finally{ setBtnLoading('o-login-btn', false, '👑 Sign In'); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SESSION ROUTING
+═══════════════════════════════════════════════════════════════ */
+async function routeAfterAuth(){
+  const { data:{ user } } = await sb.auth.getUser();
+  if(!user){ document.getElementById('boot-loader').style.display='none'; showPage('page-welcome'); return; }
+  APP.authUser = user;
+
+  const { data: profile, error: pErr } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  if(pErr || !profile){
+    document.getElementById('boot-loader').style.display='none';
+    toast('Could not load your profile. Please sign in again.','error');
+    await sb.auth.signOut();
+    showPage('page-welcome');
+    return;
+  }
+  APP.profile = profile;
+
+  if(profile.role === 'owner'){
+    document.getElementById('owner-sb-name').textContent = profile.full_name;
+    document.getElementById('owner-sb-av').textContent = (profile.full_name||'O')[0].toUpperCase();
+    document.getElementById('boot-loader').style.display='none';
+    showPage('page-owner');
+    ownerNav('dashboard', document.querySelector('#owner-sidebar .sb-item'));
+    logAudit('login','profiles',user.id,{role:'owner'});
+  } else if(profile.role === 'staff'){
+    const { data: staffRow } = await sb.from('staff').select('*').eq('id', user.id).single();
+    APP.extra = staffRow;
+    document.getElementById('staff-sb-name').textContent = profile.full_name;
+    document.getElementById('staff-sb-role').textContent = staffRow?.staff_role || 'Staff';
+    document.getElementById('staff-sb-av').textContent = (profile.full_name||'S')[0].toUpperCase();
+    document.getElementById('boot-loader').style.display='none';
+    showPage('page-staff');
+    startClock();
+    staffNav('new-order', document.querySelector('#staff-sidebar .sb-item'));
+    logAudit('login','profiles',user.id,{role:'staff'});
+  } else {
+    const { data: custRow } = await sb.from('customers').select('*').eq('id', user.id).single();
+    APP.extra = custRow;
+    document.getElementById('cust-name-display').textContent = profile.full_name;
+    document.getElementById('cust-sb-av').textContent = (profile.full_name||'C')[0].toUpperCase();
+    document.getElementById('boot-loader').style.display='none';
+    showPage('page-customer');
+    customerNav('home', document.querySelector('#customer-sidebar .sb-item'));
+    logAudit('login','profiles',user.id,{role:'customer'});
+  }
+}
+
+async function logout(){
+  await sb.auth.signOut();
+  APP.authUser=null; APP.profile=null; APP.extra=null; APP.cart={};
+  showPage('page-welcome');
+}
+
+/* Boot: check for existing session on load + listen for auth events */
+sb.auth.onAuthStateChange((event, session)=>{
+  if(event === 'PASSWORD_RECOVERY'){ newPasswordModal(); }
+});
+(async function boot(){
+  try{
+    const { data:{ session } } = await sb.auth.getSession();
+    if(session){ await routeAfterAuth(); }
+    else{ document.getElementById('boot-loader').style.display='none'; showPage('page-welcome'); }
+  }catch(e){
+    document.getElementById('boot-loader').style.display='none';
+    showPage('page-welcome');
+  }
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   NOTIFICATIONS (owner)
+═══════════════════════════════════════════════════════════════ */
+async function loadOwnerNotifications(){
+  const list=document.getElementById('owner-notif-list');
+  const dot=document.getElementById('owner-notif-dot');
+  const { data, error } = await sb.from('notifications').select('*').eq('user_id', APP.authUser.id).order('created_at',{ascending:false}).limit(15);
+  if(error || !data){ list.innerHTML=''; return; }
+  dot.style.display = data.some(n=>!n.is_read) ? 'block' : 'none';
+  list.innerHTML = data.length ? data.map(n=>`
+    <div class="notif-item ${n.is_read?'':'unread'}">
+      <div class="ni-title">${esc(n.title)}</div>
+      <div class="ni-sub">${esc(n.body||'')}</div>
+      <div class="ni-time">${fmtTime(n.created_at)} · ${fmtDate(n.created_at)}</div>
+    </div>`).join('') : `<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">No notifications yet</div>`;
+}
+async function markAllNotifsRead(){
+  await sb.from('notifications').update({is_read:true}).eq('user_id', APP.authUser.id).eq('is_read', false);
+  loadOwnerNotifications();
 }
 function toggleNotif(id){
-  const p = document.getElementById(id);
+  const p=document.getElementById(id);
   p.classList.toggle('show');
-  document.addEventListener('click',function handler(e){
+  document.addEventListener('click', function handler(e){
     if(!p.contains(e.target)){p.classList.remove('show');document.removeEventListener('click',handler);}
   });
 }
-
-/* ═══════════════════════════════════════════
-   CLOCK
-═══════════════════════════════════════════ */
 function startClock(){
-  const el = document.getElementById('staff-clock');
-  if(!el) return;
-  const update = ()=>{const n=new Date();el.textContent=n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});};
-  update(); setInterval(update,1000);
+  const el=document.getElementById('staff-clock'); if(!el) return;
+  const upd=()=>{const n=new Date();el.textContent=n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});};
+  upd(); setInterval(upd,1000);
 }
 
-/* ═══════════════════════════════════════════
-   OWNER NAVIGATION & VIEWS
-═══════════════════════════════════════════ */
-function ownerNav(view, el){
-  if(el){
-    document.querySelectorAll('#owner-sidebar .sb-item').forEach(i=>i.classList.remove('active'));
-    el.classList.add('active');
-  }
-  const titles = {dashboard:'Dashboard',analytics:'Analytics',reports:'Reports',orders:'All Orders',menu:'Menu Management',offers:'Offers & Deals',staff:'Staff Management',customers:'Customers',reviews:'Reviews',audit:'Audit Logs',settings:'Settings'};
-  document.getElementById('owner-page-title').textContent = titles[view] || view;
-  const c = document.getElementById('owner-content');
-  const views = {
-    dashboard: ownerDashboard,
-    analytics: ownerAnalytics,
-    reports: ownerReports,
-    orders: ownerOrders,
-    menu: ownerMenu,
-    offers: ownerOffers,
-    staff: ownerStaff,
-    customers: ownerCustomers,
-    reviews: ownerReviews,
-    audit: ownerAudit,
-    settings: ownerSettings,
-  };
-  c.innerHTML = '';
-  if(views[view]) c.innerHTML = views[view]();
+/* ═══════════════════════════════════════════════════════════════
+   DATA LAYER — every read/write below hits Supabase directly.
+═══════════════════════════════════════════════════════════════ */
+async function fetchMenu(availableOnly=false){
+  let q = sb.from('menu_items').select('*').order('category').order('sort_order');
+  if(availableOnly) q = q.eq('is_available', true);
+  const { data, error } = await q;
+  if(error){ toast('Could not load menu','error'); return []; }
+  APP.menuCache = data;
+  return data;
+}
+async function fetchOffers(activeOnly=false){
+  let q = sb.from('offers').select('*').order('created_at',{ascending:false});
+  if(activeOnly) q = q.eq('is_active', true);
+  const { data, error } = await q;
+  return error ? [] : data;
+}
+async function fetchOrders({ mine=false, sinceISO=null, limit=50 } = {}){
+  let q = sb.from('orders').select('*, order_items(*)').order('created_at',{ascending:false}).limit(limit);
+  if(mine) q = q.eq('customer_id', APP.authUser.id);
+  if(sinceISO) q = q.gte('created_at', sinceISO);
+  const { data, error } = await q;
+  if(error){ toast('Could not load orders','error'); return []; }
+  return data;
+}
+async function fetchReviews(limit=50){
+  const { data, error } = await sb.from('reviews').select('*').order('created_at',{ascending:false}).limit(limit);
+  return error ? [] : data;
+}
+async function fetchProfilesByIds(ids){
+  const uniq = [...new Set(ids.filter(Boolean))];
+  if(!uniq.length) return {};
+  const { data } = await sb.from('profiles').select('id, full_name').in('id', uniq);
+  const map={}; (data||[]).forEach(p=>map[p.id]=p.full_name);
+  return map;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   OWNER NAVIGATION
+═══════════════════════════════════════════════════════════════ */
+async function ownerNav(view, el){
+  if(el){ document.querySelectorAll('#owner-sidebar .sb-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); }
+  const titles={dashboard:'Dashboard',analytics:'Analytics',reports:'Reports',orders:'All Orders',menu:'Menu Management',offers:'Offers & Deals',staff:'Staff Management',customers:'Customers',reviews:'Reviews',audit:'Audit Logs',settings:'Settings'};
+  document.getElementById('owner-page-title').textContent = titles[view]||view;
+  const c=document.getElementById('owner-content');
+  c.innerHTML = loadingHTML();
   closeSidebar('owner');
-  initCharts();
+  loadOwnerNotifications();
+  const views={dashboard:ownerDashboard,analytics:ownerAnalytics,reports:ownerReports,orders:ownerOrders,menu:ownerMenu,offers:ownerOffers,staff:ownerStaff,customers:ownerCustomers,reviews:ownerReviews,audit:ownerAudit,settings:ownerSettings};
+  try{ c.innerHTML = await views[view](); initCharts(); }
+  catch(e){ c.innerHTML = `<div class="card">Failed to load: ${esc(e.message)}</div>`; }
 }
 
-function ownerDashboard(){
-  const todayRev = SAMPLE_ORDERS.filter(o=>o.date==='Today').reduce((s,o)=>s+o.total,0);
-  return `
-  <div class="stats-grid">
-    <div class="stat-card green"><div class="stat-ico">💰</div><div class="stat-val">₹${todayRev}</div><div class="stat-lbl">Today's Revenue</div><div class="stat-trend up">▲ +18% vs yesterday</div></div>
-    <div class="stat-card gold"><div class="stat-ico">📦</div><div class="stat-val">${SAMPLE_ORDERS.length}</div><div class="stat-lbl">Today's Orders</div><div class="stat-trend up">▲ +5 since morning</div></div>
-    <div class="stat-card blue"><div class="stat-ico">👥</div><div class="stat-val">${STATE.customers.length + 47}</div><div class="stat-lbl">Total Customers</div><div class="stat-trend up">▲ 3 new today</div></div>
-    <div class="stat-card orange"><div class="stat-ico">⭐</div><div class="stat-val">4.8</div><div class="stat-lbl">Avg Rating</div><div class="stat-trend up">▲ 0.1 this week</div></div>
-  </div>
-  <div style="display:grid;gap:14px;margin-bottom:14px">
-    <div class="card">
-      <div class="card-title">📊 Weekly Revenue</div>
-      <div class="chart-area">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:11px;color:var(--muted)">Mon — Sun</span>
-          <span style="font-size:13px;font-weight:700;color:var(--green)">₹38,450 total</span>
-        </div>
-        <div class="chart-bars" id="rev-chart">
-          <div class="cbar green" style="height:55%" data-val="₹4,200">.</div>
-          <div class="cbar green" style="height:70%" data-val="₹5,600">.</div>
-          <div class="cbar green" style="height:45%" data-val="₹3,800">.</div>
-          <div class="cbar green" style="height:85%" data-val="₹6,900">.</div>
-          <div class="cbar green" style="height:95%" data-val="₹8,200">.</div>
-          <div class="cbar gold" style="height:100%" data-val="₹9,750 (Sat)">.</div>
-          <div class="cbar green" style="height:60%" data-val="₹0 (Today live)">.</div>
-        </div>
-        <div class="chart-labels">
-          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-    <div class="card">
-      <div class="card-title">🏆 Top Items</div>
-      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍕 Pizzas</span><span class="prog-val">42%</span></div><div class="prog-bar"><div class="prog-fill green" style="width:42%"></div></div></div>
-      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍔 Burgers</span><span class="prog-val">35%</span></div><div class="prog-bar"><div class="prog-fill gold" style="width:35%"></div></div></div>
-      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍹 Mocktails</span><span class="prog-val">14%</span></div><div class="prog-bar"><div class="prog-fill blue" style="width:14%"></div></div></div>
-      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍫 Desserts</span><span class="prog-val">9%</span></div><div class="prog-bar"><div class="prog-fill orange" style="width:9%"></div></div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">⏰ Peak Hours</div>
-      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">12–2 PM</span><span class="prog-val">High</span></div><div class="prog-bar"><div class="prog-fill green" style="width:90%"></div></div></div>
-      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">7–9 PM</span><span class="prog-val">Peak</span></div><div class="prog-bar"><div class="prog-fill gold" style="width:100%"></div></div></div>
-      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">4–6 PM</span><span class="prog-val">Medium</span></div><div class="prog-bar"><div class="prog-fill blue" style="width:60%"></div></div></div>
-      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">10–12 PM</span><span class="prog-val">Low</span></div><div class="prog-bar"><div class="prog-fill orange" style="width:30%"></div></div></div>
-    </div>
-  </div>
-  <div class="sec-hdr"><h3>Recent Orders</h3><span class="see-all" onclick="ownerNav('orders',null)">See all →</span></div>
-  <div class="tbl-wrap">
-    <table>
-      <thead><tr><th>Order ID</th><th>Items</th><th>Total</th><th>Status</th><th>Time</th></tr></thead>
-      <tbody>
-        ${SAMPLE_ORDERS.map(o=>`<tr>
-          <td><span style="font-family:var(--font-m);color:var(--green)">${o.id}</span></td>
-          <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.items}</td>
-          <td style="font-weight:700;color:var(--white)">₹${o.total}</td>
-          <td><span class="badge ${o.status==='completed'?'green':o.status==='preparing'?'gold':'blue'}">${o.status}</span></td>
-          <td style="color:var(--muted)">${o.time}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>
-  </div>
-  <div style="margin-top:14px" class="sec-hdr"><h3>Recent Reviews</h3><span class="see-all" onclick="ownerNav('reviews',null)">See all →</span></div>
-  ${SAMPLE_REVIEWS.slice(0,2).map(reviewCard).join('')}`;
-}
+async function ownerDashboard(){
+  const [todayOrders, weekOrders, reviews, custCountRes] = await Promise.all([
+    fetchOrders({ sinceISO: todayStartISO(), limit: 200 }),
+    fetchOrders({ sinceISO: daysAgoISO(7), limit: 500 }),
+    fetchReviews(2),
+    sb.from('customers').select('id',{count:'exact',head:true})
+  ]);
+  const todayRev = todayOrders.reduce((s,o)=>s+Number(o.total),0);
+  const avgRating = (await fetchReviews(200)).reduce((acc,r,_,arr)=>acc+r.rating_overall/arr.length,0) || 0;
 
-function ownerAnalytics(){
+  // 7-day bars
+  const dayBuckets = Array.from({length:7},(_,i)=>{ const d=new Date(); d.setDate(d.getDate()-(6-i)); d.setHours(0,0,0,0); return d; });
+  const dayTotals = dayBuckets.map((d,i)=>{
+    const next = new Date(d); next.setDate(next.getDate()+1);
+    return weekOrders.filter(o=>{const t=new Date(o.created_at); return t>=d && t<next;}).reduce((s,o)=>s+Number(o.total),0);
+  });
+  const maxDay = Math.max(...dayTotals, 1);
+  const dayLabels = dayBuckets.map(d=>d.toLocaleDateString('en-IN',{weekday:'short'}));
+
+  // category breakdown today
+  const catTotals = {};
+  todayOrders.forEach(o=> (o.order_items||[]).forEach(it=>{
+    const menu = APP.menuCache.find(m=>m.id===it.menu_item_id);
+    const cat = menu?.category || 'other';
+    catTotals[cat] = (catTotals[cat]||0) + Number(it.subtotal||it.price*it.quantity);
+  }));
+  const catTotal = Object.values(catTotals).reduce((a,b)=>a+b,0) || 1;
+  const catIcons = {pizza:'🍕',burger:'🍔',mocktail:'🍹',dessert:'🍫',other:'🍽️'};
+  const catColors = {pizza:'green',burger:'gold',mocktail:'blue',dessert:'orange',other:'red'};
+
+  const recentOrders = todayOrders.slice(0,5);
+  const custIds = recentOrders.map(o=>o.customer_id);
+  const nameMap = await fetchProfilesByIds(custIds);
+
   return `
   <div class="stats-grid">
-    <div class="stat-card green"><div class="stat-ico">📅</div><div class="stat-val">₹5,840</div><div class="stat-lbl">Today</div><div class="stat-trend up">▲ +12%</div></div>
-    <div class="stat-card gold"><div class="stat-ico">📅</div><div class="stat-val">₹38,450</div><div class="stat-lbl">This Week</div><div class="stat-trend up">▲ +8%</div></div>
-    <div class="stat-card blue"><div class="stat-ico">📅</div><div class="stat-val">₹1,42,800</div><div class="stat-lbl">This Month</div><div class="stat-trend up">▲ +22%</div></div>
-    <div class="stat-card orange"><div class="stat-ico">📅</div><div class="stat-val">₹8,64,000</div><div class="stat-lbl">This Year</div><div class="stat-trend up">▲ Growing</div></div>
+    <div class="stat-card green"><div class="stat-ico">💰</div><div class="stat-val">₹${todayRev.toFixed(0)}</div><div class="stat-lbl">Today's Revenue</div></div>
+    <div class="stat-card gold"><div class="stat-ico">📦</div><div class="stat-val">${todayOrders.length}</div><div class="stat-lbl">Today's Orders</div></div>
+    <div class="stat-card blue"><div class="stat-ico">👥</div><div class="stat-val">${custCountRes.count||0}</div><div class="stat-lbl">Total Customers</div></div>
+    <div class="stat-card orange"><div class="stat-ico">⭐</div><div class="stat-val">${avgRating?avgRating.toFixed(1):'—'}</div><div class="stat-lbl">Avg Rating</div></div>
   </div>
   <div class="card" style="margin-bottom:14px">
-    <div class="card-title">📈 Monthly Revenue Trend</div>
+    <div class="card-title">📊 Last 7 Days Revenue</div>
     <div class="chart-area">
       <div class="chart-bars">
-        ${[65,72,58,80,88,95,70,85,90,100,82,75].map((h,i)=>`<div class="cbar ${i===9?'gold':'green'}" style="height:${h}%" data-val="₹${Math.round(h*1428)}">.</div>`).join('')}
+        ${dayTotals.map((v,i)=>`<div class="cbar ${i===6?'gold':'green'}" style="height:${Math.max(v/maxDay*100,3)}%" data-val="₹${v.toFixed(0)}">.</div>`).join('')}
       </div>
-      <div class="chart-labels">
-        ${['J','F','M','A','M','J','J','A','S','O','N','D'].map(m=>`<span>${m}</span>`).join('')}
-      </div>
+      <div class="chart-labels">${dayLabels.map(l=>`<span>${l}</span>`).join('')}</div>
     </div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">🏆 Today's Category Split</div>
+    ${Object.keys(catTotals).length ? Object.entries(catTotals).map(([cat,val])=>`
+      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">${catIcons[cat]||'🍽️'} ${cat.charAt(0).toUpperCase()+cat.slice(1)}</span><span class="prog-val">${Math.round(val/catTotal*100)}%</span></div><div class="prog-bar"><div class="prog-fill ${catColors[cat]||'green'}" style="width:${Math.round(val/catTotal*100)}%"></div></div></div>
+    `).join('') : `<div style="color:var(--muted);font-size:13px;padding:8px 0">No orders yet today</div>`}
+  </div>
+  <div class="sec-hdr"><h3>Recent Orders</h3><span class="see-all" onclick="ownerNav('orders',null)">See all →</span></div>
+  ${recentOrders.length ? `<div class="tbl-wrap"><table>
+    <thead><tr><th>Order</th><th>Items</th><th>Total</th><th>Status</th><th>Time</th></tr></thead>
+    <tbody>${recentOrders.map(o=>`<tr>
+      <td><span style="font-family:var(--font-m);color:var(--green)">${o.order_number}</span></td>
+      <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${(o.order_items||[]).map(it=>`${it.quantity}× ${esc(it.name)}`).join(', ')}</td>
+      <td style="font-weight:700;color:var(--white)">₹${Number(o.total).toFixed(0)}</td>
+      <td><span class="badge ${o.status==='completed'?'green':o.status==='preparing'?'gold':'blue'}">${o.status}</span></td>
+      <td style="color:var(--muted)">${fmtTime(o.created_at)}</td>
+    </tr>`).join('')}</tbody></table></div>` : `<div class="card" style="text-align:center;color:var(--muted)">No orders yet today — once Staff places orders, they'll show up here in real time.</div>`}
+  <div style="margin-top:14px" class="sec-hdr"><h3>Recent Reviews</h3><span class="see-all" onclick="ownerNav('reviews',null)">See all →</span></div>
+  ${reviews.length ? reviews.map(r=>reviewCard(r,true)).join('') : `<div class="card" style="text-align:center;color:var(--muted)">No reviews yet</div>`}`;
+}
+
+async function ownerAnalytics(){
+  const [today, week, month, year] = await Promise.all([
+    fetchOrders({sinceISO: todayStartISO(), limit:1000}),
+    fetchOrders({sinceISO: daysAgoISO(7), limit:2000}),
+    fetchOrders({sinceISO: daysAgoISO(30), limit:5000}),
+    fetchOrders({sinceISO: daysAgoISO(365), limit:5000}),
+  ]);
+  const sum = arr=>arr.reduce((s,o)=>s+Number(o.total),0);
+  // top items over last 30 days
+  const itemTotals={};
+  month.forEach(o=>(o.order_items||[]).forEach(it=>{ itemTotals[it.name]=(itemTotals[it.name]||0)+it.quantity; }));
+  const topItems = Object.entries(itemTotals).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxQty = topItems.length ? topItems[0][1] : 1;
+  const colors=['green','gold','blue','orange','red'];
+  // repeat customers in last 30 days
+  const custOrderCounts={};
+  month.forEach(o=>{ if(o.customer_id) custOrderCounts[o.customer_id]=(custOrderCounts[o.customer_id]||0)+1; });
+  const totalCust = Object.keys(custOrderCounts).length;
+  const repeatCust = Object.values(custOrderCounts).filter(c=>c>1).length;
+  const repeatPct = totalCust ? Math.round(repeatCust/totalCust*100) : 0;
+  const { count: custCount } = await sb.from('customers').select('id',{count:'exact',head:true});
+
+  return `
+  <div class="stats-grid">
+    <div class="stat-card green"><div class="stat-ico">📅</div><div class="stat-val">₹${sum(today).toFixed(0)}</div><div class="stat-lbl">Today</div></div>
+    <div class="stat-card gold"><div class="stat-ico">📅</div><div class="stat-val">₹${sum(week).toFixed(0)}</div><div class="stat-lbl">This Week</div></div>
+    <div class="stat-card blue"><div class="stat-ico">📅</div><div class="stat-val">₹${sum(month).toFixed(0)}</div><div class="stat-lbl">This Month</div></div>
+    <div class="stat-card orange"><div class="stat-ico">📅</div><div class="stat-val">₹${sum(year).toFixed(0)}</div><div class="stat-lbl">This Year</div></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
     <div class="card">
-      <div class="card-title">🍽️ Menu Performance</div>
-      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍕 Margherita</span><span class="prog-val">286 sold</span></div><div class="prog-bar"><div class="prog-fill green" style="width:100%"></div></div></div>
-      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍗 Chicken Burger</span><span class="prog-val">241 sold</span></div><div class="prog-bar"><div class="prog-fill gold" style="width:84%"></div></div></div>
-      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍫 Choco Lava</span><span class="prog-val">198 sold</span></div><div class="prog-bar"><div class="prog-fill blue" style="width:69%"></div></div></div>
-      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">☕ Cold Coffee</span><span class="prog-val">175 sold</span></div><div class="prog-bar"><div class="prog-fill orange" style="width:61%"></div></div></div>
-      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍔 Veg Burger</span><span class="prog-val">143 sold</span></div><div class="prog-bar"><div class="prog-fill red" style="width:50%"></div></div></div>
+      <div class="card-title">🍽️ Top Items (30 days)</div>
+      ${topItems.length ? topItems.map(([name,qty],i)=>`
+        <div class="prog-item"><div class="prog-hdr"><span class="prog-name">${esc(name)}</span><span class="prog-val">${qty} sold</span></div><div class="prog-bar"><div class="prog-fill ${colors[i%colors.length]}" style="width:${Math.round(qty/maxQty*100)}%"></div></div></div>
+      `).join('') : `<div style="color:var(--muted);font-size:13px">No order data yet</div>`}
     </div>
     <div class="card">
       <div class="card-title">👥 Customer Insights</div>
       <div style="display:flex;flex-direction:column;gap:14px;padding-top:4px">
-        <div style="background:var(--bg3);border-radius:10px;padding:12px">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Total Customers</div>
-          <div style="font-size:24px;font-weight:800;color:var(--white)">${STATE.customers.length + 47}</div>
-        </div>
-        <div style="background:var(--bg3);border-radius:10px;padding:12px">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Avg Order Value</div>
-          <div style="font-size:24px;font-weight:800;color:var(--gold)">₹284</div>
-        </div>
-        <div style="background:var(--bg3);border-radius:10px;padding:12px">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Repeat Customers</div>
-          <div style="font-size:24px;font-weight:800;color:var(--green)">68%</div>
-        </div>
+        <div style="background:var(--bg3);border-radius:10px;padding:12px"><div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Total Customers</div><div style="font-size:24px;font-weight:800;color:var(--white)">${custCount||0}</div></div>
+        <div style="background:var(--bg3);border-radius:10px;padding:12px"><div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Avg Order Value (30d)</div><div style="font-size:24px;font-weight:800;color:var(--gold)">₹${month.length?Math.round(sum(month)/month.length):0}</div></div>
+        <div style="background:var(--bg3);border-radius:10px;padding:12px"><div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Repeat Customers (30d)</div><div style="font-size:24px;font-weight:800;color:var(--green)">${repeatPct}%</div></div>
       </div>
     </div>
   </div>`;
 }
 
-function ownerReports(){
+async function ownerReports(){
+  const today = await fetchOrders({sinceISO: todayStartISO(), limit:1000});
+  const catTotals={}, catQty={};
+  today.forEach(o=>(o.order_items||[]).forEach(it=>{
+    const menu = APP.menuCache.find(m=>m.id===it.menu_item_id);
+    const cat = menu?.category || 'other';
+    catTotals[cat]=(catTotals[cat]||0)+Number(it.subtotal||it.price*it.quantity);
+    catQty[cat]=(catQty[cat]||0)+it.quantity;
+  }));
+  const grand = Object.values(catTotals).reduce((a,b)=>a+b,0);
+  const catIcons={pizza:'🍕',burger:'🍔',mocktail:'🍹',dessert:'🍫',other:'🍽️'};
+  const badgeColor={pizza:'green',burger:'gold',mocktail:'blue',dessert:'orange',other:'red'};
   return `
   <div class="card" style="margin-bottom:14px">
     <div class="card-title">📋 Generate Report</div>
     <div class="form-grid">
       <div class="form-row">
-        <div class="form-fld"><label>Report Type</label>
-          <select class="form-inp">
-            <option>Daily Sales Report</option>
-            <option>Weekly Summary</option>
-            <option>Monthly Revenue</option>
-            <option>Custom Date Range</option>
-            <option>Staff Performance</option>
-            <option>Menu Analysis</option>
-          </select>
-        </div>
-        <div class="form-fld"><label>Format</label>
-          <select class="form-inp"><option>On-Screen View</option><option>Print PDF</option></select>
-        </div>
+        <div class="form-fld"><label>Report Type</label><select class="form-inp" id="rep-type"><option>Daily Sales Report</option><option>Weekly Summary</option><option>Monthly Revenue</option></select></div>
+        <div class="form-fld"><label>Format</label><select class="form-inp"><option>On-Screen View</option><option>Print PDF</option></select></div>
       </div>
       <div class="form-row">
         <div class="form-fld"><label>From Date</label><input class="form-inp" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
         <div class="form-fld"><label>To Date</label><input class="form-inp" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
       </div>
-      <button class="btn btn-primary" onclick="toast('Report generated successfully! 📋')">📊 Generate Report</button>
+      <button class="btn btn-primary" onclick="toast('Showing live data below — this reflects real orders 📋')">📊 Generate Report</button>
     </div>
   </div>
   <div class="card">
-    <div class="card-title">📅 Today's Report Preview</div>
-    <div class="tbl-wrap">
-      <table>
-        <thead><tr><th>Category</th><th>Items Sold</th><th>Revenue</th><th>% of Total</th></tr></thead>
-        <tbody>
-          <tr><td>🍕 Pizzas</td><td>24</td><td style="color:var(--green);font-weight:700">₹2,850</td><td><span class="badge green">42%</span></td></tr>
-          <tr><td>🍔 Burgers</td><td>19</td><td style="color:var(--green);font-weight:700">₹2,040</td><td><span class="badge gold">35%</span></td></tr>
-          <tr><td>🍹 Mocktails</td><td>8</td><td style="color:var(--green);font-weight:700">₹632</td><td><span class="badge blue">11%</span></td></tr>
-          <tr><td>🍫 Desserts</td><td>5</td><td style="color:var(--green);font-weight:700">₹318</td><td><span class="badge orange">7%</span></td></tr>
-          <tr><td colspan="2" style="font-weight:800;color:var(--white)">Total</td><td style="font-weight:800;color:var(--green);font-size:16px">₹5,840</td><td><span class="badge green">100%</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>`;
-}
-
-function ownerOrders(){
-  return `
-  <div class="search-bar"><span class="ico">🔍</span><input type="text" placeholder="Search orders by ID or items..."></div>
-  <div class="tabs">
-    <button class="tab active">All Orders</button>
-    <button class="tab">Pending</button>
-    <button class="tab">Preparing</button>
-    <button class="tab">Completed</button>
-  </div>
-  <div class="tbl-wrap">
-    <table>
-      <thead><tr><th>Order ID</th><th>Items</th><th>Total</th><th>Status</th><th>Staff</th><th>Time</th><th>Actions</th></tr></thead>
+    <div class="card-title">📅 Today's Report (Live)</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Category</th><th>Items Sold</th><th>Revenue</th><th>% of Total</th></tr></thead>
       <tbody>
-        ${SAMPLE_ORDERS.map(o=>`<tr>
-          <td><span style="font-family:var(--font-m);color:var(--green);font-weight:600">${o.id}</span></td>
-          <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.items}</td>
-          <td style="font-weight:800;color:var(--white)">₹${o.total}</td>
-          <td><span class="badge ${o.status==='completed'?'green':o.status==='preparing'?'gold':'blue'}">${o.status}</span></td>
-          <td style="color:var(--muted)">Ravi K.</td>
-          <td style="color:var(--muted)">${o.time}</td>
-          <td><button class="btn btn-secondary btn-sm" onclick="viewReceipt('${o.id}','${o.items}',${o.total})">🧾</button></td>
-        </tr>`).join('')}
-        ${STATE.orders.map(o=>`<tr>
-          <td><span style="font-family:var(--font-m);color:var(--green);font-weight:600">${o.id}</span></td>
-          <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.summary}</td>
-          <td style="font-weight:800;color:var(--white)">₹${o.total}</td>
-          <td><span class="badge green">completed</span></td>
-          <td style="color:var(--muted)">Staff</td>
-          <td style="color:var(--muted)">${o.time}</td>
-          <td><button class="btn btn-secondary btn-sm" onclick="viewReceipt('${o.id}','${o.summary}',${o.total})">🧾</button></td>
-        </tr>`).join('')}
+        ${Object.keys(catTotals).length ? Object.entries(catTotals).map(([cat,val])=>`
+          <tr><td>${catIcons[cat]||'🍽️'} ${cat.charAt(0).toUpperCase()+cat.slice(1)}</td><td>${catQty[cat]}</td><td style="color:var(--green);font-weight:700">₹${val.toFixed(0)}</td><td><span class="badge ${badgeColor[cat]||'green'}">${Math.round(val/grand*100)}%</span></td></tr>
+        `).join('') : `<tr><td colspan="4" style="text-align:center;color:var(--muted)">No orders yet today</td></tr>`}
+        ${grand ? `<tr><td colspan="2" style="font-weight:800;color:var(--white)">Total</td><td style="font-weight:800;color:var(--green);font-size:16px">₹${grand.toFixed(0)}</td><td><span class="badge green">100%</span></td></tr>` : ''}
       </tbody>
-    </table>
+    </table></div>
   </div>`;
 }
 
-function ownerMenu(){
+async function ownerOrders(){
+  const orders = await fetchOrders({ limit: 100 });
+  const ids = orders.flatMap(o=>[o.customer_id, o.staff_id]);
+  const nameMap = await fetchProfilesByIds(ids);
+  return `
+  <div class="search-bar"><span class="ico">🔍</span><input type="text" id="ord-search" oninput="filterOwnerOrders()" placeholder="Search orders by ID or items..."></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Order</th><th>Items</th><th>Total</th><th>Status</th><th>Customer</th><th>Staff</th><th>Time</th></tr></thead>
+    <tbody id="owner-orders-body">
+      ${orders.length ? orders.map(o=>`<tr data-search="${esc(o.order_number+' '+(o.order_items||[]).map(i=>i.name).join(' '))}">
+        <td><span style="font-family:var(--font-m);color:var(--green);font-weight:600">${o.order_number}</span></td>
+        <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${(o.order_items||[]).map(it=>`${it.quantity}× ${esc(it.name)}`).join(', ')}</td>
+        <td style="font-weight:800;color:var(--white)">₹${Number(o.total).toFixed(0)}</td>
+        <td><span class="badge ${o.status==='completed'?'green':o.status==='preparing'?'gold':'blue'}">${o.status}</span></td>
+        <td style="color:var(--muted)">${esc(nameMap[o.customer_id]||'Walk-in')}</td>
+        <td style="color:var(--muted)">${esc(nameMap[o.staff_id]||'—')}</td>
+        <td style="color:var(--muted)">${fmtTime(o.created_at)}</td>
+      </tr>`).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">No orders yet</td></tr>`}
+    </tbody>
+  </table></div>`;
+}
+function filterOwnerOrders(){
+  const q=document.getElementById('ord-search').value.toLowerCase();
+  document.querySelectorAll('#owner-orders-body tr').forEach(tr=>{
+    tr.style.display = (tr.dataset.search||'').toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+async function ownerMenu(){
+  const menu = await fetchMenu(false);
   return `
   <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
     <button class="btn btn-primary" onclick="addMenuItemModal()">➕ Add Item</button>
-    <button class="btn btn-secondary">📤 Export Menu</button>
   </div>
-  <div class="tabs">
-    <button class="tab active">All</button>
-    <button class="tab">🍕 Pizzas</button>
-    <button class="tab">🍔 Burgers</button>
-    <button class="tab">🍹 Mocktails</button>
-    <button class="tab">🍫 Desserts</button>
-  </div>
+  ${menu.length===0 ? `<div class="card" style="text-align:center;color:var(--muted)">No menu items yet. Add your first item, or run the seed data in supabase-schema.sql.</div>` : `
   <div class="menu-grid">
-    ${MENU.map(item=>`
+    ${menu.map(item=>`
     <div class="menu-item-card">
-      <div class="mic-img">${item.emoji}</div>
+      <div class="mic-img">${item.emoji||'🍽️'}</div>
       <div class="mic-body">
-        <div class="mic-name">${item.name}</div>
-        <div class="mic-cat">${item.cat.charAt(0).toUpperCase()+item.cat.slice(1)} · ${item.desc}</div>
+        <div class="mic-name">${esc(item.name)}</div>
+        <div class="mic-cat">${item.category.charAt(0).toUpperCase()+item.category.slice(1)} · ${esc(item.description||'')}</div>
         <div class="mic-footer">
-          <span class="mic-price">₹${item.price}</span>
+          <span class="mic-price">₹${Number(item.price).toFixed(0)}</span>
           <div style="display:flex;align-items:center;gap:10px">
-            <label class="mic-toggle">
-              <input type="checkbox" ${item.available?'checked':''} onchange="toggleItem(${item.id},this)">
-              <span class="toggle-track"></span>
-            </label>
-            <button class="btn btn-secondary btn-icon btn-sm" onclick="editItemModal(${item.id})">✏️</button>
-            <button class="btn btn-danger btn-icon btn-sm" onclick="deleteItem(${item.id})">🗑️</button>
+            <label class="mic-toggle"><input type="checkbox" ${item.is_available?'checked':''} onchange="toggleMenuItem('${item.id}',this.checked)"><span class="toggle-track"></span></label>
+            <button class="btn btn-secondary btn-icon btn-sm" onclick="editItemModal('${item.id}')">✏️</button>
+            <button class="btn btn-danger btn-icon btn-sm" onclick="deleteMenuItemConfirm('${item.id}')">🗑️</button>
           </div>
         </div>
       </div>
     </div>`).join('')}
-  </div>`;
+  </div>`}`;
 }
-
-function ownerOffers(){
-  return `
-  <div style="display:flex;gap:10px;margin-bottom:16px">
-    <button class="btn btn-primary" onclick="addOfferModal()">➕ Create Offer</button>
-  </div>
-  <div style="display:grid;gap:12px">
-    ${OFFERS.map(o=>`
-    <div class="card" style="display:flex;align-items:center;gap:14px">
-      <span style="font-size:36px">${o.emoji}</span>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px">${o.title}</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${o.desc}</div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:20px;font-weight:800;color:var(--green)">₹${o.price}</span>
-          <span style="font-size:12px;color:var(--muted);text-decoration:line-through">₹${o.original}</span>
-          <span class="badge green">Save ₹${o.original-o.price}</span>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0">
-        <span class="badge ${o.active?'green':'red'}">${o.active?'Active':'Paused'}</span>
-        <button class="btn btn-secondary btn-sm" onclick="toast('Offer updated!')">✏️ Edit</button>
-      </div>
-    </div>`).join('')}
-  </div>`;
-}
-
-function ownerStaff(){
-  return `
-  <div style="display:flex;gap:10px;margin-bottom:16px">
-    <button class="btn btn-primary" onclick="addStaffModal()">➕ Add Staff Member</button>
-  </div>
-  <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
-    <div class="stat-card blue"><div class="stat-ico">👥</div><div class="stat-val">3</div><div class="stat-lbl">Total Staff</div></div>
-    <div class="stat-card green"><div class="stat-ico">✅</div><div class="stat-val">3</div><div class="stat-lbl">Active</div></div>
-    <div class="stat-card gold"><div class="stat-ico">📦</div><div class="stat-val">54</div><div class="stat-lbl">Orders Today</div></div>
-  </div>
-  ${STAFF.map(s=>`
-  <div class="staff-card">
-    <div class="staff-av">${s.name[0]}</div>
-    <div class="staff-info">
-      <div class="staff-name">${s.name}</div>
-      <div class="staff-role">${s.role} · ${s.email}</div>
-      <div style="margin-top:4px;display:flex;align-items:center;gap:8px">
-        <span class="badge green">Active</span>
-        <span style="font-size:11px;color:var(--muted)">${s.orders_today} orders today</span>
-      </div>
-    </div>
-    <div class="staff-actions">
-      <button class="btn btn-secondary btn-sm" onclick="toast('Staff profile updated!')">✏️</button>
-      <button class="btn btn-danger btn-sm" onclick="toast('Staff account disabled','error')">⛔</button>
-    </div>
-  </div>`).join('')}`;
-}
-
-function ownerCustomers(){
-  const all = [...STATE.customers, ...Array(47).fill(0).map((_,i)=>({name:`Customer ${i+1}`,email:`c${i+1}@mail.com`,phone:'9876543210',joined:'Earlier',points:Math.floor(Math.random()*500)}))];
-  return `
-  <div class="search-bar"><span class="ico">🔍</span><input type="text" placeholder="Search customers..."></div>
-  <div class="stat-card blue" style="margin-bottom:14px;display:flex;align-items:center;gap:14px">
-    <div style="font-size:32px">👥</div>
-    <div><div style="font-size:28px;font-weight:800;color:var(--white)">${all.length}</div><div style="font-size:12px;color:var(--muted)">Total Registered Customers</div></div>
-  </div>
-  <div class="tbl-wrap">
-    <table>
-      <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Loyalty Pts</th><th>Status</th></tr></thead>
-      <tbody>
-        ${STATE.customers.map((c,i)=>`<tr>
-          <td style="color:var(--muted)">${i+1}</td>
-          <td style="font-weight:600;color:var(--white)">${c.name}</td>
-          <td style="color:var(--muted)">${c.email}</td>
-          <td><span style="color:var(--gold);font-weight:700">${c.points||0} pts</span></td>
-          <td><span class="badge green">Active</span></td>
-        </tr>`).join('')}
-        ${all.slice(STATE.customers.length, 8).map((c,i)=>`<tr>
-          <td style="color:var(--muted)">${STATE.customers.length+i+1}</td>
-          <td style="font-weight:600;color:var(--white)">${c.name}</td>
-          <td style="color:var(--muted)">${c.email}</td>
-          <td><span style="color:var(--gold);font-weight:700">${c.points} pts</span></td>
-          <td><span class="badge green">Active</span></td>
-        </tr>`).join('')}
-      </tbody>
-    </table>
-  </div>`;
-}
-
-function ownerReviews(){
-  const allRevs = [...SAMPLE_REVIEWS, ...STATE.reviews];
-  return `
-  <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
-    <div class="stat-card gold"><div class="stat-ico">⭐</div><div class="stat-val">4.8</div><div class="stat-lbl">Avg Rating</div></div>
-    <div class="stat-card blue"><div class="stat-ico">📝</div><div class="stat-val">${allRevs.length}</div><div class="stat-lbl">Total Reviews</div></div>
-    <div class="stat-card green"><div class="stat-ico">✅</div><div class="stat-val">${allRevs.filter(r=>r.replied).length}</div><div class="stat-lbl">Replied</div></div>
-    <div class="stat-card orange"><div class="stat-ico">⏳</div><div class="stat-val">${allRevs.filter(r=>!r.replied).length}</div><div class="stat-lbl">Pending Reply</div></div>
-  </div>
-  ${allRevs.map(r=>reviewCard(r, true)).join('')}`;
-}
-
-function ownerAudit(){
-  const logs = [
-    {ico:'🔑',type:'green',title:'Owner Login',sub:'Logged in from Chrome, Maharashtra',time:'10:02 AM'},
-    {ico:'➕',type:'blue',title:'Order Created',sub:'ORD-103 · ₹515 · by Ravi K.',time:'12:04 PM'},
-    {ico:'⭐',type:'gold',title:'New Review',sub:'Rahul M. left 5 stars',time:'11:45 AM'},
-    {ico:'🍽️',type:'green',title:'Menu Updated',sub:'Cold Coffee price updated to ₹79',time:'09:30 AM'},
-    {ico:'👤',type:'blue',title:'New Customer',sub:'Priya K. registered',time:'09:15 AM'},
-    {ico:'🔑',type:'green',title:'Staff Login',sub:'Meera Patil logged in',time:'09:00 AM'},
-    {ico:'❌',type:'red',title:'Failed Login',sub:'Invalid password attempt · Unknown',time:'08:45 AM'},
-  ];
-  return `
-  <div class="card">
-    <div class="card-title">🔍 System Audit Logs</div>
-    ${logs.map(l=>`
-    <div class="audit-row">
-      <div class="audit-icon ${l.type}">${l.ico}</div>
-      <div class="audit-info"><div class="audit-title">${l.title}</div><div class="audit-sub">${l.sub}</div></div>
-      <div class="audit-time">${l.time}</div>
-    </div>`).join('')}
-  </div>`;
-}
-
-function ownerSettings(){
-  return `
-  <div class="card" style="margin-bottom:14px">
-    <div class="card-title">🏪 Cafe Information</div>
-    <div class="form-grid">
-      <div class="form-fld"><label>Cafe Name</label><input class="form-inp" value="Bull's &amp; Trading Cafe"></div>
-      <div class="form-fld"><label>Address</label><input class="form-inp" value="Highway Center Building, Baburao Nagar, Shirur, MH 412210"></div>
-      <div class="form-row">
-        <div class="form-fld"><label>Opening Time</label><input class="form-inp" type="time" value="09:00"></div>
-        <div class="form-fld"><label>Closing Time</label><input class="form-inp" type="time" value="23:00"></div>
-      </div>
-      <div class="form-fld"><label>Instagram</label><input class="form-inp" value="@bulls_and_tradingcafe"></div>
-      <button class="btn btn-primary" onclick="toast('Settings saved successfully!')">💾 Save Changes</button>
-    </div>
-  </div>
-  <div class="card" style="margin-bottom:14px">
-    <div class="card-title">🔑 Supabase Configuration</div>
-    <div style="background:var(--bg3);border:1px solid rgba(34,197,94,0.15);border-radius:var(--r);padding:14px;font-family:var(--font-m);font-size:12px;color:var(--muted);line-height:2">
-      NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co<br>
-      NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key<br>
-      SUPABASE_SERVICE_ROLE_KEY=your-service-key<br>
-      NEXT_PUBLIC_SITE_URL=https://your-domain.com
-    </div>
-    <p style="font-size:12px;color:var(--muted);margin-top:10px">Add these to your <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">.env.local</code> file in the Next.js project.</p>
-  </div>
-  <div class="card">
-    <div class="card-title">⚠️ Danger Zone</div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <button class="btn btn-danger" onclick="toast('All demo data cleared','error');STATE.orders=[];STATE.reviews=[];STATE.customers=[];saveData();ownerNav('dashboard',null)">🗑️ Clear All Demo Data</button>
-      <button class="btn btn-danger" onclick="toast('Password reset email sent!','success')">🔑 Reset Owner Password</button>
-    </div>
-  </div>`;
-}
-
-/* ═══════════════════════════════════════════
-   REVIEW CARD HELPER
-═══════════════════════════════════════════ */
-function reviewCard(r, showReply=false){
-  return `
-  <div class="review-card">
-    <div class="rev-hdr">
-      <div class="rev-user">
-        <div class="rev-av">${r.initials||r.name[0]}</div>
-        <div><div class="rev-name">${r.name}</div><div class="rev-date">${r.date||'Just now'}</div></div>
-      </div>
-      <div class="rev-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
-    </div>
-    <div class="rev-cats">
-      <span class="rev-cat"><span class="star">★</span>Food: ${r.food}/5</span>
-      <span class="rev-cat"><span class="star">★</span>Service: ${r.service}/5</span>
-      <span class="rev-cat"><span class="star">★</span>Ambience: ${r.ambience||5}/5</span>
-      <span class="rev-cat"><span class="star">★</span>Cleanliness: ${r.cleanliness}/5</span>
-    </div>
-    <div class="rev-text">${r.text}</div>
-    ${showReply ? `<button class="btn btn-secondary btn-sm" onclick="replyModal('${r.name}')">
-      ${r.replied ? '✅ View Reply' : '💬 Reply'}
-    </button>` : ''}
-  </div>`;
-}
-
-/* ═══════════════════════════════════════════
-   OWNER MODALS
-═══════════════════════════════════════════ */
 function addMenuItemModal(){
-  openModal('Add Menu Item',`
+  openModal('Add Menu Item', `
     <div class="form-grid">
       <div class="form-fld"><label>Item Name</label><input class="form-inp" id="mi-name" placeholder="e.g. Veg Cheese Burst Pizza"></div>
       <div class="form-row">
-        <div class="form-fld"><label>Category</label>
-          <select class="form-inp" id="mi-cat"><option value="pizza">Pizza</option><option value="burger">Burger</option><option value="mocktail">Mocktail</option><option value="dessert">Dessert</option></select>
-        </div>
+        <div class="form-fld"><label>Category</label><select class="form-inp" id="mi-cat"><option value="pizza">Pizza</option><option value="burger">Burger</option><option value="mocktail">Mocktail</option><option value="dessert">Dessert</option><option value="other">Other</option></select></div>
         <div class="form-fld"><label>Price (₹)</label><input class="form-inp" type="number" id="mi-price" placeholder="0"></div>
       </div>
       <div class="form-fld"><label>Description</label><textarea class="form-inp" id="mi-desc" placeholder="Short description..."></textarea></div>
@@ -1277,61 +1337,79 @@ function addMenuItemModal(){
       <button class="btn btn-primary" onclick="saveMenuItem()">💾 Add Item</button>
     </div>`);
 }
-
-function saveMenuItem(){
-  const name = document.getElementById('mi-name').value.trim();
-  if(!name){toast('Please enter item name','error');return;}
-  const price = parseFloat(document.getElementById('mi-price').value)||0;
-  MENU.push({id:Date.now(),cat:document.getElementById('mi-cat').value,emoji:document.getElementById('mi-emoji').value||'🍽️',name,desc:document.getElementById('mi-desc').value,price,available:true});
-  closeModal(); toast('Menu item added! 🍽️');
-  ownerNav('menu', null);
+async function saveMenuItem(){
+  const name=document.getElementById('mi-name').value.trim();
+  if(!name){toast('Enter item name','error');return;}
+  const price=parseFloat(document.getElementById('mi-price').value)||0;
+  const { error } = await sb.from('menu_items').insert({
+    name, category: document.getElementById('mi-cat').value,
+    price, description: document.getElementById('mi-desc').value,
+    emoji: document.getElementById('mi-emoji').value||'🍽️',
+    is_available: true, created_by: APP.authUser.id
+  });
+  if(error){ toast(error.message,'error'); return; }
+  logAudit('create','menu_items',null,{name,price});
+  closeModal(); toast('Menu item added! 🍽️'); ownerNav('menu',null);
 }
-
 function editItemModal(id){
-  const item = MENU.find(m=>m.id===id);
-  if(!item) return;
-  openModal('Edit Item: '+item.name,`
+  const item = APP.menuCache.find(m=>m.id===id); if(!item) return;
+  openModal('Edit: '+item.name, `
     <div class="form-grid">
-      <div class="form-fld"><label>Item Name</label><input class="form-inp" id="ei-name" value="${item.name}"></div>
+      <div class="form-fld"><label>Item Name</label><input class="form-inp" id="ei-name" value="${esc(item.name)}"></div>
       <div class="form-fld"><label>Price (₹)</label><input class="form-inp" type="number" id="ei-price" value="${item.price}"></div>
-      <div class="form-fld"><label>Description</label><textarea class="form-inp" id="ei-desc">${item.desc}</textarea></div>
-      <button class="btn btn-primary" onclick="updateItem(${id})">💾 Save Changes</button>
+      <div class="form-fld"><label>Description</label><textarea class="form-inp" id="ei-desc">${esc(item.description||'')}</textarea></div>
+      <button class="btn btn-primary" onclick="updateMenuItem('${id}')">💾 Save Changes</button>
     </div>`);
 }
-function updateItem(id){
-  const item = MENU.find(m=>m.id===id);
-  if(item){item.name=document.getElementById('ei-name').value;item.price=parseFloat(document.getElementById('ei-price').value)||item.price;item.desc=document.getElementById('ei-desc').value;}
+async function updateMenuItem(id){
+  const { error } = await sb.from('menu_items').update({
+    name: document.getElementById('ei-name').value,
+    price: parseFloat(document.getElementById('ei-price').value)||0,
+    description: document.getElementById('ei-desc').value
+  }).eq('id', id);
+  if(error){ toast(error.message,'error'); return; }
+  logAudit('update','menu_items',id,null);
   closeModal(); toast('Item updated!'); ownerNav('menu',null);
 }
-function deleteItem(id){
-  if(confirm('Delete this item?')){const i=MENU.findIndex(m=>m.id===id);if(i>-1)MENU.splice(i,1);toast('Item deleted','error');ownerNav('menu',null);}
+async function toggleMenuItem(id, checked){
+  const { error } = await sb.from('menu_items').update({ is_available: checked }).eq('id', id);
+  if(error){ toast(error.message,'error'); return; }
+  toast(checked?'Item enabled!':'Item disabled');
 }
-function toggleItem(id,cb){const item=MENU.find(m=>m.id===id);if(item)item.available=cb.checked;toast(cb.checked?'Item enabled!':'Item disabled');}
-
-function addStaffModal(){
-  openModal('Add Staff Member',`
-    <div class="form-grid">
-      <div class="form-fld"><label>Full Name</label><input class="form-inp" id="st-name" placeholder="Staff full name"></div>
-      <div class="form-fld"><label>Email</label><input class="form-inp" type="email" id="st-email" placeholder="staff@bulls.cafe"></div>
-      <div class="form-fld"><label>Role</label>
-        <select class="form-inp" id="st-role"><option>Head Chef</option><option>Cashier</option><option>Server</option><option>Manager</option></select>
-      </div>
-      <div class="form-fld"><label>Temp Password</label><input class="form-inp" type="password" id="st-pass" placeholder="Set temporary password"></div>
-      <div style="background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);border-radius:var(--r);padding:12px;font-size:12px;color:rgba(255,255,255,0.7)">
-        📧 A welcome email with login credentials will be sent to the staff member via Supabase Auth.
-      </div>
-      <button class="btn btn-primary" onclick="saveStaff()">➕ Create Staff Account</button>
-    </div>`);
-}
-function saveStaff(){
-  const name=document.getElementById('st-name').value.trim();
-  if(!name){toast('Enter staff name','error');return;}
-  STAFF.push({id:Date.now(),name,role:document.getElementById('st-role').value,email:document.getElementById('st-email').value,status:'active',orders_today:0});
-  closeModal();toast('Staff member added! Welcome email sent 📧');ownerNav('staff',null);
+async function deleteMenuItemConfirm(id){
+  if(!confirm('Delete this item?')) return;
+  const { error } = await sb.from('menu_items').delete().eq('id', id);
+  if(error){ toast(error.message,'error'); return; }
+  logAudit('delete','menu_items',id,null);
+  toast('Item deleted','error'); ownerNav('menu',null);
 }
 
+async function ownerOffers(){
+  const offers = await fetchOffers(false);
+  return `
+  <div style="display:flex;gap:10px;margin-bottom:16px"><button class="btn btn-primary" onclick="addOfferModal()">➕ Create Offer</button></div>
+  ${offers.length===0 ? `<div class="card" style="text-align:center;color:var(--muted)">No offers yet.</div>` : `
+  <div style="display:grid;gap:12px">
+    ${offers.map(o=>`
+    <div class="card" style="display:flex;align-items:center;gap:14px">
+      <span style="font-size:36px">${o.emoji||'🔥'}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px">${esc(o.title)}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${esc(o.description||'')}</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px;font-weight:800;color:var(--green)">₹${Number(o.offer_price).toFixed(0)}</span>
+          <span style="font-size:12px;color:var(--muted);text-decoration:line-through">₹${Number(o.original_price).toFixed(0)}</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0">
+        <span class="badge ${o.is_active?'green':'red'}">${o.is_active?'Active':'Paused'}</span>
+        <button class="btn btn-secondary btn-sm" onclick="toggleOffer('${o.id}',${!o.is_active})">${o.is_active?'Pause':'Activate'}</button>
+      </div>
+    </div>`).join('')}
+  </div>`}`;
+}
 function addOfferModal(){
-  openModal('Create New Offer',`
+  openModal('Create New Offer', `
     <div class="form-grid">
       <div class="form-fld"><label>Offer Title</label><input class="form-inp" id="of-title" placeholder="e.g. 3 Pizzas Combo"></div>
       <div class="form-fld"><label>Description</label><input class="form-inp" id="of-desc" placeholder="Short description"></div>
@@ -1343,289 +1421,413 @@ function addOfferModal(){
       <button class="btn btn-primary" onclick="saveOffer()">🔥 Create Offer</button>
     </div>`);
 }
-function saveOffer(){
+async function saveOffer(){
   const title=document.getElementById('of-title').value.trim();
   if(!title){toast('Enter offer title','error');return;}
-  OFFERS.push({id:Date.now(),title,desc:document.getElementById('of-desc').value,emoji:document.getElementById('of-emoji').value||'🔥',price:parseFloat(document.getElementById('of-price').value)||0,original:parseFloat(document.getElementById('of-original').value)||0,active:true});
-  closeModal();toast('Offer created! 🔥');ownerNav('offers',null);
+  const { error } = await sb.from('offers').insert({
+    title, description: document.getElementById('of-desc').value,
+    emoji: document.getElementById('of-emoji').value||'🔥',
+    offer_price: parseFloat(document.getElementById('of-price').value)||0,
+    original_price: parseFloat(document.getElementById('of-original').value)||0,
+    is_active: true, created_by: APP.authUser.id
+  });
+  if(error){ toast(error.message,'error'); return; }
+  closeModal(); toast('Offer created! 🔥'); ownerNav('offers',null);
+}
+async function toggleOffer(id, active){
+  const { error } = await sb.from('offers').update({ is_active: active }).eq('id', id);
+  if(error){ toast(error.message,'error'); return; }
+  toast(active?'Offer activated':'Offer paused'); ownerNav('offers',null);
 }
 
-function replyModal(name){
-  openModal('Reply to '+name,`
-    <div class="form-grid">
-      <div class="form-fld"><label>Your Reply</label>
-        <textarea class="form-inp" style="min-height:120px" placeholder="Thank you for your kind words! We're glad you enjoyed..."></textarea>
+async function ownerStaff(){
+  const { data: staffRows, error } = await sb.from('staff').select('*, profiles(full_name, is_active)').order('created_at',{ascending:false});
+  const { data: invites } = await sb.from('staff_invites').select('*').eq('used', false).gt('expires_at', new Date().toISOString()).order('created_at',{ascending:false});
+  const list = error ? [] : staffRows;
+  return `
+  <div style="display:flex;gap:10px;margin-bottom:16px"><button class="btn btn-primary" onclick="addStaffModal()">➕ Invite Staff Member</button></div>
+  <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
+    <div class="stat-card blue"><div class="stat-ico">👥</div><div class="stat-val">${list.length}</div><div class="stat-lbl">Total Staff</div></div>
+    <div class="stat-card green"><div class="stat-ico">✅</div><div class="stat-val">${list.filter(s=>s.profiles?.is_active).length}</div><div class="stat-lbl">Active</div></div>
+    <div class="stat-card gold"><div class="stat-ico">✉️</div><div class="stat-val">${(invites||[]).length}</div><div class="stat-lbl">Pending Invites</div></div>
+  </div>
+  ${(invites||[]).length ? `<div class="sec-hdr"><h3>Pending Invites</h3></div>${invites.map(inv=>`
+    <div class="staff-card"><div class="staff-av" style="background:var(--gold-dim);color:var(--gold)">✉️</div>
+      <div class="staff-info"><div class="staff-name">${esc(inv.full_name)}</div><div class="staff-role">${esc(inv.email)} · ${esc(inv.staff_role)}</div>
+        <div style="margin-top:4px"><span class="badge gold">Code: ${esc(inv.invite_code)}</span></div>
       </div>
-      <button class="btn btn-primary" onclick="closeModal();toast('Reply sent! ✅')">📤 Send Reply</button>
-    </div>`);
-}
-
-function viewReceipt(id, items, total){
-  openModal('Receipt — '+id,`
-    <div class="receipt">
-      <div class="receipt-hdr">
-        <h4>🐂 Bull's &amp; Trading Cafe</h4>
-        <p>Highway Center Building, Shirur, MH 412210</p>
-        <p style="margin-top:4px;font-size:10px">Order: ${id} · ${new Date().toLocaleString('en-IN')}</p>
-      </div>
-      ${items.split(',').map(i=>`<div class="receipt-row"><span>${i.trim()}</span><span>₹--</span></div>`).join('')}
-      <div class="receipt-total"><span>TOTAL</span><span>₹${total}</span></div>
-      <div class="receipt-footer">
-        <p>Thank you for visiting!</p>
-        <p>Trade Smart. Eat Better. 🐂</p>
-        <p style="margin-top:6px">Instagram: @bulls_and_tradingcafe</p>
+    </div>`).join('')}` : ''}
+  <div class="sec-hdr" style="margin-top:16px"><h3>Active Staff</h3></div>
+  ${list.length ? list.map(s=>`
+  <div class="staff-card">
+    <div class="staff-av">${(s.profiles?.full_name||'S')[0].toUpperCase()}</div>
+    <div class="staff-info">
+      <div class="staff-name">${esc(s.profiles?.full_name||'Staff')}</div>
+      <div class="staff-role">${esc(s.staff_role)}</div>
+      <div style="margin-top:4px;display:flex;align-items:center;gap:8px">
+        <span class="badge ${s.profiles?.is_active?'green':'red'}">${s.profiles?.is_active?'Active':'Disabled'}</span>
       </div>
     </div>
-    <div style="display:flex;gap:10px;margin-top:14px">
-      <button class="btn btn-primary" style="flex:1" onclick="window.print()">🖨️ Print</button>
-      <button class="btn btn-secondary" style="flex:1" onclick="closeModal()">Close</button>
+    <div class="staff-actions">
+      <button class="btn ${s.profiles?.is_active?'btn-danger':'btn-secondary'} btn-sm" onclick="toggleStaffActive('${s.id}',${!s.profiles?.is_active})">${s.profiles?.is_active?'⛔ Disable':'✅ Enable'}</button>
+    </div>
+  </div>`).join('') : `<div class="card" style="text-align:center;color:var(--muted)">No staff members yet</div>`}`;
+}
+function genInviteCode(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let c=''; for(let i=0;i<6;i++) c+=chars[Math.floor(Math.random()*chars.length)];
+  return c;
+}
+function addStaffModal(){
+  openModal('Invite Staff Member', `
+    <div class="form-grid">
+      <div class="form-fld"><label>Full Name</label><input class="form-inp" id="st-name" placeholder="Staff full name"></div>
+      <div class="form-fld"><label>Email</label><input class="form-inp" type="email" id="st-email" placeholder="staff@bulls.cafe"></div>
+      <div class="form-fld"><label>Role</label><select class="form-inp" id="st-role"><option>Head Chef</option><option>Cashier</option><option>Server</option><option>Manager</option></select></div>
+      <div style="background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);border-radius:var(--r);padding:12px;font-size:12px;color:rgba(255,255,255,0.7)">
+        📧 This generates a one-time invite code. Share it with them along with the app link — they'll enter it on the Staff → "Activate Invite" tab.
+      </div>
+      <button class="btn btn-primary" onclick="saveStaffInvite()">➕ Generate Invite</button>
     </div>`);
 }
-
-/* ═══════════════════════════════════════════
-   STAFF NAVIGATION & VIEWS
-═══════════════════════════════════════════ */
-function staffNav(view, el){
-  if(el){
-    document.querySelectorAll('#staff-sidebar .sb-item').forEach(i=>i.classList.remove('active'));
-    el.classList.add('active');
-  }
-  const titles = {'new-order':'New Order','orders':'Order History','daily':'Daily Summary','menu-view':'Menu'};
-  document.getElementById('staff-page-title').textContent = titles[view] || view;
-  const c = document.getElementById('staff-content');
-  const views = {'new-order':staffNewOrder,'orders':staffOrders,'daily':staffDaily,'menu-view':staffMenuView};
-  c.innerHTML = '';
-  if(views[view]) c.innerHTML = views[view]();
-  closeSidebar('staff');
-  // init cart display
-  if(view==='new-order') updateCartDisplay();
+async function saveStaffInvite(){
+  const name=document.getElementById('st-name').value.trim();
+  const email=document.getElementById('st-email').value.trim().toLowerCase();
+  const role=document.getElementById('st-role').value;
+  if(!name||!email){toast('Enter name and email','error');return;}
+  const code=genInviteCode();
+  const { error } = await sb.from('staff_invites').insert({ email, full_name:name, staff_role:role, invite_code:code, created_by: APP.authUser.id });
+  if(error){ toast(error.message,'error'); return; }
+  logAudit('create','staff_invites',null,{email});
+  closeModal();
+  openModal('Invite Created ✅', `
+    <div style="text-align:center;padding:10px 0">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Share this code with <strong style="color:var(--white)">${esc(name)}</strong> (${esc(email)})</div>
+      <div style="font-family:var(--font-m);font-size:32px;font-weight:800;letter-spacing:4px;color:var(--green);background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:20px">${code}</div>
+      <div style="font-size:11px;color:var(--muted2);margin-top:10px">Expires in 7 days · Tied to ${esc(email)} only</div>
+    </div>`);
+  ownerNav('staff', null);
+}
+async function toggleStaffActive(staffId, active){
+  const { error } = await sb.from('profiles').update({ is_active: active }).eq('id', staffId);
+  if(error){ toast(error.message,'error'); return; }
+  toast(active?'Staff account enabled':'Staff account disabled', active?'success':'error');
+  ownerNav('staff', null);
 }
 
-function staffNewOrder(){
-  STATE.cart = {};
+async function ownerCustomers(){
+  const { data, error } = await sb.from('customers').select('*, profiles(full_name)').order('total_spent',{ascending:false}).limit(100);
+  const list = error ? [] : data;
+  return `
+  <div class="search-bar"><span class="ico">🔍</span><input type="text" id="cust-search" oninput="filterOwnerCustomers()" placeholder="Search customers..."></div>
+  <div class="stat-card blue" style="margin-bottom:14px;display:flex;align-items:center;gap:14px">
+    <div style="font-size:32px">👥</div>
+    <div><div style="font-size:28px;font-weight:800;color:var(--white)">${list.length}</div><div style="font-size:12px;color:var(--muted)">Total Registered Customers</div></div>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>#</th><th>Name</th><th>Loyalty Pts</th><th>Orders</th><th>Total Spent</th></tr></thead>
+    <tbody id="owner-cust-body">
+      ${list.length ? list.map((c,i)=>`<tr data-search="${esc((c.profiles?.full_name||'').toLowerCase())}">
+        <td style="color:var(--muted)">${i+1}</td>
+        <td style="font-weight:600;color:var(--white)">${esc(c.profiles?.full_name||'Customer')}</td>
+        <td><span style="color:var(--gold);font-weight:700">${c.loyalty_points} pts</span></td>
+        <td>${c.total_orders}</td>
+        <td>₹${Number(c.total_spent).toFixed(0)}</td>
+      </tr>`).join('') : `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">No customers yet</td></tr>`}
+    </tbody>
+  </table></div>`;
+}
+function filterOwnerCustomers(){
+  const q=document.getElementById('cust-search').value.toLowerCase();
+  document.querySelectorAll('#owner-cust-body tr').forEach(tr=>{ tr.style.display=(tr.dataset.search||'').includes(q)?'':'none'; });
+}
+
+async function ownerReviews(){
+  const reviews = await fetchReviews(100);
+  const avg = reviews.length ? (reviews.reduce((s,r)=>s+r.rating_overall,0)/reviews.length).toFixed(1) : '—';
+  return `
+  <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
+    <div class="stat-card gold"><div class="stat-ico">⭐</div><div class="stat-val">${avg}</div><div class="stat-lbl">Avg Rating</div></div>
+    <div class="stat-card blue"><div class="stat-ico">📝</div><div class="stat-val">${reviews.length}</div><div class="stat-lbl">Total Reviews</div></div>
+    <div class="stat-card green"><div class="stat-ico">✅</div><div class="stat-val">${reviews.filter(r=>r.owner_reply).length}</div><div class="stat-lbl">Replied</div></div>
+    <div class="stat-card orange"><div class="stat-ico">⏳</div><div class="stat-val">${reviews.filter(r=>!r.owner_reply).length}</div><div class="stat-lbl">Pending Reply</div></div>
+  </div>
+  ${reviews.length ? reviews.map(r=>reviewCard(r,true)).join('') : `<div class="card" style="text-align:center;color:var(--muted)">No reviews yet</div>`}`;
+}
+
+async function ownerAudit(){
+  const { data, error } = await sb.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(40);
+  const logs = error ? [] : data;
+  const nameMap = await fetchProfilesByIds(logs.map(l=>l.user_id));
+  const actionMeta = { login:{ico:'🔑',type:'green'}, create:{ico:'➕',type:'blue'}, update:{ico:'✏️',type:'gold'}, delete:{ico:'🗑️',type:'red'}, view:{ico:'👁️',type:'blue'}, logout:{ico:'🚪',type:'red'} };
+  return `
+  <div class="card">
+    <div class="card-title">🔍 System Audit Logs</div>
+    ${logs.length ? logs.map(l=>{
+      const m = actionMeta[l.action]||{ico:'📋',type:'green'};
+      return `<div class="audit-row">
+        <div class="audit-icon ${m.type}">${m.ico}</div>
+        <div class="audit-info"><div class="audit-title">${l.action.charAt(0).toUpperCase()+l.action.slice(1)}${l.table_name?' · '+esc(l.table_name):''}</div><div class="audit-sub">${esc(nameMap[l.user_id]||'System')}</div></div>
+        <div class="audit-time">${fmtTime(l.created_at)}</div>
+      </div>`;
+    }).join('') : `<div style="text-align:center;color:var(--muted);padding:20px">No activity logged yet</div>`}
+  </div>`;
+}
+
+async function ownerSettings(){
+  return `
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">🏪 Cafe Information</div>
+    <div class="form-grid">
+      <div class="form-fld"><label>Cafe Name</label><input class="form-inp" value="Bull's &amp; Trading Cafe" disabled style="opacity:0.6"></div>
+      <div class="form-fld"><label>Address</label><input class="form-inp" value="Highway Center Building, Baburao Nagar, Shirur, MH 412210" disabled style="opacity:0.6"></div>
+      <div class="form-fld"><label>Instagram</label><input class="form-inp" value="@bulls_and_tradingcafe" disabled style="opacity:0.6"></div>
+      <p style="font-size:11px;color:var(--muted)">Editable cafe settings need a small <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">cafe_settings</code> table — say the word and I'll add it.</p>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">🔑 Supabase Connection</div>
+    <div style="background:var(--bg3);border:1px solid rgba(34,197,94,0.15);border-radius:var(--r);padding:14px;font-family:var(--font-m);font-size:12px;color:var(--green)">✅ Connected — all data on this page is live from your Supabase project.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">⚠️ Account</div>
+    <button class="btn btn-danger" onclick="forgotPassword('ol-email')" style="opacity:0.5" disabled>Use the Owner login page's "Forgot password" link to reset your password.</button>
+  </div>`;
+}
+
+function reviewCard(r, showReply=false){
+  const initials = (r.customer_name || 'C')[0];
+  return `
+  <div class="review-card">
+    <div class="rev-hdr">
+      <div class="rev-user"><div class="rev-av">${initials}</div><div><div class="rev-name">Customer</div><div class="rev-date">${fmtDate(r.created_at)}</div></div></div>
+      <div class="rev-stars">${'★'.repeat(r.rating_overall)}${'☆'.repeat(5-r.rating_overall)}</div>
+    </div>
+    <div class="rev-cats">
+      <span class="rev-cat"><span class="star">★</span>Food: ${r.rating_food}/5</span>
+      <span class="rev-cat"><span class="star">★</span>Service: ${r.rating_service}/5</span>
+      <span class="rev-cat"><span class="star">★</span>Ambience: ${r.rating_ambience}/5</span>
+      <span class="rev-cat"><span class="star">★</span>Cleanliness: ${r.rating_cleanliness}/5</span>
+    </div>
+    <div class="rev-text">${esc(r.review_text||'')}</div>
+    ${r.owner_reply ? `<div style="background:var(--bg3);border-radius:8px;padding:10px;margin-top:8px;font-size:12px;color:var(--text)"><strong style="color:var(--green)">Owner reply:</strong> ${esc(r.owner_reply)}</div>` : ''}
+    ${showReply ? `<button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="replyModal('${r.id}')">${r.owner_reply?'✏️ Edit Reply':'💬 Reply'}</button>` : ''}
+  </div>`;
+}
+function replyModal(reviewId){
+  openModal('Reply to Review', `
+    <div class="form-grid">
+      <div class="form-fld"><label>Your Reply</label><textarea class="form-inp" id="reply-text" style="min-height:120px" placeholder="Thank you for your kind words!..."></textarea></div>
+      <button class="btn btn-primary" onclick="sendReply('${reviewId}')">📤 Send Reply</button>
+    </div>`);
+}
+async function sendReply(reviewId){
+  const text=document.getElementById('reply-text').value.trim();
+  if(!text){toast('Write a reply first','error');return;}
+  const { error } = await sb.from('reviews').update({ owner_reply:text, reply_at:new Date().toISOString() }).eq('id', reviewId);
+  if(error){ toast(error.message,'error'); return; }
+  closeModal(); toast('Reply sent! ✅'); ownerNav('reviews',null);
+}
+
+function viewReceipt(orderNumber, itemsText, total){
+  openModal('Receipt — '+orderNumber, `
+    <div class="receipt">
+      <div class="receipt-hdr"><h4>🐂 Bull's &amp; Trading Cafe</h4><p>Highway Center Building, Shirur, MH 412210</p><p style="margin-top:4px;font-size:10px">Order: ${esc(orderNumber)} · ${new Date().toLocaleString('en-IN')}</p></div>
+      ${itemsText.split(',').map(i=>`<div class="receipt-row"><span>${esc(i.trim())}</span></div>`).join('')}
+      <div class="receipt-total"><span>TOTAL</span><span>₹${Number(total).toFixed(0)}</span></div>
+      <div class="receipt-footer"><p>Thank you for visiting!</p><p>Trade Smart. Eat Better. 🐂</p><p style="margin-top:6px">Instagram: @bulls_and_tradingcafe</p></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px"><button class="btn btn-primary" style="flex:1" onclick="window.print()">🖨️ Print</button><button class="btn btn-secondary" style="flex:1" onclick="closeModal()">Close</button></div>`);
+}
+
+function initCharts(){
+  document.querySelectorAll('.cbar').forEach((bar,i)=>{ const h=bar.style.height; bar.style.height='0'; setTimeout(()=>bar.style.height=h, i*60+150); });
+  document.querySelectorAll('.prog-fill').forEach((bar,i)=>{ const w=bar.style.width; bar.style.width='0'; setTimeout(()=>bar.style.width=w, i*100+300); });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STAFF NAVIGATION
+═══════════════════════════════════════════════════════════════ */
+async function staffNav(view, el){
+  if(el){ document.querySelectorAll('#staff-sidebar .sb-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); }
+  const titles={'new-order':'New Order','orders':'Order History','daily':'Daily Summary','menu-view':'Menu'};
+  document.getElementById('staff-page-title').textContent = titles[view]||view;
+  const c=document.getElementById('staff-content');
+  c.innerHTML = loadingHTML();
+  closeSidebar('staff');
+  const views={'new-order':staffNewOrder,'orders':staffOrders,'daily':staffDaily,'menu-view':staffMenuView};
+  try{ c.innerHTML = await views[view](); if(view==='new-order') updateCartDisplay(); }
+  catch(e){ c.innerHTML = `<div class="card">Failed to load: ${esc(e.message)}</div>`; }
+}
+
+async function staffNewOrder(){
+  APP.cart = {};
+  const menu = await fetchMenu(true);
   return `
   <div style="margin-bottom:14px">
-    <div style="font-family:var(--font-m);font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em">New Order #ORD-${STATE.orderCounter+1}</div>
+    <div style="font-family:var(--font-m);font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em">New Order</div>
     <div style="font-size:14px;color:var(--text)">Select items and quantities below</div>
   </div>
+  ${menu.length===0 ? `<div class="card" style="text-align:center;color:var(--muted)">No available menu items. Ask the Owner to add some.</div>` : `
   <div class="ob-grid" id="order-builder">
-    ${MENU.filter(m=>m.available).map(item=>`
+    ${menu.map(item=>`
     <div class="ob-item">
-      <span class="ob-emoji">${item.emoji}</span>
-      <div class="ob-info">
-        <div class="ob-name">${item.name}</div>
-        <div class="ob-price">₹${item.price}</div>
-      </div>
+      <span class="ob-emoji">${item.emoji||'🍽️'}</span>
+      <div class="ob-info"><div class="ob-name">${esc(item.name)}</div><div class="ob-price">₹${Number(item.price).toFixed(0)}</div></div>
       <div class="ob-qty">
-        <button class="qty-btn" onclick="updateCart(${item.id},-1)">−</button>
+        <button class="qty-btn" onclick="updateCart('${item.id}',-1)">−</button>
         <span class="qty-num" id="qty-${item.id}">0</span>
-        <button class="qty-btn" onclick="updateCart(${item.id},1)">+</button>
+        <button class="qty-btn" onclick="updateCart('${item.id}',1)">+</button>
       </div>
     </div>`).join('')}
   </div>
   <div style="margin-top:16px" class="ob-total-box">
-    <div>
-      <div class="ob-total-lbl">Order Total</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:2px" id="cart-summary">No items selected</div>
-    </div>
+    <div><div class="ob-total-lbl">Order Total</div><div style="font-size:12px;color:var(--muted);margin-top:2px" id="cart-summary">No items selected</div></div>
     <div class="ob-total-val" id="cart-total">₹0</div>
   </div>
   <div style="display:flex;gap:10px;margin-top:14px">
     <button class="btn btn-secondary" style="flex:1" onclick="clearCart()">🗑️ Clear</button>
     <button class="btn btn-primary" style="flex:1" onclick="placeOrder()">✅ Place Order</button>
-  </div>`;
+  </div>`}`;
 }
-
 function updateCart(id, delta){
-  STATE.cart[id] = Math.max(0, (STATE.cart[id]||0) + delta);
-  if(STATE.cart[id]===0) delete STATE.cart[id];
-  const el = document.getElementById('qty-'+id);
-  if(el) el.textContent = STATE.cart[id]||0;
+  APP.cart[id] = Math.max(0, (APP.cart[id]||0)+delta);
+  if(APP.cart[id]===0) delete APP.cart[id];
+  const el=document.getElementById('qty-'+id); if(el) el.textContent = APP.cart[id]||0;
   updateCartDisplay();
 }
-
 function updateCartDisplay(){
-  const total = Object.entries(STATE.cart).reduce((s,[id,qty])=>{
-    const item = MENU.find(m=>m.id===parseInt(id));
-    return item ? s + item.price*qty : s;
-  },0);
-  const summary = Object.entries(STATE.cart).map(([id,qty])=>{
-    const item = MENU.find(m=>m.id===parseInt(id));
-    return item ? `${qty}× ${item.name}` : '';
-  }).filter(Boolean).join(', ');
-  const totalEl = document.getElementById('cart-total');
-  const sumEl = document.getElementById('cart-summary');
-  if(totalEl) totalEl.textContent = '₹'+total;
+  const total = Object.entries(APP.cart).reduce((s,[id,qty])=>{ const item=APP.menuCache.find(m=>m.id===id); return item?s+item.price*qty:s; },0);
+  const summary = Object.entries(APP.cart).map(([id,qty])=>{ const item=APP.menuCache.find(m=>m.id===id); return item?`${qty}× ${item.name}`:''; }).filter(Boolean).join(', ');
+  const totalEl=document.getElementById('cart-total'); const sumEl=document.getElementById('cart-summary');
+  if(totalEl) totalEl.textContent='₹'+total.toFixed(0);
   if(sumEl) sumEl.textContent = summary || 'No items selected';
 }
+function clearCart(){ APP.cart={}; document.querySelectorAll('.qty-num').forEach(el=>el.textContent='0'); updateCartDisplay(); }
 
-function clearCart(){STATE.cart={};document.querySelectorAll('.qty-num').forEach(el=>el.textContent='0');updateCartDisplay();}
+async function placeOrder(){
+  const entries = Object.entries(APP.cart);
+  if(!entries.length){ toast('Add items to the order first','error'); return; }
+  const items = entries.map(([id,qty])=>{ const m=APP.menuCache.find(x=>x.id===id); return { menu_item_id:id, name:m.name, price:m.price, quantity:qty }; });
+  const total = items.reduce((s,it)=>s+it.price*it.quantity,0);
 
-function placeOrder(){
-  const total = Object.entries(STATE.cart).reduce((s,[id,qty])=>{
-    const item = MENU.find(m=>m.id===parseInt(id));
-    return item ? s + item.price*qty : s;
-  },0);
-  if(total===0){toast('Add items to the order first','error');return;}
-  const summary = Object.entries(STATE.cart).map(([id,qty])=>{
-    const item = MENU.find(m=>m.id===parseInt(id));
-    return item ? `${qty}× ${item.name}` : '';
-  }).filter(Boolean).join(', ');
-  STATE.orderCounter++;
-  const orderId = 'ORD-'+STATE.orderCounter;
-  const order = {id:orderId,summary,total,time:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}),date:'Today'};
-  STATE.orders.push(order);
-  saveData();
-  toast('Order placed! '+orderId+' · ₹'+total);
-  setTimeout(()=>viewReceipt(orderId, summary, total),500);
+  const { data: orderRow, error: orderErr } = await sb.from('orders').insert({
+    staff_id: APP.authUser.id, status:'pending', subtotal: total, total: total
+  }).select().single();
+  if(orderErr){ toast(orderErr.message,'error'); return; }
+
+  const { error: itemsErr } = await sb.from('order_items').insert(items.map(it=>({ ...it, order_id: orderRow.id })));
+  if(itemsErr){ toast(itemsErr.message,'error'); return; }
+
+  await sb.from('orders').update({ status:'completed' }).eq('id', orderRow.id);
+  logAudit('create','orders',orderRow.id,{total});
+
+  const summary = items.map(it=>`${it.quantity}× ${it.name}`).join(', ');
+  toast(`Order placed! ${orderRow.order_number} · ₹${total.toFixed(0)}`);
+  setTimeout(()=>viewReceipt(orderRow.order_number, summary, total), 400);
   clearCart();
+  staffNav('new-order', document.querySelector('#staff-sidebar .sb-item'));
 }
 
-function staffOrders(){
-  const allOrders = [...SAMPLE_ORDERS, ...STATE.orders];
+async function staffOrders(){
+  const orders = await fetchOrders({ limit: 50 });
   return `
-  <div class="search-bar"><span class="ico">🔍</span><input type="text" placeholder="Search by order ID..."></div>
-  ${allOrders.map(o=>`
-  <div class="order-card">
-    <div class="order-hdr">
-      <span class="order-num">${o.id}</span>
-      <span class="badge ${o.status==='completed'||!o.status?'green':o.status==='preparing'?'gold':'blue'}">${o.status||'completed'}</span>
-    </div>
-    <div class="order-items">${o.items||o.summary}</div>
+  <div class="search-bar"><span class="ico">🔍</span><input type="text" placeholder="Search by order ID..." oninput="filterStaffOrders(this.value)"></div>
+  <div id="staff-orders-list">
+  ${orders.length ? orders.map(o=>`
+  <div class="order-card" data-search="${esc(o.order_number.toLowerCase())}">
+    <div class="order-hdr"><span class="order-num">${o.order_number}</span><span class="badge ${o.status==='completed'?'green':o.status==='preparing'?'gold':'blue'}">${o.status}</span></div>
+    <div class="order-items">${(o.order_items||[]).map(it=>`${it.quantity}× ${esc(it.name)}`).join(', ')}</div>
     <div class="order-footer">
-      <div class="order-total">₹${o.total}</div>
-      <div style="display:flex;gap:8px">
-        <span class="order-time">${o.time}</span>
-        <button class="btn btn-secondary btn-sm" onclick="viewReceipt('${o.id}','${o.items||o.summary}',${o.total})">🧾 Receipt</button>
-      </div>
+      <div class="order-total">₹${Number(o.total).toFixed(0)}</div>
+      <div style="display:flex;gap:8px"><span class="order-time">${fmtTime(o.created_at)}</span>
+        <button class="btn btn-secondary btn-sm" onclick="viewReceipt('${o.order_number}','${(o.order_items||[]).map(it=>it.quantity+'x '+it.name).join(',').replace(/'/g,"")}',${o.total})">🧾 Receipt</button></div>
     </div>
-  </div>`).join('')}`;
+  </div>`).join('') : `<div class="card" style="text-align:center;color:var(--muted)">No orders yet</div>`}
+  </div>`;
+}
+function filterStaffOrders(q){
+  q=q.toLowerCase();
+  document.querySelectorAll('#staff-orders-list .order-card').forEach(c=>{ c.style.display=(c.dataset.search||'').includes(q)?'':'none'; });
 }
 
-function staffDaily(){
-  const todayOrders = [...SAMPLE_ORDERS, ...STATE.orders];
-  const total = todayOrders.reduce((s,o)=>s+o.total,0);
+async function staffDaily(){
+  const orders = await fetchOrders({ sinceISO: todayStartISO(), limit: 500 });
+  const total = orders.reduce((s,o)=>s+Number(o.total),0);
+  const completed = orders.filter(o=>o.status==='completed').length;
+  const catTotals={};
+  orders.forEach(o=>(o.order_items||[]).forEach(it=>{
+    const menu=APP.menuCache.find(m=>m.id===it.menu_item_id);
+    const cat=menu?.category||'other';
+    catTotals[cat]=(catTotals[cat]||0)+Number(it.subtotal||it.price*it.quantity);
+  }));
+  const catTotal=Object.values(catTotals).reduce((a,b)=>a+b,0)||1;
+  const catIcons={pizza:'🍕',burger:'🍔',mocktail:'🍹',dessert:'🍫',other:'🍽️'};
+  const catColors={pizza:'green',burger:'gold',mocktail:'blue',dessert:'orange',other:'red'};
   return `
   <div class="stats-grid">
-    <div class="stat-card green"><div class="stat-ico">💰</div><div class="stat-val">₹${total}</div><div class="stat-lbl">Today's Revenue</div></div>
-    <div class="stat-card gold"><div class="stat-ico">📦</div><div class="stat-val">${todayOrders.length}</div><div class="stat-lbl">Orders Today</div></div>
-    <div class="stat-card blue"><div class="stat-ico">📊</div><div class="stat-val">₹${Math.round(total/Math.max(todayOrders.length,1))}</div><div class="stat-lbl">Avg Order Value</div></div>
-    <div class="stat-card orange"><div class="stat-ico">✅</div><div class="stat-val">${todayOrders.filter(o=>!o.status||o.status==='completed').length}</div><div class="stat-lbl">Completed</div></div>
+    <div class="stat-card green"><div class="stat-ico">💰</div><div class="stat-val">₹${total.toFixed(0)}</div><div class="stat-lbl">Today's Revenue</div></div>
+    <div class="stat-card gold"><div class="stat-ico">📦</div><div class="stat-val">${orders.length}</div><div class="stat-lbl">Orders Today</div></div>
+    <div class="stat-card blue"><div class="stat-ico">📊</div><div class="stat-val">₹${orders.length?Math.round(total/orders.length):0}</div><div class="stat-lbl">Avg Order Value</div></div>
+    <div class="stat-card orange"><div class="stat-ico">✅</div><div class="stat-val">${completed}</div><div class="stat-lbl">Completed</div></div>
   </div>
   <div class="card">
     <div class="card-title">📅 Daily Summary — ${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</div>
-    <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍕 Pizzas</span><span class="prog-val">₹1,428</span></div><div class="prog-bar"><div class="prog-fill green" style="width:42%"></div></div></div>
-    <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍔 Burgers</span><span class="prog-val">₹1,020</span></div><div class="prog-bar"><div class="prog-fill gold" style="width:35%"></div></div></div>
-    <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍹 Mocktails</span><span class="prog-val">₹632</span></div><div class="prog-bar"><div class="prog-fill blue" style="width:14%"></div></div></div>
-    <div class="prog-item"><div class="prog-hdr"><span class="prog-name">🍫 Desserts</span><span class="prog-val">₹318</span></div><div class="prog-bar"><div class="prog-fill orange" style="width:9%"></div></div></div>
+    ${Object.keys(catTotals).length ? Object.entries(catTotals).map(([cat,val])=>`
+      <div class="prog-item"><div class="prog-hdr"><span class="prog-name">${catIcons[cat]||'🍽️'} ${cat.charAt(0).toUpperCase()+cat.slice(1)}</span><span class="prog-val">₹${val.toFixed(0)}</span></div><div class="prog-bar"><div class="prog-fill ${catColors[cat]||'green'}" style="width:${Math.round(val/catTotal*100)}%"></div></div></div>
+    `).join('') : `<div style="color:var(--muted);font-size:13px">No orders yet today</div>`}
   </div>`;
 }
 
-function staffMenuView(){
-  return `
-  <div class="menu-grid">
-    ${MENU.filter(m=>m.available).map(item=>`
+async function staffMenuView(){
+  const menu = await fetchMenu(true);
+  return `<div class="menu-grid">${menu.map(item=>`
     <div class="menu-item-card">
-      <div class="mic-img">${item.emoji}</div>
-      <div class="mic-body">
-        <div class="mic-name">${item.name}</div>
-        <div class="mic-cat">${item.desc}</div>
-        <div class="mic-footer">
-          <span class="mic-price">₹${item.price}</span>
-          <span class="badge green">Available</span>
-        </div>
+      <div class="mic-img">${item.emoji||'🍽️'}</div>
+      <div class="mic-body"><div class="mic-name">${esc(item.name)}</div><div class="mic-cat">${esc(item.description||'')}</div>
+        <div class="mic-footer"><span class="mic-price">₹${Number(item.price).toFixed(0)}</span><span class="badge green">Available</span></div>
       </div>
-    </div>`).join('')}
-  </div>`;
+    </div>`).join('') || `<div class="card" style="text-align:center;color:var(--muted)">No menu items yet</div>`}</div>`;
 }
 
-/* ═══════════════════════════════════════════
-   CUSTOMER AUTH
-═══════════════════════════════════════════ */
-function switchAuthTab(tab){
-  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='signup'?0:1)));
-  document.getElementById('auth-signup').style.display = tab==='signup'?'block':'none';
-  document.getElementById('auth-login').style.display = tab==='login'?'block':'none';
-  document.getElementById('auth-msg').className='msg';
-}
-function showAuthMsg(msg,type){const el=document.getElementById('auth-msg');el.textContent=msg;el.className=`msg show ${type}`;}
-
-function customerSignup(){
-  const name=document.getElementById('c-name').value.trim();
-  const email=document.getElementById('c-email').value.trim();
-  const phone=document.getElementById('c-phone').value.trim();
-  const pass=document.getElementById('c-pass').value;
-  if(!name||!email||!pass){showAuthMsg('Please fill all required fields','error');return;}
-  if(STATE.customers.find(c=>c.email===email)){showAuthMsg('Email already registered. Please sign in.','error');return;}
-  const customer = {id:Date.now(),name,email,phone,pass,points:50,joined:new Date().toLocaleDateString('en-IN'),reviews:[]};
-  STATE.customers.push(customer);
-  saveData();
-  showAuthMsg('✅ Account created! You earned 50 welcome points!','success');
-  setTimeout(()=>{STATE.user=customer;enterCustomer();},1500);
-}
-
-function customerLogin(){
-  const email=document.getElementById('cl-email').value.trim();
-  const pass=document.getElementById('cl-pass').value;
-  const customer = STATE.customers.find(c=>c.email===email&&c.pass===pass);
-  if(!customer){showAuthMsg('Invalid email or password','error');return;}
-  STATE.user = customer;
-  enterCustomer();
-}
-
-function enterCustomer(){
-  document.getElementById('cust-name-display').textContent = STATE.user.name;
-  showPage('page-customer');
-  customerNav('home', document.querySelector('#customer-sidebar .sb-item'));
-}
-
-/* ═══════════════════════════════════════════
-   CUSTOMER NAVIGATION & VIEWS
-═══════════════════════════════════════════ */
-function customerNav(view, el){
-  if(el){
-    document.querySelectorAll('#customer-sidebar .sb-item').forEach(i=>i.classList.remove('active'));
-    el.classList.add('active');
-  }
+/* ═══════════════════════════════════════════════════════════════
+   CUSTOMER NAVIGATION
+═══════════════════════════════════════════════════════════════ */
+async function customerNav(view, el){
+  if(el){ document.querySelectorAll('#customer-sidebar .sb-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); }
   const titles={home:'Home',menu:'Our Menu',offers:"Today's Offers",profile:'My Profile',orders:'My Orders',reviews:'My Reviews',loyalty:'Loyalty Points',visit:'Visit Us'};
   document.getElementById('customer-page-title').textContent = titles[view]||view;
-  const c = document.getElementById('customer-content');
-  const views={home:customerHome,menu:customerMenu,offers:customerOffers,profile:customerProfile,orders:customerOrders,reviews:customerReviews,loyalty:customerLoyalty,visit:customerVisit};
-  c.innerHTML='';
-  if(views[view]) c.innerHTML = views[view]();
+  const c=document.getElementById('customer-content');
+  c.innerHTML = loadingHTML();
   closeSidebar('customer');
+  const views={home:customerHome,menu:customerMenu,offers:customerOffers,profile:customerProfile,orders:customerOrders,reviews:customerReviews,loyalty:customerLoyalty,visit:customerVisit};
+  try{ c.innerHTML = await views[view](); }
+  catch(e){ c.innerHTML = `<div class="card">Failed to load: ${esc(e.message)}</div>`; }
 }
 
-function customerHome(){
-  const u = STATE.user;
+async function customerHome(){
+  const [offers] = await Promise.all([ fetchOffers(true) ]);
+  const { data: cust } = await sb.from('customers').select('loyalty_points').eq('id', APP.authUser.id).single();
+  APP.extra = cust;
   return `
   <div style="background:linear-gradient(135deg,var(--card2),var(--card3));border:1px solid rgba(34,197,94,0.15);border-radius:var(--rl);padding:20px;margin-bottom:16px">
     <div style="display:flex;align-items:center;gap:14px">
-      <div style="width:52px;height:52px;border-radius:50%;background:var(--green-dim);border:2px solid rgba(34,197,94,0.3);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--green)">${u.name[0]}</div>
-      <div>
-        <div style="font-size:18px;font-weight:800;color:var(--white)">Hey, ${u.name.split(' ')[0]}! 👋</div>
-        <div style="font-size:13px;color:var(--muted)">Welcome back to Bull's &amp; Trading Cafe</div>
-      </div>
+      <div style="width:52px;height:52px;border-radius:50%;background:var(--green-dim);border:2px solid rgba(34,197,94,0.3);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--green)">${(APP.profile.full_name||'C')[0]}</div>
+      <div><div style="font-size:18px;font-weight:800;color:var(--white)">Hey, ${esc(APP.profile.full_name.split(' ')[0])}! 👋</div><div style="font-size:13px;color:var(--muted)">Welcome back to Bull's &amp; Trading Cafe</div></div>
     </div>
     <div style="margin-top:16px;background:var(--bg3);border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:space-between">
-      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Loyalty Points</div><div style="font-size:24px;font-weight:800;color:var(--gold)">${u.points||50} pts</div></div>
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Loyalty Points</div><div style="font-size:24px;font-weight:800;color:var(--gold)">${cust?.loyalty_points ?? 0} pts</div></div>
       <button class="btn btn-gold btn-sm" onclick="customerNav('loyalty',null)">View Rewards →</button>
     </div>
   </div>
   <div class="sec-hdr"><h3>🔥 Today's Offers</h3><span class="see-all" onclick="customerNav('offers',null)">See all →</span></div>
   <div style="display:grid;gap:10px;margin-bottom:16px">
-    ${OFFERS.slice(0,3).map(o=>`
+    ${offers.length ? offers.slice(0,3).map(o=>`
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;align-items:center;gap:12px">
-      <span style="font-size:28px">${o.emoji}</span>
-      <div style="flex:1">
-        <div style="font-size:13px;font-weight:700;color:var(--white)">${o.title}</div>
-        <div style="font-size:11px;color:var(--muted)">${o.desc}</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:18px;font-weight:800;color:var(--green)">₹${o.price}</div>
-        <div style="font-size:10px;color:var(--muted);text-decoration:line-through">₹${o.original}</div>
-      </div>
-    </div>`).join('')}
+      <span style="font-size:28px">${o.emoji||'🔥'}</span>
+      <div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--white)">${esc(o.title)}</div><div style="font-size:11px;color:var(--muted)">${esc(o.description||'')}</div></div>
+      <div style="text-align:right"><div style="font-size:18px;font-weight:800;color:var(--green)">₹${Number(o.offer_price).toFixed(0)}</div><div style="font-size:10px;color:var(--muted);text-decoration:line-through">₹${Number(o.original_price).toFixed(0)}</div></div>
+    </div>`).join('') : `<div style="color:var(--muted);font-size:13px">No active offers right now</div>`}
   </div>
   <div class="sec-hdr"><h3>📍 Cafe Info</h3></div>
   <div class="card">
@@ -1637,7 +1839,8 @@ function customerHome(){
   </div>`;
 }
 
-function customerMenu(){
+async function customerMenu(){
+  const menu = await fetchMenu(true);
   return `
   <div class="tabs">
     <button class="tab active" onclick="filterCustMenu('all',this)">All</button>
@@ -1646,126 +1849,99 @@ function customerMenu(){
     <button class="tab" onclick="filterCustMenu('mocktail',this)">🍹</button>
     <button class="tab" onclick="filterCustMenu('dessert',this)">🍫</button>
   </div>
-  <div class="menu-grid" id="cust-menu-grid">
-    ${MENU.filter(m=>m.available).map(m=>`
-    <div class="menu-item-card">
-      <div class="mic-img">${m.emoji}</div>
-      <div class="mic-body">
-        <div class="mic-name">${m.name}</div>
-        <div class="mic-cat">${m.desc}</div>
-        <div class="mic-footer">
-          <span class="mic-price">₹${m.price}</span>
-          <span class="badge green">Available</span>
-        </div>
-      </div>
-    </div>`).join('')}
-  </div>`;
+  <div class="menu-grid" id="cust-menu-grid">${menuCardsHTML(menu)}</div>`;
 }
-function filterCustMenu(cat, btn){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
-  const items = cat==='all' ? MENU.filter(m=>m.available) : MENU.filter(m=>m.available&&m.cat===cat);
-  document.getElementById('cust-menu-grid').innerHTML = items.map(m=>`
+function menuCardsHTML(items){
+  if(!items.length) return `<div class="card" style="text-align:center;color:var(--muted)">No menu items available yet</div>`;
+  return items.map(m=>`
     <div class="menu-item-card">
-      <div class="mic-img">${m.emoji}</div>
-      <div class="mic-body">
-        <div class="mic-name">${m.name}</div>
-        <div class="mic-cat">${m.desc}</div>
-        <div class="mic-footer"><span class="mic-price">₹${m.price}</span><span class="badge green">Available</span></div>
+      <div class="mic-img">${m.emoji||'🍽️'}</div>
+      <div class="mic-body"><div class="mic-name">${esc(m.name)}</div><div class="mic-cat">${esc(m.description||'')}</div>
+        <div class="mic-footer"><span class="mic-price">₹${Number(m.price).toFixed(0)}</span><span class="badge green">Available</span></div>
       </div>
     </div>`).join('');
 }
+function filterCustMenu(cat, btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); btn.classList.add('active');
+  const items = cat==='all' ? APP.menuCache.filter(m=>m.is_available) : APP.menuCache.filter(m=>m.is_available&&m.category===cat);
+  document.getElementById('cust-menu-grid').innerHTML = menuCardsHTML(items);
+}
 
-function customerOffers(){
-  return `
-  <div style="display:grid;gap:12px">
-    ${OFFERS.map(o=>`
+async function customerOffers(){
+  const offers = await fetchOffers(true);
+  return `<div style="display:grid;gap:12px">${offers.length ? offers.map(o=>`
     <div class="card" style="position:relative;overflow:hidden">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--green),rgba(34,197,94,0.3))"></div>
       <div style="display:flex;align-items:center;gap:14px">
-        <span style="font-size:40px">${o.emoji}</span>
-        <div style="flex:1">
-          <div style="font-size:16px;font-weight:800;color:var(--white);margin-bottom:4px">${o.title}</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:10px">${o.desc}</div>
-          <div style="display:flex;align-items:center;gap:12px">
-            <span style="font-size:24px;font-weight:800;color:var(--green)">₹${o.price}</span>
-            <span style="font-size:13px;color:var(--muted);text-decoration:line-through">₹${o.original}</span>
-            <span class="badge green">Save ₹${o.original-o.price}</span>
-          </div>
+        <span style="font-size:40px">${o.emoji||'🔥'}</span>
+        <div style="flex:1"><div style="font-size:16px;font-weight:800;color:var(--white);margin-bottom:4px">${esc(o.title)}</div><div style="font-size:13px;color:var(--muted);margin-bottom:10px">${esc(o.description||'')}</div>
+          <div style="display:flex;align-items:center;gap:12px"><span style="font-size:24px;font-weight:800;color:var(--green)">₹${Number(o.offer_price).toFixed(0)}</span><span style="font-size:13px;color:var(--muted);text-decoration:line-through">₹${Number(o.original_price).toFixed(0)}</span></div>
         </div>
       </div>
-    </div>`).join('')}
-  </div>`;
+    </div>`).join('') : `<div class="card" style="text-align:center;color:var(--muted)">No active offers right now</div>`}</div>`;
 }
 
-function customerProfile(){
-  const u = STATE.user;
+async function customerProfile(){
+  const { data: cust } = await sb.from('customers').select('*').eq('id', APP.authUser.id).single();
+  const { count: revCount } = await sb.from('reviews').select('id',{count:'exact',head:true}).eq('customer_id', APP.authUser.id);
   return `
   <div class="card" style="margin-bottom:14px;text-align:center;padding:28px 20px">
-    <div style="width:72px;height:72px;border-radius:50%;background:var(--green-dim);border:3px solid rgba(34,197,94,0.3);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:var(--green);margin:0 auto 14px">${u.name[0]}</div>
-    <div style="font-size:20px;font-weight:800;color:var(--white);margin-bottom:4px">${u.name}</div>
-    <div style="font-size:13px;color:var(--muted)">${u.email}</div>
+    <div style="width:72px;height:72px;border-radius:50%;background:var(--green-dim);border:3px solid rgba(34,197,94,0.3);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:var(--green);margin:0 auto 14px">${(APP.profile.full_name||'C')[0]}</div>
+    <div style="font-size:20px;font-weight:800;color:var(--white);margin-bottom:4px">${esc(APP.profile.full_name)}</div>
+    <div style="font-size:13px;color:var(--muted)">${esc(APP.authUser.email)}</div>
     <div style="margin-top:14px;display:flex;gap:16px;justify-content:center">
-      <div><div style="font-size:20px;font-weight:800;color:var(--gold)">${u.points||50}</div><div style="font-size:11px;color:var(--muted)">Points</div></div>
-      <div><div style="font-size:20px;font-weight:800;color:var(--green)">${STATE.reviews.filter(r=>r.userId===u.id).length}</div><div style="font-size:11px;color:var(--muted)">Reviews</div></div>
-      <div><div style="font-size:20px;font-weight:800;color:var(--blue)">${u.joined||'Today'}</div><div style="font-size:11px;color:var(--muted)">Joined</div></div>
+      <div><div style="font-size:20px;font-weight:800;color:var(--gold)">${cust?.loyalty_points ?? 0}</div><div style="font-size:11px;color:var(--muted)">Points</div></div>
+      <div><div style="font-size:20px;font-weight:800;color:var(--green)">${revCount||0}</div><div style="font-size:11px;color:var(--muted)">Reviews</div></div>
+      <div><div style="font-size:20px;font-weight:800;color:var(--blue)">${fmtDate(cust?.created_at||APP.authUser.created_at)}</div><div style="font-size:11px;color:var(--muted)">Joined</div></div>
     </div>
   </div>
   <div class="card">
     <div class="card-title">✏️ Edit Profile</div>
     <div class="form-grid">
-      <div class="form-fld"><label>Full Name</label><input class="form-inp" id="pr-name" value="${u.name}"></div>
-      <div class="form-fld"><label>Email</label><input class="form-inp" value="${u.email}" disabled style="opacity:0.5"></div>
-      <div class="form-fld"><label>Phone</label><input class="form-inp" id="pr-phone" value="${u.phone||''}"></div>
-      <div class="form-fld"><label>New Password</label><input class="form-inp" type="password" id="pr-pass" placeholder="Leave blank to keep current"></div>
+      <div class="form-fld"><label>Full Name</label><input class="form-inp" id="pr-name" value="${esc(APP.profile.full_name)}"></div>
+      <div class="form-fld"><label>Email</label><input class="form-inp" value="${esc(APP.authUser.email)}" disabled style="opacity:0.5"></div>
+      <div class="form-fld"><label>Phone</label><input class="form-inp" id="pr-phone" value="${esc(APP.profile.phone||'')}"></div>
+      <div class="form-fld"><label>Birthday 🎂</label><input class="form-inp" type="date" id="pr-birthday" value="${cust?.birthday||''}"></div>
       <button class="btn btn-primary" onclick="updateProfile()">💾 Save Profile</button>
     </div>
   </div>`;
 }
-function updateProfile(){
-  const u=STATE.user;
-  u.name=document.getElementById('pr-name').value.trim()||u.name;
-  u.phone=document.getElementById('pr-phone').value.trim();
-  const np=document.getElementById('pr-pass').value;if(np)u.pass=np;
-  document.getElementById('cust-name-display').textContent=u.name;
-  saveData();toast('Profile updated! ✅');
+async function updateProfile(){
+  const name=document.getElementById('pr-name').value.trim()||APP.profile.full_name;
+  const phone=document.getElementById('pr-phone').value.trim();
+  const birthday=document.getElementById('pr-birthday').value || null;
+  const { error:e1 } = await sb.from('profiles').update({ full_name:name, phone }).eq('id', APP.authUser.id);
+  const { error:e2 } = await sb.from('customers').update({ birthday }).eq('id', APP.authUser.id);
+  if(e1||e2){ toast((e1||e2).message,'error'); return; }
+  APP.profile.full_name = name;
+  document.getElementById('cust-name-display').textContent = name;
+  toast('Profile updated! ✅');
 }
 
-function customerOrders(){
-  const myOrders = STATE.orders.slice(0,5);
-  if(myOrders.length===0) return `<div style="text-align:center;padding:48px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:16px">📦</div><div style="font-size:16px;font-weight:600">No orders yet</div><div style="font-size:13px;margin-top:8px">Your order history will appear here</div></div>`;
-  return myOrders.map(o=>`
+async function customerOrders(){
+  const orders = await fetchOrders({ mine:true, limit: 30 });
+  if(!orders.length) return `<div style="text-align:center;padding:48px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:16px">📦</div><div style="font-size:16px;font-weight:600">No orders yet</div><div style="font-size:13px;margin-top:8px">Your order history will appear here</div></div>`;
+  return orders.map(o=>`
   <div class="order-card">
-    <div class="order-hdr"><span class="order-num">${o.id}</span><span class="badge green">completed</span></div>
-    <div class="order-items">${o.summary}</div>
-    <div class="order-footer">
-      <div class="order-total">₹${o.total}</div>
-      <button class="btn btn-secondary btn-sm" onclick="viewReceipt('${o.id}','${o.summary}',${o.total})">🧾 Receipt</button>
-    </div>
+    <div class="order-hdr"><span class="order-num">${o.order_number}</span><span class="badge ${o.status==='completed'?'green':'blue'}">${o.status}</span></div>
+    <div class="order-items">${(o.order_items||[]).map(it=>`${it.quantity}× ${esc(it.name)}`).join(', ')}</div>
+    <div class="order-footer"><div class="order-total">₹${Number(o.total).toFixed(0)}</div><button class="btn btn-secondary btn-sm" onclick="viewReceipt('${o.order_number}','${(o.order_items||[]).map(it=>it.quantity+'x '+it.name).join(',').replace(/'/g,"")}',${o.total})">🧾 Receipt</button></div>
   </div>`).join('');
 }
 
-function customerReviews(){
-  const myRevs = STATE.reviews.filter(r=>r.userId===STATE.user.id);
+async function customerReviews(){
+  const { data: mine } = await sb.from('reviews').select('*').eq('customer_id', APP.authUser.id).order('created_at',{ascending:false});
   return `
-  <div style="margin-bottom:16px">
-    <button class="btn btn-primary" onclick="writeReviewModal()">✍️ Write a Review</button>
-  </div>
-  ${myRevs.length===0 ? `<div style="text-align:center;padding:40px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:16px">⭐</div><div>No reviews yet. Share your experience!</div></div>` : myRevs.map(r=>reviewCard(r)).join('')}
-  <div class="sec-hdr" style="margin-top:16px"><h3>All Reviews</h3></div>
-  ${SAMPLE_REVIEWS.slice(0,2).map(r=>reviewCard(r)).join('')}`;
+  <div style="margin-bottom:16px"><button class="btn btn-primary" onclick="writeReviewModal()">✍️ Write a Review</button></div>
+  ${(mine&&mine.length) ? mine.map(r=>reviewCard(r)).join('') : `<div style="text-align:center;padding:40px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:16px">⭐</div><div>No reviews yet. Share your experience!</div></div>`}`;
 }
-
 function writeReviewModal(){
-  openModal('Write a Review',`
-    <div style="text-align:center;margin-bottom:16px">
-      <div style="font-size:13px;color:var(--muted)">How was your experience at Bull's &amp; Trading Cafe?</div>
-    </div>
+  openModal('Write a Review', `
+    <div style="text-align:center;margin-bottom:16px"><div style="font-size:13px;color:var(--muted)">How was your experience at Bull's &amp; Trading Cafe?</div></div>
     <div class="form-grid">
-      <div class="form-fld">
-        <label>Overall Rating</label>
+      <div class="form-fld"><label>Overall Rating</label>
         <div class="rating-input" id="overall-rating">
-          <input type="radio" name="overall" id="s5" value="5"><label for="s5">★</label>
+          <input type="radio" name="overall" id="s5" value="5" checked><label for="s5">★</label>
           <input type="radio" name="overall" id="s4" value="4"><label for="s4">★</label>
           <input type="radio" name="overall" id="s3" value="3"><label for="s3">★</label>
           <input type="radio" name="overall" id="s2" value="2"><label for="s2">★</label>
@@ -1773,46 +1949,37 @@ function writeReviewModal(){
         </div>
       </div>
       <div class="form-row">
-        <div class="form-fld"><label>Food (1-5)</label><input class="form-inp" type="number" id="rv-food" min="1" max="5" value="5" placeholder="5"></div>
-        <div class="form-fld"><label>Service (1-5)</label><input class="form-inp" type="number" id="rv-service" min="1" max="5" value="5" placeholder="5"></div>
+        <div class="form-fld"><label>Food (1-5)</label><input class="form-inp" type="number" id="rv-food" min="1" max="5" value="5"></div>
+        <div class="form-fld"><label>Service (1-5)</label><input class="form-inp" type="number" id="rv-service" min="1" max="5" value="5"></div>
       </div>
       <div class="form-row">
-        <div class="form-fld"><label>Ambience (1-5)</label><input class="form-inp" type="number" id="rv-ambience" min="1" max="5" value="5" placeholder="5"></div>
-        <div class="form-fld"><label>Cleanliness (1-5)</label><input class="form-inp" type="number" id="rv-clean" min="1" max="5" value="5" placeholder="5"></div>
+        <div class="form-fld"><label>Ambience (1-5)</label><input class="form-inp" type="number" id="rv-ambience" min="1" max="5" value="5"></div>
+        <div class="form-fld"><label>Cleanliness (1-5)</label><input class="form-inp" type="number" id="rv-clean" min="1" max="5" value="5"></div>
       </div>
-      <div class="form-fld">
-        <label>Your Review</label>
-        <textarea class="form-inp" id="rv-text" style="min-height:100px" placeholder="Tell us about your visit..."></textarea>
-      </div>
+      <div class="form-fld"><label>Your Review</label><textarea class="form-inp" id="rv-text" style="min-height:100px" placeholder="Tell us about your visit..."></textarea></div>
       <button class="btn btn-primary" onclick="submitReview()">⭐ Submit Review (+20 points)</button>
     </div>`);
 }
-
-function submitReview(){
-  const text = document.getElementById('rv-text').value.trim();
+async function submitReview(){
+  const text=document.getElementById('rv-text').value.trim();
   if(!text){toast('Please write your review','error');return;}
-  const rating = parseInt(document.querySelector('input[name="overall"]:checked')?.value||5);
-  const review = {
-    id:Date.now(), userId:STATE.user.id, name:STATE.user.name,
-    initials:STATE.user.name[0], rating,
-    food:parseInt(document.getElementById('rv-food').value)||5,
-    service:parseInt(document.getElementById('rv-service').value)||5,
-    ambience:parseInt(document.getElementById('rv-ambience').value)||5,
-    cleanliness:parseInt(document.getElementById('rv-clean').value)||5,
-    text, date:'Just now', replied:false
-  };
-  STATE.reviews.push(review);
-  STATE.user.points = (STATE.user.points||50) + 20;
-  saveData();
-  closeModal(); toast('Review submitted! +20 loyalty points ⭐');
-  customerNav('reviews', null);
+  const rating=parseInt(document.querySelector('input[name="overall"]:checked')?.value||5);
+  const { error } = await sb.from('reviews').insert({
+    customer_id: APP.authUser.id, rating_overall: rating,
+    rating_food: parseInt(document.getElementById('rv-food').value)||5,
+    rating_service: parseInt(document.getElementById('rv-service').value)||5,
+    rating_ambience: parseInt(document.getElementById('rv-ambience').value)||5,
+    rating_cleanliness: parseInt(document.getElementById('rv-clean').value)||5,
+    review_text: text
+  });
+  if(error){ toast(error.message,'error'); return; }
+  closeModal(); toast('Review submitted! +20 loyalty points ⭐'); customerNav('reviews', null);
 }
 
-function customerLoyalty(){
-  const u = STATE.user;
-  const pts = u.points||50;
-  const nextReward = 200;
-  const progress = Math.min(pts/nextReward*100,100);
+async function customerLoyalty(){
+  const { data: cust } = await sb.from('customers').select('*').eq('id', APP.authUser.id).single();
+  const pts = cust?.loyalty_points ?? 0;
+  const nextReward=200; const progress=Math.min(pts/nextReward*100,100);
   return `
   <div class="loyalty-card">
     <div style="font-size:11px;color:rgba(245,158,11,0.7);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px;font-weight:700">Loyalty Points</div>
@@ -1825,9 +1992,7 @@ function customerLoyalty(){
     <div class="card-title">🎁 How to Earn Points</div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div style="display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:10px;padding:12px"><span style="font-size:22px">⭐</span><div><div style="font-size:13px;font-weight:600;color:var(--white)">Write a Review</div><div style="font-size:12px;color:var(--muted)">+20 points per review</div></div></div>
-      <div style="display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:10px;padding:12px"><span style="font-size:22px">🎂</span><div><div style="font-size:13px;font-weight:600;color:var(--white)">Birthday Registration</div><div style="font-size:12px;color:var(--muted)">+50 points bonus</div></div></div>
-      <div style="display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:10px;padding:12px"><span style="font-size:22px">📷</span><div><div style="font-size:13px;font-weight:600;color:var(--white)">Instagram Follow</div><div style="font-size:12px;color:var(--muted)">+10 points</div></div></div>
-      <div style="display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:10px;padding:12px"><span style="font-size:22px">🤝</span><div><div style="font-size:13px;font-weight:600;color:var(--white)">Refer a Friend</div><div style="font-size:12px;color:var(--muted)">+30 points per referral</div></div></div>
+      <div style="display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:10px;padding:12px"><span style="font-size:22px">🎂</span><div><div style="font-size:13px;font-weight:600;color:var(--white)">Birthday Registered</div><div style="font-size:12px;color:var(--muted)">Add it in My Profile</div></div></div>
     </div>
   </div>
   <div class="card">
@@ -1839,15 +2004,17 @@ function customerLoyalty(){
     </div>
   </div>`;
 }
-function redeemPoints(pts, item){
-  if(STATE.user.points<pts){toast('Not enough points','error');return;}
-  STATE.user.points -= pts;
-  saveData();
+async function redeemPoints(pts, item){
+  const { data: cust } = await sb.from('customers').select('loyalty_points').eq('id', APP.authUser.id).single();
+  if(!cust || cust.loyalty_points<pts){ toast('Not enough points','error'); return; }
+  const { error:e1 } = await sb.from('customers').update({ loyalty_points: cust.loyalty_points-pts }).eq('id', APP.authUser.id);
+  const { error:e2 } = await sb.from('loyalty_transactions').insert({ customer_id: APP.authUser.id, points: -pts, reason: 'redemption: '+item });
+  if(e1||e2){ toast((e1||e2).message,'error'); return; }
   toast(`🎁 Redeemed! Free ${item} coupon generated. Show this to staff!`);
-  setTimeout(()=>customerNav('loyalty',null),500);
+  setTimeout(()=>customerNav('loyalty',null), 400);
 }
 
-function customerVisit(){
+async function customerVisit(){
   return `
   <div class="card" style="margin-bottom:14px">
     <div class="card-title">📍 Our Location</div>
@@ -1866,67 +2033,14 @@ function customerVisit(){
   </div>
   <div class="card">
     <div class="card-title">📷 Follow Us</div>
-    <a href="https://www.instagram.com/bulls_and_tradingcafe?igsh=MTkyczd3dDc4NXlkbw==" target="_blank" class="btn" style="width:100%;justify-content:center;display:flex;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#bc1888);color:white">
-      📷 @bulls_and_tradingcafe on Instagram
-    </a>
+    <a href="https://www.instagram.com/bulls_and_tradingcafe?igsh=MTkyczd3dDc4NXlkbw==" target="_blank" class="btn" style="width:100%;justify-content:center;display:flex;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#bc1888);color:white">📷 @bulls_and_tradingcafe on Instagram</a>
   </div>`;
 }
 
-/* ═══════════════════════════════════════════
-   DATA PERSISTENCE
-═══════════════════════════════════════════ */
-function saveData(){
-  localStorage.setItem('btc_customers', JSON.stringify(STATE.customers));
-  localStorage.setItem('btc_orders', JSON.stringify(STATE.orders));
-  localStorage.setItem('btc_reviews', JSON.stringify(STATE.reviews));
-  localStorage.setItem('btc_order_counter', STATE.orderCounter);
-}
-
-/* ═══════════════════════════════════════════
-   CHART INIT (animate bars)
-═══════════════════════════════════════════ */
-function initCharts(){
-  // Already set via inline styles, just ensure they're visible
-  document.querySelectorAll('.cbar').forEach((bar,i)=>{
-    const h = bar.style.height;
-    bar.style.height = '0';
-    setTimeout(()=>bar.style.height=h, i*60+200);
-  });
-  document.querySelectorAll('.prog-fill').forEach((bar,i)=>{
-    const w = bar.style.width;
-    bar.style.width='0';
-    setTimeout(()=>bar.style.width=w, i*100+400);
-  });
-}
-
-/* ═══════════════════════════════════════════
-   BOOT
-═══════════════════════════════════════════ */
-// Close notif panel when clicking outside
+/* Close notif panel when clicking outside */
 document.addEventListener('click', function(e){
-  document.querySelectorAll('.notif-panel.show').forEach(p=>{
-    if(!p.parentElement.contains(e.target)) p.classList.remove('show');
-  });
+  document.querySelectorAll('.notif-panel.show').forEach(p=>{ if(!p.parentElement.contains(e.target)) p.classList.remove('show'); });
 });
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const cafeSupabase = window.supabase.createClient(
-  "https://zqaxjajpucjfbwvzhkzg.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxYXhqYWpwdWNqZmJ3dnpoa3pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzOTA2NDIsImV4cCI6MjA5Nzk2NjY0Mn0.JDK1PWPnl7mB-9OyWUmbuSmfav9Lv-E0DKCD7WPwpuU"
-);
-console.log("Supabase Connected");
-
-async function testSupabase() {
- const { data, error } = await cafeSupabase.auth.getSession();
-
-  console.log("Data:", data);
-  console.log("Error:", error);
-
-  alert("Supabase connection successful!");
-}
-
-testSupabase();
 </script>
 </body>
 </html>
