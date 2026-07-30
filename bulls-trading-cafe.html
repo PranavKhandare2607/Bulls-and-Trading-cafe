@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Bull's & Trading Cafe – Shirur's most loved café. Pizzas, Burgers, Mocktails & Desserts. Fresh, Tasty & Affordable.">
+<title>Bull's & Trading Cafe | Trade Smart. Eat Better.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#FAFAF7;
+  --cream2:#F4F1EA;
+  --cream3:#EDE9DF;
+  --green:#1A6B3C;
+  --green2:#22883F;
+  --green-light:#E8F5EE;
+  --green-mid:#C8E6D4;
+  --green-accent:#2EA55A;
+  --orange:#E8682A;
+  --orange-light:#FEF0E8;
+  --dark:#0F1F15;
+  --dark2:#1C3226;
+  --text:#1A1A1A;
+  --text2:#4A4A4A;
+  --text3:#7A7A7A;
+  --border:#DDD9CF;
+  --border2:#C8C4BA;
+  --white:#FFFFFF;
+  --shadow:0 4px 24px rgba(26,107,60,0.10);
+  --shadow-lg:0 12px 48px rgba(26,107,60,0.15);
+  --font-display:'Playfair Display',serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+  --radius:14px;
+  --radius-sm:8px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--text);font-family:var(--font-body);font-size:16px;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:var(--green);color:var(--white)}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--cream2)}
+::-webkit-scrollbar-thumb{background:var(--green);border-radius:3px}
+img{display:block;max-width:100%;object-fit:cover}
+
+/* ── NAV ── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 56px;
+  background:rgba(250,250,247,0.92);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  transition:padding 0.3s,box-shadow 0.3s;
+}
+.nav.scrolled{padding:12px 56px;box-shadow:0 2px 20px rgba(26,107,60,0.08)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-icon{width:38px;height:38px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.nav-logo-text{font-family:var(--font-display);font-size:20px;color:var(--dark);line-height:1.1}
+.nav-logo-text span{color:var(--green);display:block;font-size:10px;font-family:var(--font-body);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3)}
+.nav-links{display:flex;gap:32px;align-items:center;list-style:none}
+.nav-links a{color:var(--text2);text-decoration:none;font-size:14px;font-weight:500;transition:color 0.2s}
+.nav-links a:hover{color:var(--green)}
+.nav-cta{background:var(--green)!important;color:var(--white)!important;padding:10px 22px!important;border-radius:100px!important;font-weight:600!important;font-size:13px!important;transition:background 0.2s!important,transform 0.2s!important}
+.nav-cta:hover{background:var(--green2)!important;transform:translateY(-1px)!important}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px}
+.hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;transition:0.3s}
+.mobile-menu{display:none;position:fixed;top:72px;left:0;right:0;background:rgba(250,250,247,0.98);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:24px 32px;z-index:999;flex-direction:column;gap:4px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{color:var(--text);text-decoration:none;font-size:16px;font-weight:500;padding:12px 0;border-bottom:1px solid var(--border);transition:color 0.2s}
+.mobile-menu a:hover{color:var(--green)}
+.mobile-menu a:last-child{border:none}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  padding:110px 56px 80px;
+  background:var(--cream);
+}
+.hero-floating-food{
+  position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden;
+}
+.food-float{
+  position:absolute;font-size:42px;
+  animation:floatAround linear infinite;
+  opacity:0.13;
+  filter:grayscale(20%);
+  user-select:none;
+}
+@keyframes floatAround{
+  0%{transform:translateY(0) rotate(0deg);opacity:0.10}
+  25%{transform:translateY(-20px) rotate(5deg);opacity:0.18}
+  50%{transform:translateY(-10px) rotate(-3deg);opacity:0.12}
+  75%{transform:translateY(-25px) rotate(4deg);opacity:0.16}
+  100%{transform:translateY(0) rotate(0deg);opacity:0.10}
+}
+.hero-inner{
+  position:relative;z-index:1;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:60px;align-items:center;
+  max-width:1160px;margin:0 auto;width:100%;
+}
+.hero-left{}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--green-light);
+  border:1px solid var(--green-mid);
+  color:var(--green);
+  padding:7px 16px;border-radius:100px;
+  font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+  margin-bottom:24px;
+  animation:fadeUp 0.7s ease both;
+}
+.hero-badge-dot{width:7px;height:7px;background:var(--green-accent);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:0.6}}
+.hero-title{
+  font-family:var(--font-display);
+  font-size:clamp(48px,5.5vw,72px);
+  line-height:1.05;
+  color:var(--dark);
+  margin-bottom:20px;
+  animation:fadeUp 0.8s 0.1s ease both;
+}
+.hero-title em{color:var(--green);font-style:normal}
+.hero-tagline{
+  font-family:var(--font-mono);
+  font-size:13px;color:var(--green);
+  letter-spacing:0.12em;text-transform:uppercase;
+  margin-bottom:14px;
+  animation:fadeUp 0.8s 0.05s ease both;
+}
+.hero-sub{
+  font-size:17px;color:var(--text2);
+  line-height:1.75;margin-bottom:36px;
+  max-width:480px;
+  animation:fadeUp 0.8s 0.2s ease both;
+}
+.hero-buttons{display:flex;gap:14px;flex-wrap:wrap;animation:fadeUp 0.8s 0.3s ease both}
+.btn-green{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--green);color:var(--white);
+  padding:15px 30px;border-radius:100px;
+  font-weight:700;font-size:15px;text-decoration:none;
+  transition:background 0.2s,transform 0.2s,box-shadow 0.2s;
+  box-shadow:0 4px 20px rgba(26,107,60,0.22);
+}
+.btn-green:hover{background:var(--green2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(26,107,60,0.3)}
+.btn-outline{
+  display:inline-flex;align-items:center;gap:8px;
+  background:transparent;color:var(--green);
+  padding:14px 28px;border-radius:100px;
+  font-weight:600;font-size:15px;text-decoration:none;
+  border:2px solid var(--green);
+  transition:background 0.2s,transform 0.2s;
+}
+.btn-outline:hover{background:var(--green-light);transform:translateY(-2px)}
+.hero-right{position:relative;animation:fadeUp 0.9s 0.2s ease both}
+.hero-img-wrap{
+  position:relative;border-radius:28px;overflow:hidden;
+  aspect-ratio:4/5;box-shadow:var(--shadow-lg);
+}
+.hero-img-wrap img{width:100%;height:100%;object-fit:cover}
+.hero-img-badge{
+  position:absolute;bottom:24px;left:24px;right:24px;
+  background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);
+  border-radius:16px;padding:16px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 4px 24px rgba(0,0,0,0.08);
+}
+.hero-img-badge .item{text-align:center}
+.hero-img-badge .item .val{font-family:var(--font-display);font-size:22px;color:var(--green);line-height:1}
+.hero-img-badge .item .lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-top:3px}
+.hero-img-badge .divider{width:1px;height:36px;background:var(--border)}
+.hero-float-tag{
+  position:absolute;top:24px;right:-16px;
+  background:var(--green);color:var(--white);
+  border-radius:12px;padding:10px 16px;
+  font-size:13px;font-weight:700;
+  box-shadow:var(--shadow);
+  white-space:nowrap;
+  animation:floatBob 3s ease-in-out infinite;
+}
+@keyframes floatBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.hero-float-tag2{
+  position:absolute;top:50%;left:-20px;
+  background:var(--white);color:var(--green);
+  border:2px solid var(--green-mid);
+  border-radius:12px;padding:10px 16px;
+  font-size:13px;font-weight:700;
+  box-shadow:var(--shadow);white-space:nowrap;
+  animation:floatBob 3.5s 1s ease-in-out infinite;
+}
+
+/* ── SECTION UTILS ── */
+section{padding:90px 56px}
+.section-inner{max-width:1160px;margin:0 auto}
+.sec-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--green);margin-bottom:12px;
+}
+.sec-tag::before{content:'';width:20px;height:2px;background:var(--green);display:inline-block;border-radius:1px}
+.sec-title{font-family:var(--font-display);font-size:clamp(36px,4vw,54px);color:var(--dark);line-height:1.1;margin-bottom:14px}
+.sec-title em{color:var(--green);font-style:normal}
+.sec-sub{font-size:16px;color:var(--text2);line-height:1.75;max-width:520px}
+.fade-in{opacity:0;transform:translateY(28px);transition:opacity 0.7s ease,transform 0.7s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* ── OFFERS ── */
+.offers-section{background:var(--dark);padding:90px 56px}
+.offers-section .sec-tag{color:#6EE89A}
+.offers-section .sec-tag::before{background:#6EE89A}
+.offers-section .sec-title{color:var(--white)}
+.offers-section .sec-sub{color:rgba(255,255,255,0.6)}
+.offers-header{margin-bottom:52px}
+.offers-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:20px}
+.offer-card{
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:20px;padding:28px 18px 24px;
+  text-align:center;cursor:pointer;position:relative;overflow:hidden;
+  transition:transform 0.3s,border-color 0.3s,background 0.3s;
+}
+.offer-card:hover{transform:translateY(-6px);border-color:rgba(110,232,154,0.3);background:rgba(110,232,154,0.05)}
+.offer-card-img{
+  width:72px;height:72px;border-radius:50%;
+  object-fit:cover;margin:0 auto 14px;
+  border:2px solid rgba(110,232,154,0.2);
+}
+.offer-card-name{font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:8px;line-height:1.4}
+.offer-card-price{
+  font-family:var(--font-display);
+  font-size:34px;color:#6EE89A;line-height:1;margin-bottom:4px;
+}
+.offer-card-note{font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.06em}
+.offer-pill{
+  position:absolute;top:12px;right:12px;
+  background:#6EE89A;color:var(--dark);
+  font-size:9px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;
+  padding:3px 8px;border-radius:100px;
+}
+.offer-mega{
+  background:linear-gradient(135deg,rgba(232,104,42,0.15),rgba(232,104,42,0.06));
+  border:1px solid rgba(232,104,42,0.25);
+  border-radius:20px;padding:28px 36px;
+  display:flex;align-items:center;gap:24px;flex-wrap:wrap;
+}
+.offer-mega img{width:64px;height:64px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.offer-mega-text{flex:1;min-width:200px}
+.offer-mega-text h3{font-size:20px;font-weight:700;color:var(--white);margin-bottom:6px}
+.offer-mega-text p{font-size:13px;color:rgba(255,255,255,0.55)}
+.offer-mega-badge{
+  background:var(--orange);color:var(--white);
+  font-weight:800;font-size:14px;padding:12px 24px;
+  border-radius:12px;white-space:nowrap;flex-shrink:0;
+}
+
+/* ── ABOUT / WHY ── */
+.about-section{background:var(--cream2)}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
+.about-imgs{display:grid;grid-template-columns:1fr 1fr;gap:14px;position:relative}
+.about-img-main{border-radius:22px;overflow:hidden;grid-column:1/-1;aspect-ratio:16/9;box-shadow:var(--shadow)}
+.about-img-main img{width:100%;height:100%;object-fit:cover}
+.about-img-sm{border-radius:16px;overflow:hidden;aspect-ratio:1;box-shadow:var(--shadow)}
+.about-img-sm img{width:100%;height:100%;object-fit:cover}
+.about-quote{
+  font-family:var(--font-display);
+  font-size:22px;color:var(--dark);line-height:1.6;
+  margin-bottom:28px;
+}
+.about-quote em{color:var(--green);font-style:normal}
+.about-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:32px}
+.about-stat{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:14px;padding:20px;
+}
+.about-stat .num{font-family:var(--font-display);font-size:32px;color:var(--green);line-height:1}
+.about-stat .lbl{font-size:12px;color:var(--text3);margin-top:4px}
+
+/* ── MENU ── */
+.menu-section{background:var(--cream)}
+.menu-tabs{display:flex;gap:10px;margin:36px 0 40px;flex-wrap:wrap}
+.menu-tab{
+  padding:10px 22px;border-radius:100px;
+  border:1.5px solid var(--border);background:transparent;
+  color:var(--text2);font-size:13px;font-weight:600;
+  cursor:pointer;font-family:var(--font-body);
+  transition:all 0.2s;
+}
+.menu-tab.active,.menu-tab:hover{background:var(--green);color:var(--white);border-color:var(--green)}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:22px}
+.menu-card{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:22px;overflow:hidden;
+  transition:transform 0.3s,box-shadow 0.3s;cursor:pointer;
+}
+.menu-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
+.menu-card-img{height:210px;overflow:hidden;position:relative;background:var(--cream2)}
+.menu-card-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.5s}
+.menu-card:hover .menu-card-img img{transform:scale(1.06)}
+.menu-card-body{padding:20px}
+.menu-card-name{font-size:16px;font-weight:700;color:var(--dark);margin-bottom:6px}
+.menu-card-desc{font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:16px}
+.menu-card-footer{display:flex;align-items:center;justify-content:space-between}
+.menu-card-price{font-family:var(--font-display);font-size:24px;color:var(--green)}
+.menu-card-tag{
+  font-size:10px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;
+  padding:4px 10px;border-radius:6px;
+  background:var(--green-light);color:var(--green);
+  border:1px solid var(--green-mid);
+}
+.menu-card-tag.hot{background:var(--orange-light);color:var(--orange);border-color:#F5C4A8}
+
+/* ── GALLERY ── */
+.gallery-section{background:var(--cream2);padding:90px 56px}
+.gallery-grid{
+  columns:3 260px;gap:16px;margin-top:48px;
+}
+.gallery-item{
+  break-inside:avoid;margin-bottom:16px;
+  border-radius:18px;overflow:hidden;cursor:pointer;
+  position:relative;
+}
+.gallery-item img{width:100%;display:block;transition:transform 0.4s}
+.gallery-item:hover img{transform:scale(1.04)}
+.gallery-item::after{
+  content:'View';position:absolute;inset:0;
+  background:rgba(26,107,60,0.5);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--white);font-size:15px;font-weight:700;
+  letter-spacing:0.1em;
+  opacity:0;transition:opacity 0.3s;
+}
+.gallery-item:hover::after{opacity:1}
+
+/* ── REVIEWS ── */
+.reviews-section{background:var(--dark);padding:90px 0}
+.reviews-section .sec-tag{color:#6EE89A}
+.reviews-section .sec-tag::before{background:#6EE89A}
+.reviews-section .sec-title{color:var(--white)}
+.reviews-header{padding:0 56px;margin-bottom:52px;text-align:center}
+.reviews-header .sec-sub{margin:0 auto;color:rgba(255,255,255,0.55)}
+.reviews-track-wrap{overflow:hidden;margin-bottom:14px}
+.reviews-track{
+  display:flex;gap:18px;width:max-content;
+  animation:scrollLeft 32s linear infinite;
+}
+.reviews-track.rev{animation-direction:reverse}
+@keyframes scrollLeft{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.review-card{
+  width:320px;flex-shrink:0;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:18px;padding:24px;
+}
+.review-stars{color:#FBBF24;font-size:15px;letter-spacing:2px;margin-bottom:12px}
+.review-text{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.7;margin-bottom:18px}
+.review-author{display:flex;align-items:center;gap:10px}
+.review-av{
+  width:38px;height:38px;border-radius:50%;
+  background:var(--green);
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;color:var(--white);font-weight:700;flex-shrink:0;
+}
+.review-name{font-size:14px;font-weight:700;color:var(--white)}
+.review-loc{font-size:12px;color:rgba(255,255,255,0.4)}
+
+/* ── VISIT ── */
+.visit-section{background:var(--cream)}
+.visit-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:56px;align-items:start}
+.visit-address{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:20px;padding:28px;margin-bottom:20px;
+}
+.visit-address h3{font-family:var(--font-display);font-size:22px;color:var(--dark);margin-bottom:10px}
+.visit-address p{color:var(--text2);line-height:1.8;font-size:15px}
+.visit-hours{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.visit-hour{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+.visit-hour .day{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
+.visit-hour .time{font-size:14px;font-weight:700;color:var(--dark)}
+.visit-map{border-radius:24px;overflow:hidden;box-shadow:var(--shadow-lg);position:relative;height:420px}
+.visit-map iframe{width:100%;height:100%;border:0}
+.visit-map-btn{
+  position:absolute;bottom:20px;right:20px;
+  background:var(--green);color:var(--white);
+  font-weight:700;font-size:13px;
+  padding:10px 20px;border-radius:100px;
+  text-decoration:none;box-shadow:var(--shadow);
+  transition:background 0.2s;
+}
+.visit-map-btn:hover{background:var(--green2)}
+
+/* ── CTA ── */
+.cta-section{
+  background:var(--green);
+  padding:100px 56px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.cta-section::before{
+  content:'';position:absolute;top:-80px;right:-80px;
+  width:320px;height:320px;border-radius:50%;
+  background:rgba(255,255,255,0.06);
+}
+.cta-section::after{
+  content:'';position:absolute;bottom:-60px;left:-60px;
+  width:240px;height:240px;border-radius:50%;
+  background:rgba(255,255,255,0.05);
+}
+.cta-inner{position:relative;z-index:1;max-width:700px;margin:0 auto}
+.cta-title{
+  font-family:var(--font-display);
+  font-size:clamp(36px,5vw,58px);
+  color:var(--white);line-height:1.1;margin-bottom:16px;
+}
+.cta-sub{font-size:18px;color:rgba(255,255,255,0.75);margin-bottom:36px;line-height:1.6}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn-white{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--white);color:var(--green);
+  padding:15px 32px;border-radius:100px;
+  font-weight:800;font-size:15px;text-decoration:none;
+  transition:transform 0.2s,box-shadow 0.2s;
+  box-shadow:0 4px 20px rgba(0,0,0,0.15);
+}
+.btn-white:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.2)}
+.btn-white-outline{
+  display:inline-flex;align-items:center;gap:8px;
+  background:transparent;color:var(--white);
+  padding:14px 30px;border-radius:100px;
+  font-weight:700;font-size:15px;text-decoration:none;
+  border:2px solid rgba(255,255,255,0.5);
+  transition:border-color 0.2s,background 0.2s;
+}
+.btn-white-outline:hover{border-color:var(--white);background:rgba(255,255,255,0.1)}
+
+/* ── FOOTER ── */
+footer{background:var(--dark2);padding:64px 56px 32px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px}
+.footer-brand-logo{font-family:var(--font-display);font-size:28px;color:var(--white);margin-bottom:10px}
+.footer-brand-logo em{color:#6EE89A;font-style:normal}
+.footer-brand-tag{font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px}
+.footer-brand-p{font-size:14px;color:rgba(255,255,255,0.5);line-height:1.8}
+.footer-col h4{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:16px}
+.footer-col a,.footer-col p{display:block;font-size:14px;color:rgba(255,255,255,0.55);text-decoration:none;margin-bottom:8px;line-height:1.6;transition:color 0.2s}
+.footer-col a:hover{color:#6EE89A}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.07);padding-top:28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-bottom p{font-size:13px;color:rgba(255,255,255,0.3)}
+.footer-bottom em{color:#6EE89A;font-style:normal}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── MOBILE ── */
+@media(max-width:1024px){
+  .offers-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:900px){
+  .nav{padding:16px 24px}
+  .nav.scrolled{padding:12px 24px}
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  section{padding:72px 24px}
+  .offers-section{padding:72px 24px}
+  .gallery-section{padding:72px 24px}
+  .reviews-section{padding:72px 0}
+  .reviews-header{padding:0 24px}
+  .visit-section{padding:72px 24px}
+  .cta-section{padding:72px 24px}
+  footer{padding:56px 24px 28px}
+  .hero{padding:100px 24px 72px}
+  .hero-inner{grid-template-columns:1fr;gap:40px;text-align:center}
+  .hero-sub{margin:0 auto 36px}
+  .hero-buttons{justify-content:center}
+  .hero-right{order:-1}
+  .hero-float-tag{right:8px;top:16px}
+  .hero-float-tag2{left:8px}
+  .about-grid{grid-template-columns:1fr;gap:40px}
+  .visit-grid{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr 1fr;gap:32px}
+}
+@media(max-width:600px){
+  .offers-grid{grid-template-columns:1fr 1fr}
+  .footer-grid{grid-template-columns:1fr}
+  .gallery-grid{columns:2 140px}
+  .about-stats{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="mainNav">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">🐂</div>
+    <div class="nav-logo-text">
+      Bull's &amp; Trading Cafe
+      <span>Trade Smart. Eat Better.</span>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#offers">Offers</a></li>
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#visit">Visit Us</a></li>
+    <li><a href="bulls-cafe-management.html" style="color:var(--green);font-weight:700">👤 Login</a></li>
+    <li><a href="https://maps.google.com/?q=Highway+Center+Building,+Baburao+Nagar,+Shirur,+Maharashtra+412210" target="_blank" class="nav-cta">📍 Get Directions</a></li>
+  </ul>
+  <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#offers" onclick="closeMobileMenu()">Today's Offers</a>
+  <a href="#menu" onclick="closeMobileMenu()">Our Menu</a>
+  <a href="#about" onclick="closeMobileMenu()">About Us</a>
+  <a href="#visit" onclick="closeMobileMenu()">Visit Us</a>
+  <a href="bulls-cafe-management.html" style="color:var(--green);font-weight:700">👤 Login / My Account</a>
+  <a href="https://maps.google.com/?q=Highway+Center+Building,+Baburao+Nagar,+Shirur,+Maharashtra+412210" target="_blank" style="color:var(--green);font-weight:700">📍 Get Directions</a>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <!-- Floating food icons -->
+  <div class="hero-floating-food" id="floatingFood"></div>
+
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-tagline">Shirur, Maharashtra · Est. 2024</div>
+      <div class="hero-badge"><span class="hero-badge-dot"></span> Now Open · Fresh Every Day</div>
+      <h1 class="hero-title">
+        Shirur's Most<br>
+        <em>Unique Café</em><br>
+        Experience.
+      </h1>
+      <p class="hero-sub">
+        Pizzas, Burgers, Mocktails &amp; Desserts — all at prices that make every bite a great deal. Visit us at Highway Center Building, Baburao Nagar.
+      </p>
+      <div class="hero-buttons">
+        <a href="https://maps.google.com/?q=Highway+Center+Building,+Baburao+Nagar,+Shirur,+Maharashtra+412210" target="_blank" class="btn-green">📍 Get Directions</a>
+        <a href="#offers" class="btn-outline">🍕 Explore Offers</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-img-wrap">
+        <img
+          src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&q=80"
+          alt="Delicious Pizza at Bull's & Trading Cafe"
+          loading="eager"
+          onerror="this.style.background='#E8F5EE';this.alt='';this.style.minHeight='400px'"
+        />
+        <div class="hero-float-tag">🍕 2 Pizzas just ₹119!</div>
+        <div class="hero-float-tag2">📍 Shirur, Maharashtra</div>
+        <div class="hero-img-badge">
+          <div class="item"><div class="val">₹59</div><div class="lbl">Starting at</div></div>
+          <div class="divider"></div>
+          <div class="item"><div class="val">99%</div><div class="lbl">Satisfaction</div></div>
+          <div class="divider"></div>
+          <div class="item"><div class="val">50+</div><div class="lbl">Menu Items</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED OFFERS -->
+<section class="offers-section" id="offers">
+  <div class="section-inner">
+    <div class="offers-header fade-in">
+      <div class="sec-tag">Hot Deals</div>
+      <h2 class="sec-title" style="color:var(--white)">Today's <em style="color:#6EE89A">Best Offers</em></h2>
+      <p class="sec-sub">Incredible food at prices that surprise you every single time.</p>
+    </div>
+    <div class="offers-grid fade-in">
+      <div class="offer-card">
+        <div class="offer-pill">Trending</div>
+        <img class="offer-card-img"
+          src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&q=80"
+          alt="Pizza" onerror="this.style.display='none'">
+        <div class="offer-card-name">2 Pizzas Combo</div>
+        <div class="offer-card-price">₹119</div>
+        <div class="offer-card-note">Best Value Deal</div>
+      </div>
+      <div class="offer-card">
+        <img class="offer-card-img"
+          src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&q=80"
+          alt="Veg Burger" onerror="this.style.display='none'">
+        <div class="offer-card-name">2 Veg Burgers</div>
+        <div class="offer-card-price">₹119</div>
+        <div class="offer-card-note">Green Signal Deal</div>
+      </div>
+      <div class="offer-card">
+        <img class="offer-card-img"
+          src="https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=200&q=80"
+          alt="Non-Veg Burger" onerror="this.style.display='none'">
+        <div class="offer-card-name">2 Non-Veg Burgers</div>
+        <div class="offer-card-price">₹139</div>
+        <div class="offer-card-note">Power Pack Combo</div>
+      </div>
+      <div class="offer-card">
+        <div class="offer-pill">Fresh</div>
+        <img class="offer-card-img"
+          src="https://images.unsplash.com/photo-1544145945-f90425340c7e?w=200&q=80"
+          alt="Mocktail" onerror="this.style.display='none'">
+        <div class="offer-card-name">Fresh Mocktail</div>
+        <div class="offer-card-price">₹79</div>
+        <div class="offer-card-note">Refreshing Pick</div>
+      </div>
+      <div class="offer-card">
+        <img class="offer-card-img"
+          src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=200&q=80"
+          alt="Choco Lava Cake" onerror="this.style.display='none'">
+        <div class="offer-card-name">Choco Lava Cake</div>
+        <div class="offer-card-price">₹59</div>
+        <div class="offer-card-note">Sweet Deal</div>
+      </div>
+    </div>
+    <div class="offer-mega fade-in">
+      <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&q=80" alt="Burger deal" onerror="this.style.display='none'">
+      <div class="offer-mega-text">
+        <h3>🔥 The Big Bull Deal</h3>
+        <p>Buy 20 Burgers and get 4 Cold Coffees absolutely FREE. Perfect for groups &amp; office orders!</p>
+      </div>
+      <div class="offer-mega-badge">4 Cold Coffees FREE</div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about-section" id="about">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div class="about-imgs fade-in">
+        <div class="about-img-main">
+          <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=900&q=80" alt="Bull's & Trading Cafe interior" onerror="this.style.background='var(--cream3)';this.style.minHeight='240px'">
+        </div>
+        <div class="about-img-sm">
+          <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80" alt="Cafe food" onerror="this.style.background='var(--cream3)'">
+        </div>
+        <div class="about-img-sm">
+          <img src="https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&q=80" alt="Cafe burger" onerror="this.style.background='var(--cream3)'">
+        </div>
+      </div>
+      <div class="fade-in">
+        <div class="sec-tag">Our Story</div>
+        <h2 class="sec-title">Where Food Meets <em>Great Value.</em></h2>
+        <p class="about-quote">
+          At Bull's &amp; Trading Cafe, <em>every meal is a profitable deal.</em> We believe great food shouldn't cost a fortune — and we prove it every single day.
+        </p>
+        <p class="sec-sub">
+          Located in the heart of Shirur at Highway Center Building, Baburao Nagar, we're the go-to spot for fresh pizzas, loaded burgers, refreshing mocktails, and indulgent desserts — all served with warmth and speed.
+        </p>
+        <div class="about-stats">
+          <div class="about-stat">
+            <div class="num">99%</div>
+            <div class="lbl">Customer Satisfaction</div>
+          </div>
+          <div class="about-stat">
+            <div class="num">₹59</div>
+            <div class="lbl">Starts From</div>
+          </div>
+          <div class="about-stat">
+            <div class="num">50+</div>
+            <div class="lbl">Menu Items</div>
+          </div>
+          <div class="about-stat">
+            <div class="num">#1</div>
+            <div class="lbl">Café in Shirur</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MENU -->
+<section class="menu-section" id="menu">
+  <div class="section-inner">
+    <div class="fade-in">
+      <div class="sec-tag">Our Menu</div>
+      <h2 class="sec-title">Fresh. Tasty. <em>Affordable.</em></h2>
+      <p class="sec-sub">Everything made fresh, served with love. Your next favourite meal is just one order away.</p>
+    </div>
+    <div class="menu-tabs">
+      <button class="menu-tab active" onclick="filterMenu('all',this)">All Items</button>
+      <button class="menu-tab" onclick="filterMenu('pizza',this)">🍕 Pizzas</button>
+      <button class="menu-tab" onclick="filterMenu('burger',this)">🍔 Burgers</button>
+      <button class="menu-tab" onclick="filterMenu('mocktail',this)">🍹 Mocktails</button>
+      <button class="menu-tab" onclick="filterMenu('dessert',this)">🍫 Desserts</button>
+    </div>
+    <div class="menu-grid" id="menuGrid"></div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="gallery-section" id="gallery">
+  <div class="section-inner">
+    <div class="fade-in" style="text-align:center">
+      <div class="sec-tag" style="justify-content:center">Photo Gallery</div>
+      <h2 class="sec-title">Food That <em>Speaks</em> for Itself.</h2>
+    </div>
+    <div class="gallery-grid fade-in" id="galleryGrid"></div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="reviews-section" id="reviews">
+  <div class="reviews-header fade-in">
+    <div class="sec-tag" style="justify-content:center">Customer Love</div>
+    <h2 class="sec-title" style="text-align:center">What Our Guests Say</h2>
+    <p class="sec-sub">Real reviews from real people who love Bull's &amp; Trading Cafe.</p>
+  </div>
+  <div class="reviews-track-wrap">
+    <div class="reviews-track" id="track1"></div>
+  </div>
+  <div class="reviews-track-wrap">
+    <div class="reviews-track rev" id="track2"></div>
+  </div>
+</section>
+
+<!-- VISIT -->
+<section class="visit-section" id="visit">
+  <div class="section-inner">
+    <div class="fade-in" style="text-align:center;margin-bottom:52px">
+      <div class="sec-tag" style="justify-content:center">Find Us</div>
+      <h2 class="sec-title" style="text-align:center">Visit <em>Bull's &amp; Trading Cafe</em></h2>
+    </div>
+    <div class="visit-grid">
+      <div class="fade-in">
+        <div class="visit-address">
+          <h3>Bull's &amp; Trading Cafe</h3>
+          <p>Highway Center Building<br>Baburao Nagar, Shirur<br>Maharashtra 412210</p>
+        </div>
+        <div class="visit-hours">
+          <div class="visit-hour">
+            <div class="day">Mon – Fri</div>
+            <div class="time">9:00 AM – 11:00 PM</div>
+          </div>
+          <div class="visit-hour">
+            <div class="day">Sat – Sun</div>
+            <div class="time">8:00 AM – 11:30 PM</div>
+          </div>
+        </div>
+        <a href="https://maps.google.com/?q=Highway+Center+Building,+Baburao+Nagar,+Shirur,+Maharashtra+412210" target="_blank" class="btn-green">📍 Open in Google Maps</a>
+      </div>
+      <div class="visit-map fade-in">
+        <iframe
+          src="https://maps.google.com/maps?q=Shirur,Maharashtra+412210&z=14&output=embed"
+          allowfullscreen loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="Bull's & Trading Cafe on Google Maps">
+        </iframe>
+        <a href="https://maps.google.com/?q=Highway+Center+Building,+Baburao+Nagar,+Shirur,+Maharashtra+412210" target="_blank" class="visit-map-btn">📍 Get Directions</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-inner fade-in">
+    <h2 class="cta-title">Ready for Something Delicious?</h2>
+    <p class="cta-sub">Visit Bull's &amp; Trading Cafe in Shirur today. Great food, unbeatable prices, and a vibe you'll love.</p>
+    <div class="cta-btns">
+      <a href="https://maps.google.com/?q=Highway+Center+Building,+Baburao+Nagar,+Shirur,+Maharashtra+412210" target="_blank" class="btn-white">📍 Get Directions</a>
+      <a href="#menu" class="btn-white-outline">🍕 View Full Menu</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="section-inner">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand-logo">Bull's &amp; <em>Trading</em></div>
+        <div class="footer-brand-tag">Trade Smart. Eat Better.</div>
+        <p class="footer-brand-p">Shirur's favourite café for pizzas, burgers, mocktails &amp; more. Fresh ingredients, great value, every day.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Menu</h4>
+        <a href="#menu">Pizzas</a>
+        <a href="#menu">Burgers</a>
+        <a href="#menu">Mocktails</a>
+        <a href="#menu">Desserts</a>
+      </div>
+      <div class="footer-col">
+        <h4>Address</h4>
+        <p>Highway Center Building</p>
+        <p>Baburao Nagar, Shirur</p>
+        <p>Maharashtra 412210</p>
+        <a href="https://maps.google.com/?q=Highway+Center+Building,+Baburao+Nagar,+Shirur,+Maharashtra+412210" target="_blank">Get Directions →</a>
+      </div>
+      <div class="footer-col">
+        <h4>Hours</h4>
+        <p>Mon–Fri: 9AM–11PM</p>
+        <p>Sat–Sun: 8AM–11:30PM</p>
+        <h4 style="margin-top:16px">Follow</h4>
+        <a href="#">Instagram</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 <em>Bull's &amp; Trading Cafe</em>. All rights reserved. Shirur, Maharashtra.</p>
+      <p style="font-size:12px">Made with ❤️ in Shirur</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── FLOATING FOOD ICONS ──
+const foodIcons = ['🍕','🍔','🍹','🍫','☕','🥤','🍟','🌮','🥗','🧁','🍦','🥪'];
+const floatContainer = document.getElementById('floatingFood');
+for(let i=0;i<18;i++){
+  const el = document.createElement('div');
+  el.className = 'food-float';
+  el.textContent = foodIcons[i % foodIcons.length];
+  const size = 32 + Math.random()*24;
+  el.style.cssText = `
+    left:${Math.random()*100}%;
+    top:${Math.random()*100}%;
+    font-size:${size}px;
+    animation-duration:${5+Math.random()*7}s;
+    animation-delay:${Math.random()*5}s;
+  `;
+  floatContainer.appendChild(el);
+}
+
+// ── MENU DATA ──
+const menuData = [
+  {cat:'pizza',name:'Classic Margherita',desc:'Fresh tomato sauce, mozzarella and fragrant basil on a crispy hand-tossed base.',price:'₹119',tag:'Bestseller',tagType:'',img:'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=500&q=80'},
+  {cat:'pizza',name:'Paneer Tikka Pizza',desc:'Spiced paneer, capsicum, onion and tangy sauce on a golden crust.',price:'₹129',tag:'Spicy',tagType:'hot',img:'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500&q=80'},
+  {cat:'pizza',name:'Veg Supreme Pizza',desc:'Loaded with fresh veggies, olives, corn and a generous cheese pull.',price:'₹139',tag:'Loaded',tagType:'',img:'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500&q=80'},
+  {cat:'burger',name:'Crispy Veg Burger',desc:'Crunchy golden patty, fresh lettuce, tomato and our signature house sauce.',price:'₹119',tag:'Veg',tagType:'',img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&q=80'},
+  {cat:'burger',name:'Spicy Chicken Burger',desc:'Juicy chicken fillet, jalapeños, crispy slaw and smoky chipotle mayo.',price:'₹139',tag:'Non-Veg',tagType:'hot',img:'https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=500&q=80'},
+  {cat:'burger',name:'Double Stack Burger',desc:'Two patties, double cheese, caramelised onions — the ultimate indulgence.',price:'₹159',tag:'Premium',tagType:'',img:'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=500&q=80'},
+  {cat:'mocktail',name:'Green Mojito',desc:'Fresh mint, lime, sugar cane and ice — the ultimate refresher.',price:'₹79',tag:'Fresh',tagType:'',img:'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=500&q=80'},
+  {cat:'mocktail',name:'Berry Blast',desc:'Mixed berries, citrus, soda and a burst of natural sweetness.',price:'₹89',tag:'Fruity',tagType:'',img:'https://images.unsplash.com/photo-1587888637140-849b25d42c05?w=500&q=80'},
+  {cat:'mocktail',name:'Cold Coffee',desc:'Creamy, strong and chilled — the perfect companion to any meal.',price:'₹79',tag:'Popular',tagType:'hot',img:'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=500&q=80'},
+  {cat:'dessert',name:'Choco Lava Cake',desc:'Warm chocolate cake with a molten centre that oozes pure happiness.',price:'₹59',tag:'Bestseller',tagType:'',img:'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=500&q=80'},
+  {cat:'dessert',name:'Vanilla Sundae',desc:'Classic vanilla ice cream, chocolate drizzle and a crunch topping.',price:'₹69',tag:'Classic',tagType:'',img:'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=500&q=80'},
+  {cat:'dessert',name:'Brownie Delight',desc:'Fudgy chocolate brownie served warm with a scoop of vanilla ice cream.',price:'₹79',tag:'Indulgent',tagType:'',img:'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500&q=80'},
+];
+
+function renderMenu(cat){
+  const grid = document.getElementById('menuGrid');
+  const items = cat==='all'?menuData:menuData.filter(i=>i.cat===cat);
+  grid.innerHTML = items.map(item=>`
+    <div class="menu-card">
+      <div class="menu-card-img">
+        <img src="${item.img}" alt="${item.name}" loading="lazy"
+          onerror="this.parentElement.style.background='var(--cream2)';this.style.display='none'">
+      </div>
+      <div class="menu-card-body">
+        <div class="menu-card-name">${item.name}</div>
+        <div class="menu-card-desc">${item.desc}</div>
+        <div class="menu-card-footer">
+          <span class="menu-card-price">${item.price}</span>
+          <span class="menu-card-tag ${item.tagType}">${item.tag}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function filterMenu(cat,btn){
+  document.querySelectorAll('.menu-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderMenu(cat);
+}
+renderMenu('all');
+
+// ── GALLERY ──
+const galleryImgs = [
+  {url:'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&q=80',alt:'Pizza'},
+  {url:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80',alt:'Burger'},
+  {url:'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=600&q=80',alt:'Mocktail'},
+  {url:'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&q=80',alt:'Choco Lava'},
+  {url:'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&q=80',alt:'Cafe'},
+  {url:'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=80',alt:'Pizza close'},
+  {url:'https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=600&q=80',alt:'Burger 2'},
+  {url:'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600&q=80',alt:'Cold coffee'},
+  {url:'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&q=80',alt:'Pizza 3'},
+];
+document.getElementById('galleryGrid').innerHTML = galleryImgs.map(img=>`
+  <div class="gallery-item">
+    <img src="${img.url}" alt="${img.alt}" loading="lazy"
+      onerror="this.parentElement.style.display='none'">
+  </div>`).join('');
+
+// ── REVIEWS ──
+const reviews = [
+  {n:'Rahul M.',l:'Shirur',t:'The 2 pizza combo at ₹119 is unreal value! The crust is perfect and the toppings are so generous. Best café in Shirur, hands down.'},
+  {n:'Priya K.',l:'Pune',t:'Stopped here on the highway and I\'m so glad I did. The choco lava cake at ₹59 was absolutely divine. Will come back every time I pass through!'},
+  {n:'Amol S.',l:'Shirur',t:'We ordered 20 burgers for office and got 4 cold coffees FREE. The team loved every bite. Amazing value and super quick service.'},
+  {n:'Sneha D.',l:'Ahmednagar',t:'The mocktails here are so fresh and well-made. The green mojito and berry blast are my absolute favourites. Great ambience too!'},
+  {n:'Vikas R.',l:'Ranjangaon',t:'Crispy veg burger and cold coffee is my go-to combo now. Unbeatable for the price. I visit every single week without fail.'},
+  {n:'Nisha P.',l:'Shirur',t:'The café atmosphere is so warm and welcoming. Food quality is consistently great and the staff are always smiling. Love this place!'},
+  {n:'Kiran B.',l:'Shirur',t:'Finally a café that gets it right — fresh food, amazing offers, and that cosy vibe. The paneer tikka pizza is simply outstanding.'},
+  {n:'Anjali T.',l:'Pune',t:'The spicy chicken burger is next level! Juicy, packed with flavour and the mayo sauce is to die for. My friends and I keep coming back.'},
+];
+function makeCard(r){
+  return `<div class="review-card">
+    <div class="review-stars">★★★★★</div>
+    <p class="review-text">"${r.t}"</p>
+    <div class="review-author">
+      <div class="review-av">${r.n[0]}</div>
+      <div><div class="review-name">${r.n}</div><div class="review-loc">📍 ${r.l}</div></div>
+    </div>
+  </div>`;
+}
+const half = Math.ceil(reviews.length/2);
+const t1 = document.getElementById('track1');
+const t2 = document.getElementById('track2');
+const row1 = reviews.slice(0,half);
+const row2 = reviews.slice(half);
+t1.innerHTML = [...row1,...row1].map(makeCard).join('');
+t2.innerHTML = [...row2,...row2].map(makeCard).join('');
+
+// ── SCROLL OBSERVER ──
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible') });
+},{threshold:0.1});
+document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+
+// ── NAV ──
+window.addEventListener('scroll',()=>{
+  document.getElementById('mainNav').classList.toggle('scrolled',window.scrollY>60);
+});
+
+// ── MOBILE MENU ──
+function toggleMobileMenu(){
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+function closeMobileMenu(){
+  document.getElementById('mobileMenu').classList.remove('open');
+}
+</script>
+</body>
+</html>
